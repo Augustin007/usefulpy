@@ -5,7 +5,7 @@ setup(
     name = 'usefulmodules',
     version = '1.0.0',
     description = 'Simple resources and modules for a cleaner looking program',
-    author = 'Austin Garcia',
+    author = 'Augustin Garcia',
     author_email = 'albusdumbledore101123@gmail.com',
     py_modules = ['validation']
     )
