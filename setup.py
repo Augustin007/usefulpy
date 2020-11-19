@@ -7,5 +7,5 @@ setup(
     description = 'Simple resources and modules for a cleaner looking program',
     author = 'Augustin Garcia',
     author_email = 'albusdumbledore101123@gmail.com',
-    py_modules = ['validation']
+    py_modules = ['validation', 'mathematics']
     )
