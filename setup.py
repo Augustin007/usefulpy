@@ -2,7 +2,7 @@ from distutils.core import setup
 from distutils.sysconfig import get_python_lib
 
 setup(
-    name = 'useful',
+    name = 'usefulmodules',
     version = '1.0.0',
     description = 'Simple resources and modules for a cleaner looking program',
     author = 'Austin Garcia',
