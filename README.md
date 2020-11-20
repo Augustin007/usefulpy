@@ -50,7 +50,10 @@ _note, imports the whole math module, imports validation_
 
 ['AngleType', 'Composite', 'DegreesToRadians', 'Expression', 'Heron', 'LawofCos', 'LawofSin', 'Phi', 'Prime', 'PrimeOrComposite', 'RadiansToDegrees', 'TriangleType', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', '_composites', '_primes', '_reduce', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh', 'basenum', 'cbrt', 'ceil', 'comb', 'copysign', 'cos', 'cosh', 'create', 'degrees', 'dist', 'e', 'eq', 'erf', 'erfc', 'exp', 'expm1', 'fabs', 'factor', 'factorial', 'findgcd', 'floor', 'fmod', 'fraction', 'frexp', 'fromNumBaseFormat', 'fsum', 'gamma', 'gcd', 'gcd2', 'hypot', 'i', 'icbrt', 'inf', 'irrational', 'irt', 'isTriangle', 'isclose', 'isfinite', 'isinf', 'isnan', 'isqrt', 'j', 'k', 'kappa', 'lcf', 'ldexp', 'lgamma', 'ln', 'log', 'log10', 'log1p', 'log2', 'lsigma', 'makefraction', 'modf', 'nan', 'num', 'perm', 'phi', 'pi', 'pow', 'prepare', 'prod', 'psi', 'quaternion', 'radians', 'remainder', 'rho', 'rt', 'sigma', 'sin', 'sinh', 'sqrt', 'summation', 'tan', 'tanh', 'tau', 'trunc', 'validation', 'var', 'Φ', 'κ', 'π', 'ρ', 'ς', 'σ', 'τ', 'φ', 'ψ']
 
-includes several constants, variables with both their english and greek names. includes a quaternion class, for using quaternions. a basenum class, for working in different number systems
+Includes several constants, variables with both their english and greek names. includes a quaternion class, for using quaternions. a basenum class, for working in different number systems. 
 Triangle stuff, angles, valid triangle, law of cosines and law of sines functions. 
-Prime and composites functions. factoring numbers
-least commmon factor functions
+Prime and composites functions. 
+Factoring numbers. 
+Least commmon factor functions
+
+I am constructing an 'expression' class for algebraic expressions... still in progress. 
