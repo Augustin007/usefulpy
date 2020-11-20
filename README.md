@@ -8,7 +8,7 @@ but these cut down a lot of little bits of code that can become quite messy.
 
 While these codes have a long way to go to be perfect, they can be quite helpful
 
-#validation
+# validation
 validation includes various modules for getting input and preparing clean output, as well quick checks for types.
 
 _note: it imports the datetime module, as well as namedtuple and deque from collections_ 
@@ -41,7 +41,7 @@ intinput continues to ask for input until the input is an integer... useless in 
 
 etc.
 
-#mathematics
+# mathematics
 Contains a lot of useful mathematical stuff
 
 _note, imports the whole math module, imports validation_
