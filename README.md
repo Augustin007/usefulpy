@@ -15,8 +15,6 @@ _note: it imports the datetime module, as well as namedtuple and deque from coll
 
 While I would recommend going through the code by hand, a quick introduction
 
->>> dir(validation)
-
 ['YesOrNo', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', '_getinp', '_keyob', 'datetime', 'deque', 'floatinput', 'floatlistinput', 'fromrepr', 'func', 'function', 'getYesOrNo', 'intinput', 'intlistinput', 'is_float', 'is_floatlist', 'is_function', 'is_integer', 'is_intlist', 'isbool', 'makelist', 'namedtuple', 'tryfloat', 'tryint', 'trynumber', 'trytype', 'validdate', 'validinput', 'validquery']
 
 makelist makes a list from any sort of input, this works well with any sort of iterable, but non-iterables usually wind up being a list with a single value, 
