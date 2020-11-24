@@ -331,7 +331,7 @@ tryfloat = lambda s:trytype(float, s)
 trynumber = lambda s: tryint(tryfloat(s))
 
 from random import *
-rint = randomint
+rint = randint
 rnum = random
 
 def lowbias(low, high):
