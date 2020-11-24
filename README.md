@@ -55,3 +55,6 @@ Factoring numbers.
 Least commmon factor functions
 
 I am constructing an 'expression' class for algebraic expressions... still in progress. 
+
+# formatting
+Contains a few stuff for formatting output.
