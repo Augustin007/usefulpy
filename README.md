@@ -1,4 +1,4 @@
-# useful
+# __useful__
 _A module filled with many useful functions and modules in various subjects._
 
 Simple resources and modules for a cleaner looking program
@@ -8,7 +8,7 @@ but geared to cut down a lot of little bits of code that can become quite messy.
 
 While these codes have a long way to go to be perfect, they can be quite helpful
 
-## validation
+### validation
 _version 1.1.2_
 
 Validation includes various modules for getting input and preparing clean output, as well quick checks for types.
