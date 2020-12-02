@@ -88,10 +88,10 @@ multline is an class in progress that is supposed to cocinate and deal with stri
 
 so, in theory:
 
-' 3 '     '12'     ' 3 12'
+' 3 '   '12'   ' 3 12'
 
 '---' + '--' = '-----'
 
-' 4 '     '13'     ' 4 13'
+' 4 '   '13'   ' 4 13'
 
 etc.
