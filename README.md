@@ -8,8 +8,8 @@ but geared to cut down a lot of little bits of code that can become quite messy.
 
 While these codes have a long way to go to be perfect, they can be quite helpful
 
-### validation
-_version 1.1.2_
+## validation
+### version 1.1.2
 
 Validation includes various modules for getting input and preparing clean output, as well quick checks for types.
 
@@ -44,7 +44,7 @@ intinput continues to ask for input until the input is an integer... useless in 
 etc.
 
 ## mathematics
-_version 1.1.2_
+### version 1.1.2
 
 Contains a lot of useful mathematical stuff
 
@@ -65,7 +65,7 @@ Least commmon factor functions.
 I am constructing an 'expression' class for algebraic expressions... still in progress. 
 
 ## formatting
-_version 1.2.1_
+### version 1.2.1
 
 Contains a few stuff for formatting output. (and a few other odds and ends that I'm not very sure how they got there)
 
