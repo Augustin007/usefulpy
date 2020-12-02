@@ -1,4 +1,4 @@
-## useful
+# useful
 _A module filled with many useful functions and modules in various subjects._
 
 Simple resources and modules for a cleaner looking program
@@ -8,7 +8,7 @@ but geared to cut down a lot of little bits of code that can become quite messy.
 
 While these codes have a long way to go to be perfect, they can be quite helpful
 
-# validation
+## validation
 _version 1.1.2_
 
 Validation includes various modules for getting input and preparing clean output, as well quick checks for types.
@@ -43,7 +43,7 @@ intinput continues to ask for input until the input is an integer... useless in 
 
 etc.
 
-# mathematics
+## mathematics
 _version 1.1.2_
 
 Contains a lot of useful mathematical stuff
@@ -64,7 +64,7 @@ Least commmon factor functions.
 
 I am constructing an 'expression' class for algebraic expressions... still in progress. 
 
-# formatting
+## formatting
 _version 1.2.1_
 
 Contains a few stuff for formatting output. (and a few other odds and ends that I'm not very sure how they got there)
