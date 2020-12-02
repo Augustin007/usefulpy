@@ -1,6 +1,6 @@
 '''
 File: formatting.py
-Version: 1.1.2
+Version: 1.2.2
 Author: Austin Garcia
 
 Several useful functions for formatting output.
