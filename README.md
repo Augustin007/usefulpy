@@ -4,7 +4,9 @@ _A module filled with many useful functions and modules in various subjects._
 Simple resources and modules for a cleaner looking program
 
 These are all simple functions that pop up a lot in programming, nothing particularily difficult or brilliant, 
-but geared to cut down a lot of little bits of code that can become quite messy. These have no requirements.
+but geared to cut down a lot of little bits of code that can become quite messy. 
+
+These have no requirements, just unzip the folder and put the folder where python can see it. Designed in python 3.8 and later 3.9
 
 While these codes have a long way to go to be perfect, they can be quite helpful
 
