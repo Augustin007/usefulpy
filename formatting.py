@@ -28,7 +28,8 @@ RELEASE NOTES:
    Some small bug fixes
    Raises warnings at unfinished sections
 '''
-import validation
+try: import validation
+except: import usefulpy.validation as validation
 import warnings
 __version__ = '1.2.2'
 vowels = 'aeiou'
@@ -92,9 +93,6 @@ def scour(self, of= ''):
             if c in of: self.pop(count)
             else: count += 1
         return self
-
-from formatting import greek_letters, translate, endingpuncuation, phrasepuncuation
-import validation
 
 def unformat(text: str, /, query = 1):
     numbers = {
