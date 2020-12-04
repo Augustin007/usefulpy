@@ -46,11 +46,11 @@ intinput continues to ask for input until the input is an integer... useless in 
 etc.
 
 ## mathematics
-### version 1.1.3
+### version 1.2.1
 
-Contains a lot of useful mathematical stuff
+Contains a lot of useful mathematical stuff, for
 
-_note, imports the whole math module, imports validation_
+_note, imports the whole math module, two classes from statistics, reduce from functools, imports validation, imports formatting... is that all?_
 
 Useable functions in mathematics: AngleType, Composite, DegreesToRadians, Expression, Heron, LawofCos, LawofSin, Phi, Prime, PrimeOrComposite, RadiansToDegrees, TriangleType, basenum, cbrt, create, e, eq, factor, findgcd, fromNumBaseFormat, fsum, gcd2, i, icbrt, irrational, irt, isTriangle, j, k, kappa, lcf, ln, log, makefraction, phi, pi, pow, prepare, psi, quaternion, rho, rt, sigma, summation, validation, var, Φ, κ, π, ρ, ς, σ, τ, φ, and ψ
 
