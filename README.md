@@ -1,14 +1,19 @@
 # _usefulpy_
 _A module filled with many useful functions and modules in various subjects._
 
+#### summary
 Simple resources and modules for a cleaner looking program
 
 These are all simple functions that pop up a lot in programming, nothing particularily difficult or brilliant, 
 but geared to cut down a lot of little bits of code that can become quite messy. 
 
-These have no requirements, just unzip the folder and put the folder where python can see it. Designed in python 3.8 and later 3.9
-
 While these codes have a long way to go to be perfect, they can be quite helpful
+
+#### download
+
+These have no requirements, just unzip the folder and put the folder where python can see it. 
+mathematics is in a zip file, so in order for this to work, unzipping the folder within the folder is also necessary
+_note_ Designed in python 3.8 and later in 3.9
 
 ## validation
 ### version 1.1.2
