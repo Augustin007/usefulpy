@@ -4,7 +4,7 @@ _A module filled with many useful functions and modules in various subjects._
 #### summary
 Simple resources and modules for a cleaner looking program
 
-These are all simple functions that pop up a lot in programming, nothing particularily difficult or brilliant, 
+These are all simple functions that pop up a lot in programming, nothing particularly difficult or brilliant, 
 but geared to cut down a lot of little bits of code that can become quite messy. 
 
 While these codes have a long way to go to be perfect, they can be quite helpful
