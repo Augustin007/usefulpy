@@ -11,8 +11,7 @@ While these codes have a long way to go to be perfect, they can be quite helpful
 
 #### download
 
-These have no requirements, just unzip the folder and put the folder where python can see it. 
-mathematics is in a zip file, so in order for it to work, unzipping the folder within the folder is also necessary
+These have no requirements, just unzip and put the folder where python can see it. 
 
 _note_ Designed in python 3.8 and later in 3.9
 
