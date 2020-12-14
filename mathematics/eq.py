@@ -114,6 +114,7 @@ def create(text):
     text = (ntext+' ').replace('  ', ' ')
     neq = eq(text, var)
     try: fns[fnnm] = neq
+    except: pass
     return neq
 
 class eq(object):
