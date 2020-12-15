@@ -24,11 +24,13 @@ losing any value'''
 Simple, but works well and can be used in a variety of situations. This also allows you to quickly write the check without having to go back and make a module, interupting your flow of thought; or without marking it down for later creation, and then forget it (happens to me all the time).
 
 ### Versions
+
 ###### [Usefulpy 1.1.1](https://github.com/Augustin007/usefulpy/releases/tag/1.1.1):
 A series of simple functions, data, and programs to make code cleaner
 - validation 1.1.2
 - formatting 1.2.2
 - mathematics 1.1.3
+
 ###### [Usefulpy 1.1.2](https://github.com/Augustin007/usefulpy/releases/tag/v1.1.2):
 These are all simple functions that pop up a lot in programming geared to cut down a lot of the little bits of code that can become quite messy and repetitive.
 Most changes are to the mathematics section.
