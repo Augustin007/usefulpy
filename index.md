@@ -32,9 +32,10 @@ A series of simple functions, data, and programs to make code cleaner
 ###### [Usefulpy 1.1.2](https://github.com/Augustin007/usefulpy/releases/tag/v1.1.2):
 These are all simple functions that pop up a lot in programming geared to cut down a lot of the little bits of code that can become quite messy and repetitive.
 Most changes are to the mathematics section.
- - 1.1.2
- - 1.2.2
- - 1.2.3
+ - validation 1.1.2
+ - formatting 1.2.2
+ - mathematics 1.2.3
+
 ## validation
 ### version 1.1.2
 
