@@ -32,39 +32,30 @@ _note: it imports the datetime module, as well as namedtuple and deque from coll
 Usable functions in validation: YesOrNo, datetime (_note: datetime can be accessed through validation, but is built into python, and is not by me_), deque (_see note on datetime_), floatinput, floatlistinput, fromrepr, getYesOrNo, intinput, intlistinput, is_float, is_floatlist, is_function, is_integer, is_intlist, isbool, makelist, namedtuple (_see note on datetime_), tryfloat, tryint, trynumber, trytype, validdate, validinput, and validquery
 
 #### integer/float tools:
- - `is_integer`/`is_float`: return True if s is an integer/float or can be converted into one.
- - `intinput`/`floatinput`: continue to ask for input until input is an integer/float
- - `tryint`/`tryfloat`: converts to an integer if is_integer/is_float
- - `is_intlist`/`is_floatlist`: checks if a list or a string with spaces is composed soley of integers/floats.
+ - `is_integer`/`is_float`: return `True` if s is an integer/float or can be converted into one.
+ - `intinput`/`floatinput`: continue to ask for input until input is an integer/float... Useless in a gui environment but useful in shell scripts
+ - `tryint`/`tryfloat`: converts to an integer if `is_integer`/`is_float`
+ - `trynumber`: `tryfloat(tryint(s))`
+ - `is_intlist`/`is_floatlist`: checks if a list or a string with spaces is composed only of integers/floats.
  - `intlistinput`/`floatlistinput`: continues to ask for input until input can be converted to a list of integers/floats
 
 #### Simple randomizers:
  - `lowbias`/`highbias`/`centerbias`/`outerbias`: random number biased towards the lower/higher/central/outer numbers
  - `rbool`/`truebias`/`falsebias`: return a random bool, not biased or biased to `True` or `False`
 
-makelist makes a list from any sort of input, this works well with any sort of iterable, but non-iterables usually wind up being a list with a single value, 
+#### Custumizable tools
+ - `validquery`: return `True` if an object can be converted to a type.
+ - `validinput`: continue asking for input until the input can be converted to a certain type. This can be used for multiple inputs at once. It has a lot of possible arguments.
+ - `trytype`: converts something to a type if `validquery` for the object and the type returns `True`
 
-is_intlist checks if an input is a list of integers... this includes a single integer, a string containing integers spaced out, a file containing integers spaced out, a string in the format of a list, a list, tuple, or other iterable that contains only integers.
-
-is_floatlist does something similar, it takes the same thing, but checks whether the values can be converted to floats.
-
-is_function tests whether a variable is a function.
-
-is_integer checks if an object can be converted to an integer without losing any value
-
-is_float checks if an object can be converted to a float.
-
-isbool checks if type(s) is bool.
-
-fromrepr is supposed to be the opposite of repr, but still needs some work.
-
-tryint converts s into an integer if is_integer(s)
-
-trytype trys to convers an object into a specified type, else returning original value
-
-intinput continues to ask for input until the input is an integer... useless in a gui environment, but quite useful in shell scripts.
-
-etc.
+#### Other
+ - `YesOrNo`: return `True` or `False` for most variations of yes and no: returns `None` otherwise.
+ - `getYesOrNo`: take inputs until `YesOrNo` returns either `True` or `False`
+ - `fromrepr`: is meant to be the inverse of `repr`
+ - `makelist`: makelist makes a list from any sort of input, including from the str version of a list, (so `makelist('[1, [1, 2]]')` returns `[1, [1, 2]]`this works well with any sort of iterable, but many non-iterables wind up being a list with a single value, 
+ - `validdate`: return `True` if input numbers form a valid date
+ - `isbool`: return `type(s)==bool`
+ - `is_function`: returns `True` if the object is a function.
 
 ## mathematics
 ### version 1.2.3
