@@ -49,34 +49,46 @@ RELEASE NOTES:
   2.1.5
    Hopefully fixed a couple elusive bugs...
    Improvement with 'create' and involving function.
-   
    Functions are addable.
+  2.1.6
+   Bugfixes... made to work with nmath > 2.1.1
+   more functions
 
 '''
 
-__version__ = '2.1.5'
+__version__ = '2.1.6'
 
 try: from nmath import *
 except: from usefulpy.mathematics.nmath import *
 
+from usefulpy import validation as _validation
 from usefulpy import formatting
 import copy
 
-translations = {'cos':'\\cos ', 'sin':'\\sin ', 'tan':'\\tan ',
-                'arccos':'\\arccos ', 'arcsin':'\\arcsin ',
-                'sqrt': '\\sqrt ', 'cbrt':'\\cbrt ', 'rt': '\\rt ',  'arctan':'\\arctan ',
+def derivate(eq, at):
+    return (eq(at+1e-10)-eq(at))/1e-10
+
+translations = {'cos':'\\cos ', 'sin':'\\sin ', 'tan':'\\tan ', 'sec':'\\sec ',
+                'csc':'\\csc ', 'cot':'\\cot ', 'arc\\sec': '\\arcsec ', 'arc\\csc':'\\arccsc ',
+                'arc\\cot':'\\arccot ', 'arc\\cos':'\\arccos ', 'arc\\sin':'\\arcsin ',
+                'sqrt': '\\sqrt ', 'cbrt':'\\cbrt ', 'rt': '\\rt ',  'arc\\tan':'\\arctan ',
                 'log':'\\log ', 'ln':'\\ln ', 'π':'\x0epi ', 'τ':'\x0etau ',
                 'e':'\x0ee ', 'Φ': '\x0ephi ', 'φ':'\x0elphi ', 'ρ': '\x0erho ',
                 'σ': '\x0esigma ', 'ς': '\x0elsigma ', 'κ': '\x0ekappa ',
-                'ψ': '\x0epsi ', '**':'^', '\\sq\\rt':'\\sqrt', '\\cb\\rt':'\\cbrt'}
+                'ψ': '\x0epsi ', '**':'^', '\\sq\\rt':'\\sqrt', '\\cb\\rt':'\\cbrt',
+                'floor':'\\floor ', 'c\x0ee il':'\\ceil ', 'd\x0ee rivat\x0ee ':'\\derivate ',
+                '\\s\x0ee c':'\\sec ', '\\arcsec ':'\\arcs\x0ee c '}
 constants = {'\x0epi': π, '\x0etau': τ, '\x0ee': e, '\x0ephi': Φ, '\x0elphi': φ,
              '\x0erho': ρ, '\x0esigma': σ, '\x0elsigma': ς, '\x0ekappa': κ,
              '\x0epsi': ψ}
 mathfuncs = {'\\cos': (cos, (1,)), '\\sin': (sin, (1,)), '\\tan': (tan, (1,)),
              '\\arccos': (acos, (1,)), '\\arcsin': (asin, (1,)),
-             '\\arctan' : (atan, (1,)), '\\log': (log, (1, (2,))),
+             '\\arctan' : (atan, (1,)), '\\log': (log, (1, (2, ))),
              '\\ln': (ln, (1,)), '\\sqrt': (sqrt, (1,)), '\\cbrt':(cbrt, (1,)),
-             '\\rt':(rt, (-2, 1))}
+             '\\rt':(rt, (-2, 1)), '\\floor':(floor, (1, )), '\\ceil':(ceil, (1,)),
+             '\\sec': (sec, (1,)), '\\csc': (csc, (1,)), '\\cot': (cot, (1,)),
+             '\\arcsec': (asec, (1,)), '\\arccsc': (acsc, (1,)),
+             '\\arccot' : (acot, (1,)), '\\derivate':(derivate, (1, 'var'))}
 parenthesis = '()'
 digits = '0.123456789'
 operations = '^+-*/'
@@ -84,7 +96,11 @@ implied = 'im*'
 
 fns = {}
 
+
+
 def create(text):
+    if type(text) == eq:
+        return copy.deepcopy(text)
     text = text.replace(' ', '')
     while '--' in text: text = text.replace('--', '+')
     while '++' in text: text = text.replace('++', '+')
@@ -92,10 +108,12 @@ def create(text):
     while '-+' in text: text = text.replace('-+', '-')
     text = text.replace('**', '^')
     var = None
-    if text[1] == '(' and text[3:5] == ')=':
-        var = text[2]
-        fnnm = text[0]
-        text = text[5:]
+    try:
+        if text[1] == '(' and text[3:5] == ')=':
+            var = text[2]
+            fnnm = text[0]
+            text = text[5:]
+    except: pass
     text = formatting.translate(text, translations)
     ntext = ''
     fn = False
@@ -125,6 +143,7 @@ create this from *input* which is what makes it useful'''
         parameter = None
         if type(text) == self.__class__:
             self = copy.deepcopy(text)
+            return
         if '"' in text:
             index = text.index('"')
             text = text[:index]
@@ -182,7 +201,7 @@ create this from *input* which is what makes it useful'''
                             prevtype = num
                         else:
                             nlist.append(runstr)
-                            if validation.is_float(runstr): curtype = num
+                            if _validation.is_float(runstr): curtype = num
                             elif runstr in operations: curtype = oper
                             elif runstr.startswith('\\'): curtype = f
                             elif runstr.startswith('\x0e'): curtype = c
@@ -193,16 +212,16 @@ create this from *input* which is what makes it useful'''
                                     else:
                                         var = runstr
                                     curtype = va
-                                elif runstr == var: curtype = va
+                                elif runstr == var or (runstr == '-'+var): curtype = va
                                 else: raise SyntaxError(runstr + ' seems to be an invalid character')
                             prevtype = curtype
                     if prevtype in (va, num, c, p):
-                        nlist.append
-                    nlist.append(runstr)
+                        nlist.append(implied)
+                    nlist.append(_validation.trynumber(runstr))
                     runstr = '('
                 elif char == ' ':
                     if runstr != '':
-                        if validation.is_float(runstr): curtype = num
+                        if _validation.is_float(runstr): curtype = num
                         elif runstr in operations: curtype = oper
                         elif runstr.startswith('\\'): curtype = f
                         elif runstr.startswith('\x0e'): curtype = c
@@ -213,20 +232,20 @@ create this from *input* which is what makes it useful'''
                                 else:
                                     var = runstr
                                 curtype = va
-                            elif runstr == var: curtype = va
+                            elif runstr == var or (runstr == '-'+var): curtype = va
                             else: raise SyntaxError(runstr + ' seems to be an invalid character')
                         if prevtype in (va, num, c, p):
                             if curtype == oper: pass
                             else: nlist.append(implied)
                         if runstr == '-' and prevtype == na: pass
                         elif runstr == '-' and prevtype == oper: pass
-                        else: nlist.append(validation.trynumber(runstr)); runstr = ''
+                        else: nlist.append(_validation.trynumber(runstr)); runstr = ''
                         prevtype = curtype
                         if fn: fn = False
                 elif char == '\\' or char == '\x0e':
                     fn = True
                     if runstr != '':
-                        if validation.is_float(runstr): curtype = num
+                        if _validation.is_float(runstr): curtype = num
                         elif runstr in operations: curtype = oper
                         elif runstr.startswith('\\'): curtype = f
                         elif runstr.startswith('\x0e'): curtype = c
@@ -237,13 +256,13 @@ create this from *input* which is what makes it useful'''
                                 else:
                                     var = runstr
                                 curtype = va
-                            elif runstr == var: curtype = va
+                            elif runstr == var or (runstr == '-'+var): curtype = va
                             else: raise SyntaxError(runstr + ' seems to be an invalid character')
-                        if prevtype in (va, num, c):
+                        if prevtype in (va, num, c, p):
                             if curtype == oper: pass
                             else: nlist.append(implied)
                         prevtype = curtype
-                    nlist.append(validation.trynumber(runstr))
+                    nlist.append(_validation.trynumber(runstr))
                     runstr = char
                 elif fn:
                     runstr += char
@@ -252,17 +271,17 @@ create this from *input* which is what makes it useful'''
                 else:
                     if runstr == '':
                         runstr += char
-                    elif validation.is_float(runstr) or runstr == '-' or runstr == '.' or runstr == '-.':
-                        if validation.is_float(char) or char == '.':
+                    elif _validation.is_float(runstr) or runstr == '-' or runstr == '.' or runstr == '-.':
+                        if _validation.is_float(char) or char == '.':
                             runstr += char
                         elif runstr == '-':
                             runstr += char
                         else:
-                            nlist.append(validation.trynumber(runstr))
+                            nlist.append(_validation.trynumber(runstr))
                             nlist.append(implied)
                             runstr = char
-                    elif validation.is_float(char):
-                        nlist.append(validation.trynumber(runstr))
+                    elif _validation.is_float(char):
+                        nlist.append(_validation.trynumber(runstr))
                         nlist.append(implied)
                         runstr = char
                     else: runstr += char
@@ -283,18 +302,45 @@ create this from *input* which is what makes it useful'''
         self.var = var
         if nlist[0] == '+': nlist = nlist[1:]
         nlist = formatting.scour(nlist)
-        if len(nlist) == 1 and (type(nlist[0]) is self.__class__): nlist = nlist[0]
+        if len(nlist) == 1 and (type(nlist[0]) is self.__class__):
+            nlist = nlist[0].neq
         return nlist
 
     def __repr__(self):
         if self.solved:
             return '('+str(self.value)+')'
+        nneq = []
+        for n in self.neq:
+            if _validation.is_float(n) and ('e' in str(n)):
+                n = str(n)
+                negative = n.startswith('-')
+                if negative: n = n[1:]
+                power = n[n.index('-')+1:]
+                fnm = n[:n.index('-')-1]
+                qlen = len(fnm)
+                nneq.append('0.'+('0'*(int(power)-qlen))+fnm)
+            else: nneq.append(n)
         reprtranslate = {'[':'(', ']':')', ',':'', "'":'', '\\':'', ' im* ':''}
-        return formatting.translate(str(self.neq), reprtranslate)
+        nrepr = formatting.translate(str(nneq), reprtranslate)
+        return nrepr
 
     def solve(self, value):
         if self.solved: return self.value
         Nlist = self.neq.copy()
+        def d(Nlist):
+            while '\\derivate' in Nlist:
+                count = 1
+                for x in Nlist.copy():
+                    if x == '\\derivate':
+                        if type(Nlist[count]) is self.__class__:
+                            Nlist[count-1:count+1] = [derivate(Nlist[count], value)]
+                        elif Nlist[count]== self.var:
+                            Nlist[count-1:count+1] = 1
+                        else: Nlist[count-1:count+1] = 0
+                        break
+                    count += 1
+            return Nlist
+                    
         def s(Nlist):
             count = 0
             for x in Nlist.copy():
@@ -338,7 +384,7 @@ create this from *input* which is what makes it useful'''
                 count = 1
                 for x in Nlist.copy():
                     if prev1 == implied:
-                        if validation.is_float(prev2) and validation.is_float(x):
+                        if _validation.is_float(prev2) and _validation.is_float(x):
                             Nlist[count-3:count] = [prev2*x]
                             break
                         else: pass
@@ -367,7 +413,9 @@ create this from *input* which is what makes it useful'''
                         args = []
                         
                         for datum in pardata:
-                            args.append(Nlist[index+datum])
+                            if datum == 'var': args.append(value)
+                            else: args.append(Nlist[index+datum])
+                        
                         nvalue = fx(*args)
                         pardata = list(pardata)
                         pardata.append(0)
@@ -416,29 +464,37 @@ create this from *input* which is what makes it useful'''
                 prev = ''
                 count = 0
                 for x in Nlist.copy():
-                    if validation.is_float(x) and validation.is_float(prev):
+                    if _validation.is_float(x) and _validation.is_float(prev):
                         if x < 0:
                             Nlist[count-1:count+1] = [prev+x]
                             break
                         else:
                             Nlist[count-1:count+1] = [prev*x]
                             break
-                    elif prev == '-' and validation.is_float(x):
+                    elif prev == '-' and _validation.is_float(x):
                         Nlist[count-1, count] = [-x]
                     count += 1
                     prev = x
                 else: break
             return Nlist
-        OOP = 'spifemab'
-        oop = {'s': s, 'p':p, 'f':f, 'i': imp, 'e':e, 'm': m, 'a':a, 'b':b}
+        OOP = 'dspifemab'
+        oop = {'d':d, 's': s, 'p':p, 'f':f, 'i': imp, 'e':e, 'm': m, 'a':a, 'b':b}
         for op in OOP:
             Nlist = oop[op](Nlist)
         if len(Nlist)==1:
-            return validation.trynumber(Nlist[0])
+            return _validation.trynumber(Nlist[0])
         else:
             raise ValueError(Nlist)
+
+    def derivate(self):
+        return (self(create('x+0.000000000000000000000000000001'))-self(create('x')))/create('0.000000000000000000000000000001')
+    
     def __call__(self, num):
-        return self.solve(num)
+        if _validation.is_float(num):
+            return self.solve(num)
+        if type(num) == self.__class__:
+            nstr = formatting.translate(repr(self), {self.var: repr(num), ('-'+self.var):repr(0-num)})
+            return create(nstr)
 
     def __str__(self):
         return repr(self)

@@ -33,7 +33,7 @@ RELEASE NOTES:
 
 __version__ = '1.2.1'
 
-from usefulpy import validation
+from usefulpy import validation as _validation
 
 class quaternion(object):
     '''A quaternion class'''
@@ -62,7 +62,7 @@ class quaternion(object):
         if c == None: c = 0
         if d == None: d = 0
         for num in (a, b, c, d):
-            if not validation.is_float(num):raise ValueError
+            if not _validation.is_float(num):raise ValueError
         self.real = a
         self.i = b
         self.j = c
@@ -100,11 +100,11 @@ class quaternion(object):
         i = self.i+other.i
         j = self.j+other.j
         k = self.k+other.k
-        return validation.trynumber(quaternion(real, i, j, k))
+        return _validation.trynumber(quaternion(real, i, j, k))
 
     def __radd__(other, self):
         '''return self+other'''
-        return validation.trynumber(other+self)
+        return _validation.trynumber(other+self)
 
     def __sub__(self, other):
         '''return self-other'''
@@ -114,11 +114,11 @@ class quaternion(object):
         i = self.i-other.i
         j = self.j-other.j
         k = self.k-other.k
-        return validation.trynumber(quaternion(real, i, j, k))
+        return _validation.trynumber(quaternion(real, i, j, k))
 
     def __rsub__(other, self):
         '''return self-other'''
-        return validation.trynumber(self+(-1*other))
+        return _validation.trynumber(self+(-1*other))
 
     def __mul__(self, other):
         '''return self*other'''
@@ -130,7 +130,7 @@ class quaternion(object):
         i = a*f + b*e + c*h - d*g
         j = a*g - b*h + c*e + d*f
         k = a*h + b*g - c*f + d*e
-        return validation.trynumber(quaternion(real, i, j, k))
+        return _validation.trynumber(quaternion(real, i, j, k))
 
     def __rmul__(other, self):
         '''return self*other'''
@@ -142,10 +142,10 @@ class quaternion(object):
         i = a*f + b*e + c*h - d*g
         j = a*g - b*h + c*e + d*f
         k = a*h + b*g - c*f + d*e
-        return validation.trynumber(quaternion(real, i, j, k))
+        return _validation.trynumber(quaternion(real, i, j, k))
 
     def floor(self):
-        return validation.trynumber(floor(self.real), floor(self.i), floor(self.j), floor(self.k))
+        return _validation.trynumber(floor(self.real), floor(self.i), floor(self.j), floor(self.k))
 
     def __floordiv__(self, other):
         n = self/other
@@ -167,12 +167,12 @@ class quaternion(object):
         another.i = makefraction(another.i, divfactor)
         another.j = makefraction(another.j, divfactor)
         another.k = makefraction(another.k, divfactor)
-        return validation.trynumber(another)
+        return _validation.trynumber(another)
 
     def __rtruediv__(other, self):
         '''return self/other'''
         if type(self) != other.__class__: self = other.__class__(self)
-        return validation.trynumber(self/other)
+        return _validation.trynumber(self/other)
 
     def __str__(self):
         '''str(self)'''
@@ -195,7 +195,7 @@ class quaternion(object):
 >>> x.converse()
 1-1i-5j
 >>> '''
-        return validation.trynumber(quaternion(self.real, -self.i, -self.j, -self.k))
+        return _validation.trynumber(quaternion(self.real, -self.i, -self.j, -self.k))
 
     def __lt__(self, other):
         '''return self<other'''

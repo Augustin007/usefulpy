@@ -24,7 +24,7 @@ RELEASE NOTES:
 
 __version__ = '1.1.1'
 
-from usefulpy import validation
+from usefulpy import validation as _validation
 
 def fromNumBaseFormat(text):
     '''return a basenum from text:
@@ -37,7 +37,7 @@ def fromNumBaseFormat(text):
         if not base.isdigit(): raise ValueError('This could not be converted into a basenum object')
         return basenum(num, int(base))
     else:
-        if validation.is_float(text): return basenum(text)
+        if _validation.is_float(text): return basenum(text)
         else: raise ValueError('This could not be converted into a basenum object')
 
 class basenum(object):
@@ -111,7 +111,7 @@ class basenum(object):
         if base == self.base: return self
         number = abs(float(self))
         if number == 0: return basenum('0', base)
-        if base == 10: return basenum(str(validation.trynumber(self)))
+        if base == 10: return basenum(str(_validation.trynumber(self)))
         strint, n, p = "", 0, 0
         if number >= 1:
             while (base**n)<= number: n+=1
@@ -139,7 +139,7 @@ class basenum(object):
 
     def __radd__(other, self):
         '''return self+other'''
-        return validation.tryint(float(self)+float(other))
+        return _validation.tryint(float(self)+float(other))
 
     def __mul__(self, other):
         '''return self*other'''
@@ -151,7 +151,7 @@ class basenum(object):
 
     def __rmul__(other, self):
         '''return self*other'''
-        return validation.tryint(float(self)*float(other))
+        return _validation.tryint(float(self)*float(other))
 
     def __sub__(self, other):
         '''return self-other'''
@@ -162,7 +162,7 @@ class basenum(object):
 
     def __rsub__(other, self):
         '''return self-other'''
-        return validation.tryint(float(self)-float(other))
+        return _validation.tryint(float(self)-float(other))
 
     def __truediv__(self, other):
         '''return self/other'''
@@ -173,7 +173,7 @@ class basenum(object):
 
     def __rtruediv__(other, self):
         '''return self/other'''
-        return validation.tryint(float(self)/float(other))
+        return _validation.tryint(float(self)/float(other))
 
     def __lt__(self, other):
         '''return self<other'''

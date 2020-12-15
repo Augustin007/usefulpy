@@ -49,6 +49,7 @@ except:
     from usefulpy.mathematics.quaternion import *
     from usefulpy.mathematics.PrimeComposite import *
 from usefulpy.formatting import multline
+from usefulpy import validation as _validation
 
 class FrozenError(Exception):
     def __init__(self, source = ''):
@@ -66,7 +67,7 @@ class irrational(object):
         if value == 'pi': value = 'π'
         if value == 'tau': value = 'τ'
         self.name = None
-        if type(value) == str: value = validation.tryfloat(value)
+        if type(value) == str: value = _validation.tryfloat(value)
         if type(value) == str:
             self.name, self.value = value
             irrational.conversions[name]
@@ -107,8 +108,8 @@ class var(object):
         if type(name) != str: raise TypeError
         if len(name) != 1: raise ValueError
         if value != None:
-            if validation.is_float(value):
-                value = validation.tryint(float(value))
+            if _validation.is_float(value):
+                value = _validation.tryint(float(value))
                 if type(value) == float: value = expression(value)
             else: raise FloatingPointError
         self.name = name
@@ -134,7 +135,7 @@ class var(object):
         if self.solved: raise AttributeError
         if value != None:
             if is_float(value):
-                value = validation.tryint(float(value))
+                value = _validation.tryint(float(value))
                 if type(value) == float: value = expression(value)
             else: raise FloatingPointError
         self.value = value
@@ -226,10 +227,10 @@ class Expression:
             if number.solved: number = number.value
         if type(number) in Expression.ExpressionTypes:
             if number.__solved__(): return Expression.acceptType(number.value)
-        if validation.is_integer(number): return int(number)
-        if validation.is_float(number):
+        if _validation.is_integer(number): return int(number)
+        if _validation.is_float(number):
             new, times = round(float(number), 13), 1
-            while not validation.is_integer(new): times *= 10; new *= 10
+            while not _validation.is_integer(new): times *= 10; new *= 10
             return Expression.divExpression(int(new), times)
         if type(number) == fraction: return Expression.divExpression(number.as_integer_ratio()[0], '/', number.as_integer_ratio()[1])
         if type(number) == complex: return quaternion(first)
@@ -273,19 +274,19 @@ class Expression:
                 self.numer, self.denom = self.numer//ngcd, self.denom//ngcd
                 return
             if type(self.denom) is self.__class__ is type(self.numer):
-                nlcf = lcf(self.numer.denom, self.denom.denom)
-                self.numer = Expression.acceptType(self.numer*nlcf)
-                self.denom = Expression.acceptType(self.denom*nlcf)
+                nlcm = lcm(self.numer.denom, self.denom.denom)
+                self.numer = Expression.acceptType(self.numer*nlcm)
+                self.denom = Expression.acceptType(self.denom*nlcm)
                 return
             if type(self.denom) is self.__class__:
-                nlcf = self.denom.denom
-                self.numer = Expression.acceptType(self.numer*nlcf)
-                self.denom = Expression.acceptType(self.denom*nlcf)
+                nlcm = self.denom.denom
+                self.numer = Expression.acceptType(self.numer*nlcm)
+                self.denom = Expression.acceptType(self.denom*nlcm)
                 return
             if type(self.numer) is self.__class__:
-                nlcf = self.numer.denom
-                self.numer = Expression.acceptType(self.numer*nlcf)
-                self.denom = Expression.acceptType(self.denom*nlcf)
+                nlcm = self.numer.denom
+                self.numer = Expression.acceptType(self.numer*nlcm)
+                self.denom = Expression.acceptType(self.denom*nlcm)
                 return
             if type(self.denom) in self.ExpressionTypes:
                 #NOT IMPLEMENTED

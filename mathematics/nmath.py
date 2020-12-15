@@ -22,139 +22,265 @@ RELEASE NOTES:
    Simple math importations with some changes and additions
   Version 1.1.2
    Changed some variable names and importations. More comments.
-
+2
+ 2.1
+  Version 2.1.1
+   Reworked a lot of little details to allow for use with complex numbers
+   throughout.
 '''
 
-__version__ = '1.1.2'
+__version__ = '2.1.1'
 
 #Primary importations
 from functools import reduce as _reduce
-from math import *
-del degrees, radians, log10
 import warnings
 from decimal import Decimal as num
 from fractions import Fraction as fraction
-from usefulpy import validation
+from usefulpy import validation as _validation
+
+import cmath as _cmath
+import math as _math
+
+from math import e, pi, tau, nan, inf
+from cmath import infj, nanj
+
+from cmath import phase, polar, rect
+
+from math import ceil, comb, copysign, dist, erf, erfc, expm1, fabs, factorial
+from math import floor, fmod, frexp, fsum, gamma, hypot, ldexp, lgamma, modf
+from math import nextafter, perm, prod, remainder, trunc, ulp
+
+def sqrt(x, /):
+    try: return _math.sqrt(x)
+    except: return _cmath.sqrt(x)
+
+def isqrt(x, /):
+    try: return _math.isqrt(x)
+    except: return complex(int(_cmath.sqrt(x).real), int(_cmath.sqrt(x).imag))
+
+def exp(x, /):
+    '''return e to the power of x'''
+    try: return _math.exp(x)
+    except: return _cmath.exp(x)
+
+def isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0):
+    try: return _math.isclose(a, b, rel_tol=1e-09, abs_tol=0.0)
+    except: return _cmath.isclose(a, b, rel_tol=1e-09, abs_tol=0.0)
+
+def isfinite(x, /):
+    try: return _math.isfinite(x)
+    except: return _cmath.isfinite(x)
+
+def isinf(x, /):
+    try: return _math.isinf(x)
+    except: return _cmath.isinf(x)
+
+def isnan(x, /):
+    try: return _math.isnan(x)
+    except: return _cmath.isnan(x)
 
 def RadiansToDegrees(r):
     '''Convert radians to degrees.'''
-    d = (r*180)/pi; return validation.tryint(d)
+    d = (r*180)/pi; return _validation.tryint(d)
 
 def DegreesToRadians(r):
     '''Convert degrees to radians.'''
-    d = (r*pi)/180; return validation.tryint(d)
+    d = (r*pi)/180; return _validation.tryint(d)
 
 def makefraction(numer, denom = 1):
     '''Make a valid fraction type out of a float type'''
-    numer = validation.tryint(round(float(numer), 15))
-    denom = validation.tryint(round(float(denom), 15))
-    while not (validation.is_integer(numer) and validation.is_integer(denom)):
+    numer = _validation.tryint(round(float(numer), 15))
+    denom = _validation.tryint(round(float(denom), 15))
+    while not (_validation.is_integer(numer) and _validation.is_integer(denom)):
         denom *= 10
         numer *= 10
     return fraction(int(numer), int(denom))
 
 def rt(nth, num, /):
     '''return nth root of num'''
-    return validation.tryint(num**(1/nth))
+    return _validation.tryint(num**(1/nth))
 
 def irt(nth, num, /):
     '''return integer nth root of num'''
-    return int(rt(nth, num))
+    try: return int(rt(nth, num))
+    except: return complex(int(rt(nth, num).real), int(rt(nth, num).imag))
 
-_log = log
-ln = lambda x: _log(x)
-def log(x, base = 10, /): return _log(x, base)
+
+def ln(x, /):
+    try: return _math.log(x)
+    except: return _cmath.log(x)
+    
+def log(x, base = 10, /):
+    try: return _math.log(x, base)
+    except: return _cmath.log(x, base)
 
 _angle = 'rad'
+_circle = tau
+
 def radians():
-    global _angle
+    global _angle, _circle 
     _angle = 'rad'
+    _circle = tau
+
 def degrees():
-    global _angle
+    global _angle, _circle 
     _angle = 'deg'
-_acos=acos
+    _circle = 360
+
 def acos(θ, /):
-    ans = _acos(θ)
+    try: ans = _math.acos(θ)
+    except: ans = _cmath.acos(θ)
     if _angle == 'deg':
         return RadiansToDegrees(ans)
     return ans
-_acosh=acosh
+
 def acosh(θ, /):
-    ans = _acosh(θ)
+    try: ans = _math.acosh(θ)
+    except: ans = _cmath.acosh(θ)
     if _angle == 'deg':
         return RadiansToDegrees(ans)
     return ans
-_asin=asin
-def asin(x, /):
-    ans = _asin(x)
+
+def asin(θ, /):
+    try: ans = _math.asin(θ)
+    except: ans = _cmath.asin(θ)
     if _angle == 'deg':
         return RadiansToDegrees(ans)
     return ans
-_asinh=asinh
+
 def asinh(θ, /):
-    ans = _asinh(θ)
+    try: ans = _math.asinh(θ)
+    except: ans = _cmath.asinh(θ)
     if _angle == 'deg':
         return RadiansToDegrees(ans)
     return ans
-_atan=atan
+
 def atan(θ, /):
-    ans = _atan(θ)
+    try: ans = _math.atan(θ)
+    except: ans = _cmath.atan(θ)
     if _angle == 'deg':
         return RadiansToDegrees(ans)
     return ans
-_atan2=atan2
-def atan2(θ, /):
-    ans = _atan2(θ)
-    if _angle == 'deg':
-        return RadiansToDegrees(ans)
-    return ans
-_atanh=atanh
+
 def atanh(θ, /):
-    ans = _atanh(θ)
+    try: ans = _math.atanh(θ)
+    except: ans = _cmath.atanh(θ)
     if _angle == 'deg':
         return RadiansToDegrees(ans)
     return ans
-_cos=cos
+
+def asec(θ, /):
+    try: return acos(1/θ)
+    except ZeroDivisionError: return nan
+
+def asech(θ, /):
+    try: return acosh(1/θ)
+    except ZeroDivisionError: return nan
+
+def acsc(θ, /):
+    try: return asin(1/θ)
+    except ZeroDivisionError: return nan
+
+def acsch(θ, /):
+    try: return asinh(1/θ)
+    except ZeroDivisionError: return nan
+
+def acot(θ, /):
+    try: return atan(1/θ)
+    except ZeroDivisionError: return nan
+
+def acoth(θ, /):
+    try: return atanh(1/θ)
+    except ZeroDivisionError: return nan
+
 def cos(θ, /):
+    θ = θ%_circle
+    qc = _circle/4
+    if θ == qc: return 0
+    if θ == 3*qc: return 0
+    if θ == 2*qc: return -1
+    if θ == 0: return 1
     if _angle == 'deg':
         θ = DegreesToRadians(θ)
-    return _cos(θ)
-_cosh=cosh
+    try: return _math.cos(θ)
+    except: return _cmath.cos(θ)
+
 def cosh(θ, /):
     if _angle == 'deg':
         θ = DegreesToRadians(θ)
-    return _cosh(θ)
-_sin=sin
+    try: return _math.cosh(θ)
+    except: return _cmath.cosh(θ)
+
 def sin(θ, /):
+    if θ == qc: return 1
+    if θ == 3*qc: return -1
+    if θ == 2*qc: return 0
+    if θ == 0: return 0
     if _angle == 'deg':
         θ = DegreesToRadians(θ)
-    return _sin(θ)
-_sinh=sinh
+    try: return _math.sin(θ)
+    except: return _cmath.sin(θ)
+
 def sinh(θ, /):
     if _angle == 'deg':
         θ = DegreesToRadians(θ)
-    return _sinh(θ)
-_tan=tan
+    try: return _math.sinh(θ)
+    except: return _cmath.sinh(θ)
+
 def tan(θ, /):
+    if θ == qc: return nan
+    if θ == 3*qc: return nan
+    if θ == 2*qc: return 0
+    if θ == 0: return 0
     if _angle == 'deg':
         θ = DegreesToRadians(θ)
-    return _tan(θ)
-_tanh=tanh
+    try: return _math.tan(θ)
+    except: return _cmath.tan(θ)
+
 def tanh(θ, /):
     if _angle == 'deg':
         θ = DegreesToRadians(θ)
-    return _tanh(θ)
+    try: return _math.tanh(θ)
+    except: return _cmath.tanh(θ)
+
+def sec(θ, /):
+    try: return 1/cos(θ)
+    except ZeroDivisionError: return nan
+
+def sech(θ, /):
+    try: return 1/cosh(θ)
+    except ZeroDivisionError: return nan
+
+def csc(θ, /):
+    try: return 1/sin(θ)
+    except ZeroDivisionError: return nan
+
+def csch(θ, /):
+    try: return 1/sinh(θ)
+    except ZeroDivisionError: return nan
+
+def cot(θ, /):
+    try: return 1/tan(θ)
+    except ZeroDivisionError: return nan
+
+def coth(θ, /):
+    try: return 1/tanh(θ)
+    except ZeroDivisionError: return nan
 
 def cis(θ, /):
     return cos(θ)+(1j*sin(θ))
 
-cbrt = lambda x: rt(3, x)
+def cbrt(x, /):
+    return rt(3, x)
 
-icbrt = lambda x: irt(3, x)
+def icbrt(x, /):
+    return irt(3, x)
 
-def odd(num, /): return num%2 != 0
+def odd(num, /):
+    return num%2 != 0
 
-def even(num, /): return num%2 == 0
+def even(num, /):
+    return num%2 == 0
 
 def summation(start, finish, function = lambda x: x):
     '''Σ'''

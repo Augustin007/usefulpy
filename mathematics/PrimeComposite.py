@@ -27,13 +27,17 @@ __version__ = '1.1.1'
 try: from nmath import *
 except: from usefulpy.mathematics.nmath import *
 
+from usefulpy import validation as _validation
+
+from math import gcd
+
 _primes = [2]
 _composites = []
 def PrimeOrComposite(num):
     '''return 'prime' if prime and 'composite' if composite'''
     Prime = 'prime'
     Composite = 'composite'
-    if not validation.is_integer(num): raise TypeError
+    if not _validation.is_integer(num): raise TypeError
     num = int(num)
     if num < 1: raise TypeError
     if num == 1: return 'neither'
@@ -80,8 +84,8 @@ def factor(num):
     factors.append(num)
     return factors
 
-def lcf(a, b):
-    '''Return least common factor of a and b'''
+def lcm(a, b):
+    '''Return least common multiple of a and b'''
     ngcd = gcd(a, b)
     a, b = a//ngcd, b//ngcd
     return a*b*ngcd
@@ -92,7 +96,7 @@ def gcd2(a, b):
         if type(a) is Expression: return a.gcd(b)
         return b.gcd(a)
     def acceptable(num):
-        if validation.is_float(num): return abs(validation.tryint(float(num)))
+        if _validation.is_float(num): return abs(_validation.tryint(float(num)))
         return num.__gcd__()
     ac = acceptable
     nums = (ac(a), ac(b))
