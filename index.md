@@ -123,4 +123,3 @@ Most changes are to the mathematics section.
 - validation 1.1.2
 - formatting 1.2.2
 - mathematics 1.2.3
-etc.
