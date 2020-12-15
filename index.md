@@ -31,7 +31,7 @@ _note: it imports the datetime module, as well as namedtuple and deque from coll
 
 Usable functions in validation: YesOrNo, datetime (_note: datetime can be accessed through validation, but is built into python, and is not by me_), deque (_see note on datetime_), floatinput, floatlistinput, fromrepr, getYesOrNo, intinput, intlistinput, is_float, is_floatlist, is_function, is_integer, is_intlist, isbool, makelist, namedtuple (_see note on datetime_), tryfloat, tryint, trynumber, trytype, validdate, validinput, and validquery
 
-#### integer/float tools:
+#### Integer/Float Tools:
  - `is_integer`/`is_float`: return `True` if s is an integer/float or can be converted into one.
  - `intinput`/`floatinput`: continue to ask for input until input is an integer/float... Useless in a gui environment but useful in shell scripts
  - `tryint`/`tryfloat`: converts to an integer if `is_integer`/`is_float`
@@ -43,12 +43,12 @@ Usable functions in validation: YesOrNo, datetime (_note: datetime can be access
  - `lowbias`/`highbias`/`centerbias`/`outerbias`: random number biased towards the lower/higher/central/outer numbers
  - `rbool`/`truebias`/`falsebias`: return a random bool, not biased or biased to `True` or `False`
 
-#### Custumizable tools
+#### Custumizable Tools:
  - `validquery`: return `True` if an object can be converted to a type.
  - `validinput`: continue asking for input until the input can be converted to a certain type. This can be used for multiple inputs at once. It has a lot of possible arguments.
  - `trytype`: converts something to a type if `validquery` for the object and the type returns `True`
 
-#### Other
+#### Other Tools:
  - `YesOrNo`: return `True` or `False` for most variations of yes and no: returns `None` otherwise.
  - `getYesOrNo`: take inputs until `YesOrNo` returns either `True` or `False`
  - `fromrepr`: is meant to be the inverse of `repr`
