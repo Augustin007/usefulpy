@@ -1,5 +1,4 @@
 # Usefulpy
-#
 Filled with simple resources and modules for a cleaner looking program, Usefulpy is a module filled with many useful functions and modules in various subjects geared to cut down and simplify some little bits of code that can become messy or repetitive.
 
 So instead of checking, say
@@ -23,33 +22,25 @@ losing any value'''
 
 Simple, but works well and can be used in a variety of situations. This also allows you to quickly write the check without having to go back and make a module, interupting your flow of thought; or without marking it down for later creation, and then forget it (happens to me all the time).
 
-### Versions
-
-###### [Usefulpy 1.1.1](https://github.com/Augustin007/usefulpy/releases/tag/1.1.1):
-A series of simple functions, data, and programs to make code cleaner
-- validation 1.1.2
-- formatting 1.2.2
-- mathematics 1.1.3
-
-###### [Usefulpy 1.1.2](https://github.com/Augustin007/usefulpy/releases/tag/v1.1.2):
-These are all simple functions that pop up a lot in programming geared to cut down a lot of the little bits of code that can become quite messy and repetitive.
-Most changes are to the mathematics section.
-- validation 1.1.2
-- formatting 1.2.2
-- mathematics 1.2.3
-
-
 While I would recommend getting aquainted with the code by sifting through it, here is a quick introduction:
 
 ## validation
-#
-
-Validation includes various modules for getting input and preparing clean output, as well quick checks for types.
+Validation includes various tools for getting input and preparing clean output, as well quick checks for types.
 
 _note: it imports the datetime module, as well as namedtuple and deque from collections_ 
 
 Usable functions in validation: YesOrNo, datetime (_note: datetime can be accessed through validation, but is built into python, and is not by me_), deque (_see note on datetime_), floatinput, floatlistinput, fromrepr, getYesOrNo, intinput, intlistinput, is_float, is_floatlist, is_function, is_integer, is_intlist, isbool, makelist, namedtuple (_see note on datetime_), tryfloat, tryint, trynumber, trytype, validdate, validinput, and validquery
 
+#### integer/float tools:
+ - `is_integer`/`is_float`: return True if s is an integer/float or can be converted into one.
+ - `intinput`/`floatinput`: continue to ask for input until input is an integer/float
+ - `tryint`/`tryfloat`: converts to an integer if is_integer/is_float
+ - `is_intlist`/`is_floatlist`: checks if a list or a string with spaces is composed soley of integers/floats.
+ - `intlistinput`/`floatlistinput`: continues to ask for input until input can be converted to a list of integers/floats
+
+#### Simple randomizers:
+ - `lowbias`/`highbias`/`centerbias`/`outerbias`: random number biased towards the lower/higher/central/outer numbers
+ - `rbool`/`truebias`/`falsebias`: return a random bool, not biased or biased to `True` or `False`
 
 makelist makes a list from any sort of input, this works well with any sort of iterable, but non-iterables usually wind up being a list with a single value, 
 
@@ -126,4 +117,19 @@ so, in theory:
 
 ' 4 '   '13'   ' 4 13'
 
+
+## Versions
+
+###### [Usefulpy 1.1.1](https://github.com/Augustin007/usefulpy/releases/tag/1.1.1):
+A series of simple functions, data, and programs to make code cleaner
+- validation 1.1.2
+- formatting 1.2.2
+- mathematics 1.1.3
+
+###### [Usefulpy 1.1.2](https://github.com/Augustin007/usefulpy/releases/tag/v1.1.2):
+These are all simple functions that pop up a lot in programming geared to cut down a lot of the little bits of code that can become quite messy and repetitive.
+Most changes are to the mathematics section.
+- validation 1.1.2
+- formatting 1.2.2
+- mathematics 1.2.3
 etc.
