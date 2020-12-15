@@ -2,6 +2,39 @@
 
 Filled with simple resources and modules for a cleaner looking program, Usefulpy is a module filled with many useful functions and modules in various subjects geared to cut down and simplify some little bits of code that can become messy or repetitive.
 
+So instead of checking, say
+```Python
+float(x) == int(float(x))
+```
+
+You can check it as
+```Python
+is_integer(x)
+```
+
+Which leads to 
+```Python
+def is_integer(s):
+    '''Check if an object is an integer can be turned into an integer without
+losing any value'''
+    try: return int(float(s)) == float(s)
+    except: return False
+```
+
+Simple, but works well and can be used in a variety of situations. This also allows you to quickly write the check without having to go back and make a module, interupting your flow of thought; or without marking it down for later creation, and then forget it (happens to me all the time).
+
+### Versions
+###### [Usefulpy 1.1.1](https://github.com/Augustin007/usefulpy/releases/tag/1.1.1):
+A series of simple functions, data, and programs to make code cleaner
+- validation 1.1.2
+- formatting 1.2.2
+- mathematics 1.1.3
+###### [Usefulpy 1.1.2](https://github.com/Augustin007/usefulpy/releases/tag/v1.1.2)
+These are all simple functions that pop up a lot in programming geared to cut down a lot of the little bits of code that can become quite messy and repetitive.
+Most changes are to the mathematics section.
+ - 1.1.2
+ - 1.2.2
+ - 1.2.3
 ## validation
 ### version 1.1.2
 
