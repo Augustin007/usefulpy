@@ -51,7 +51,7 @@ intinput continues to ask for input until the input is an integer... useless in 
 etc.
 
 ## mathematics
-### version 1.2.3
+### version 1.2.1
 
 Contains a lot of useful mathematical stuff, for
 
@@ -72,7 +72,7 @@ Least commmon factor functions.
 I am constructing an 'expression' class for algebraic expressions... still in progress. 
 
 ## formatting
-### version 1.2.3
+### version 1.2.2
 
 Contains a few stuff for formatting output. (and a few other odds and ends that I'm not very sure how they got there)
 

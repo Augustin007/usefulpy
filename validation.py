@@ -42,7 +42,8 @@ def is_function(s):
     return type(s) is function
 
 def is_integer(s):
-    '''Check if an object can be turned into an integer without losing any value'''
+    '''Check if an object is an integer can be turned into an integer without
+losing any value'''
     try: return int(float(s)) == float(s)
     except: return False
 
@@ -60,7 +61,7 @@ def tryint(s):
     if is_integer(s): return int(float(s))
     return s
 
-#Necessary for 'fromerepr', essentially a dictionary with a single item.
+#Necessary for 'fromrepr', essentially a dictionary with a single item.
 class _keyob(object):
     '''Support for fromrepr'''
     def __init__(self, arg:str):
@@ -330,9 +331,7 @@ tryfloat = lambda s:trytype(float, s)
 
 trynumber = lambda s: tryint(tryfloat(s))
 
-from random import *
-rint = randint
-rnum = random
+from random import randint as rint, random as rnum
 
 def lowbias(low, high):
     '''return a random integer from low to high, lower numbers have higher
