@@ -27,7 +27,7 @@ While I would recommend getting aquainted with the code by sifting through it, h
 ## validation
 Validation includes various tools for getting input and preparing clean output, as well quick checks for types.
 
-_note: it imports the datetime module, as well as namedtuple and deque from collections_ 
+_note: it imports the_ `datetime` _module, as well as namedtuple and deque from the_ `collections` _module_ 
 
 Usable functions in validation: YesOrNo, datetime (_note: datetime can be accessed through validation, but is built into python, and is not by me_), deque (_see note on datetime_), floatinput, floatlistinput, fromrepr, getYesOrNo, intinput, intlistinput, is_float, is_floatlist, is_function, is_integer, is_intlist, isbool, makelist, namedtuple (_see note on datetime_), tryfloat, tryint, trynumber, trytype, validdate, validinput, and validquery
 
