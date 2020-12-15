@@ -1,5 +1,5 @@
 # Usefulpy
-
+#
 Filled with simple resources and modules for a cleaner looking program, Usefulpy is a module filled with many useful functions and modules in various subjects geared to cut down and simplify some little bits of code that can become messy or repetitive.
 
 So instead of checking, say
@@ -38,16 +38,18 @@ Most changes are to the mathematics section.
 - formatting 1.2.2
 - mathematics 1.2.3
 
+
+While I would recommend getting aquainted with the code by sifting through it, here is a quick introduction:
+
 ## validation
-### version 1.1.2
+#
 
 Validation includes various modules for getting input and preparing clean output, as well quick checks for types.
 
 _note: it imports the datetime module, as well as namedtuple and deque from collections_ 
 
-While I would recommend getting aquainted with the code by sifting through it, here is a quick introduction:
-
 Usable functions in validation: YesOrNo, datetime (_note: datetime can be accessed through validation, but is built into python, and is not by me_), deque (_see note on datetime_), floatinput, floatlistinput, fromrepr, getYesOrNo, intinput, intlistinput, is_float, is_floatlist, is_function, is_integer, is_intlist, isbool, makelist, namedtuple (_see note on datetime_), tryfloat, tryint, trynumber, trytype, validdate, validinput, and validquery
+
 
 makelist makes a list from any sort of input, this works well with any sort of iterable, but non-iterables usually wind up being a list with a single value, 
 
