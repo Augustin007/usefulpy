@@ -22,7 +22,7 @@ losing any value'''
 
 Simple, but works well and can be used in a variety of situations. This also allows you to quickly write the check without having to go back and make a module, interupting your flow of thought; or without marking it down for later creation, and then forget it (happens to me all the time).
 
-While I would recommend getting aquainted with the code by sifting through it, here is a quick introduction:
+While I would recommend getting aquainted with the code by sifting through it by hand, here is a quick introduction:
 
 ## validation
 Validation includes various tools for getting input and preparing clean output, as well quick checks for types.
