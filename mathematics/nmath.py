@@ -192,12 +192,14 @@ def acoth(θ, /):
     except ZeroDivisionError: return nan
 
 def cos(θ, /):
-    θ = θ%_circle
-    qc = _circle/4
-    if θ == qc: return 0
-    if θ == 3*qc: return 0
-    if θ == 2*qc: return -1
-    if θ == 0: return 1
+    try:
+        θ = θ%_circle
+        qc = _circle/4
+        if θ == qc: return 0
+        if θ == 3*qc: return 0
+        if θ == 2*qc: return -1
+        if θ == 0: return 1
+    except: pass
     if _angle == 'deg':
         θ = DegreesToRadians(θ)
     try: return _math.cos(θ)
@@ -210,10 +212,14 @@ def cosh(θ, /):
     except: return _cmath.cosh(θ)
 
 def sin(θ, /):
-    if θ == qc: return 1
-    if θ == 3*qc: return -1
-    if θ == 2*qc: return 0
-    if θ == 0: return 0
+    try:
+        θ = θ%_circle
+        qc = _circle/4
+        if θ == qc: return 1
+        if θ == 3*qc: return -1
+        if θ == 2*qc: return 0
+        if θ == 0: return 0
+    except: pass
     if _angle == 'deg':
         θ = DegreesToRadians(θ)
     try: return _math.sin(θ)
@@ -226,10 +232,14 @@ def sinh(θ, /):
     except: return _cmath.sinh(θ)
 
 def tan(θ, /):
-    if θ == qc: return nan
-    if θ == 3*qc: return nan
-    if θ == 2*qc: return 0
-    if θ == 0: return 0
+    try:
+        θ = θ%_circle
+        qc = _circle/4
+        if θ == qc: return nan
+        if θ == 3*qc: return nan
+        if θ == 2*qc: return 0
+        if θ == 0: return 0
+    except: pass
     if _angle == 'deg':
         θ = DegreesToRadians(θ)
     try: return _math.tan(θ)
@@ -282,7 +292,9 @@ def even(num, /):
 
 def summation(start, finish, function = lambda x: x):
     '''Σ'''
-    return _reduce((lambda x, y: x+function(y)), range(start, finish+1))
+    rangelist = list(range(start, finish+1))
+    rangelist[0] = function(rangelist[0])
+    return _reduce((lambda x, y: x+function(y)), rangelist)
 
 Σ = Sigma = summation #Summation is usually noted with a capital greek Sigma
 
