@@ -49,7 +49,6 @@ Cosine, one or the other must be given, not both'''
     if gamma != None and c != None: raise BaseException
     if gamma == None:
         pyth = (a**2)+(b**2)-(c**2)
-        if pyth == 0: return (pi/2)
         anglecos = (pyth)/(2*a*b); Angle = acos(anglecos)
         return _validation.tryint(Angle)
     pyth = (a**2)+(b**2); anglecos = cos(gamma)
