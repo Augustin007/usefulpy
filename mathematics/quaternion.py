@@ -34,6 +34,8 @@ RELEASE NOTES:
 __version__ = '1.2.1'
 
 from usefulpy import validation as _validation
+try: from nmath import *
+except: from usefulpy.mathematics.nmath import *
 
 class quaternion(object):
     '''A quaternion class'''
@@ -163,10 +165,10 @@ class quaternion(object):
             other = quaternion(other)
         another = self*(other.converse())
         divfactor=((abs(other))**2)
-        another.real = makefraction(another.real, divfactor)
-        another.i = makefraction(another.i, divfactor)
-        another.j = makefraction(another.j, divfactor)
-        another.k = makefraction(another.k, divfactor)
+        another.real = another.real/divfactor
+        another.i = another.i/divfactor
+        another.j = another.j/divfactor
+        another.k = another.k/divfactor
         return _validation.trynumber(another)
 
     def __rtruediv__(other, self):
@@ -255,6 +257,34 @@ class quaternion(object):
     def __repr__(self):
         '''IDLE representation'''
         return '('+str(self)+')'
+
+    def __pow__(self, other):
+        '''return self**other'''
+        try:
+            self = _validation.trynumber(complex(self))
+            self**other
+        except: pass
+        if _validation.is_integer(other) and other>=0:
+            current = 1
+            for l in range(int(other)): current *= self
+            return current
+        else: raise NotImplementedError('Raising quaternions to non-integer powers has not been implemented yet')
+
+    def __rpow__(other, self):
+        '''return other**self'''
+        try:
+            other = _validation.trynumber(complex(other))
+            self**other
+        except: pass
+        if _validation.is_integer(other) and other>=0:
+            current = 1
+            for l in range(int(other)): current *= self
+            return current
+        else:
+            print('2')
+            r, theta = polar(self)
+            print(r, theta)
+            return _validation.trynumber((r**other)*cis(theta*other))
 
 i = quaternion(b = 1)
 j = quaternion(c = 1)
