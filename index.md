@@ -56,11 +56,34 @@ _note: it imports the_ `datetime` _module, as well as namedtuple and deque from 
  - `is_function`: returns `True` if the object is a function.
 
 ## mathematics
-### version 1.2.3
-
+### version 1.2.4
+_(latest release contains version 1.2.3)_
 Contains a lot of useful mathematical stuff.
 
 _note: imports the_ `math` _and_ `cmath` _modules,_ `fraction.Fraction as fraction`, `decimal.Decimal as num`, `reduce` _from_ `functools`_,_ `validation`_,_ `formatting`_,_ `warnings`_... is that all?_
+
+mathematics is divided into several programs, though `from usefulpy.mathematics import *` imports all of the functions from all of them.
+- `nmath`: new math, essentially imports and combines `math` and `cmath` (complex math), adds some more constants, and allows for a radians or degrees setting.
+- `triangles`: different functions dealing with triangles, as from `TriangleType` to `LawofCos`.
+- `PrimeComposite`: Functions dealing with factoring, gcd, lcm, primes and composites.
+- `basenum`: a class that saves numbers in any base counting system.
+- `quaternion`: a quaternion class: **In progress**
+- `eq`: a class, requires a string argument in a function `create` which returns an object of the class from a string `create('f(s)=s+1')` returns a callable object represented as `(s + 1)`
+- `algebraicsolver`: eventually will be able to solve or simplify algebraic expressions **early stages... still in progress**
+
+#### nmath 2.1.1
+ - constants: `e`, `pi`/`π`, `tau`/`τ`, `nan`, `inf`, `infj`, `nanj`, `Phi`/`Φ`, `kappa`/`κ`, `rho`/`ρ`, `lsigma`/`ς`, `sigma`/`σ`, `phi`/`φ`, and `psi`/`ψ`
+ - `num`/`fraction`: `Decimal.decimal` and `Fraction.fraction` from python built-ins
+ - `makefraction`: creates a correct fraction object out of floats
+ - `phase`, `polar`, `rect`, `ceil`, `comb`, `copysign`, `dist`, `erf`, `erfc`, `expm1`, `fabs`, `factorial`, `floor`, `fmod`, `frexp`, `fsum`, `gamma`, `hypot`, `ldexp`, `lgamma`, `modf`, `nextafter`, `perm`, `prod`, `remainder`, `trunc`, `ulp`: functions imported directly `math`, `cmath`
+ - `sqrt`, `isqrt`, `exp`, `isclose`, `isfinite`, `isinf`, `isnan`, `ln`, `log`: functions that call `math` and `cmath` versions but are modified to work both for real and complex numbers, instead of only one at a time.
+ - `RadiansToDegrees`/`DegreesToRadians`: self explanatory
+ - `radians`/`degrees`: functions that set the nmath setting to radians or degrees (default is radians)
+ - `acos`, `acosh`, `asin`, `asinh`, `atan`, `atanh`, `asec`, `asech`, `acsc`, `acsch`, `acot`, `acoth`, `cos`, `cosh`, `sin`, `sinh`, `tan`, `tanh`, `sec`, `sech`, `csc`, `csch`, `cot`, `coth`, `cis`: Trigonometric functions, work with real and complex numbers, more functions than available with math and cmath and closer responses for quarter degrees. 
+ - `rt`, `irt`, `cbrt`, `icbrt`: root functions not in `math` and `cmath`
+ - `odd`/`even`: return `True` if number is odd or even.
+ - `summation`/`Σ`/`Sigma`: Summation
+ - 
 
 Useable functions in mathematics: AngleType, Composite, DegreesToRadians, Expression, Heron, LawofCos, LawofSin, Phi, Prime, PrimeOrComposite, RadiansToDegrees, TriangleType, basenum, cbrt, create, e, eq, factor, findgcd, fromNumBaseFormat, fsum, gcd2, i, icbrt, irrational, irt, isTriangle, j, k, kappa, lcf, ln, log, makefraction, phi, pi, pow, prepare, psi, quaternion, rho, rt, sigma, summation, validation, var, Φ, κ, π, ρ, ς, σ, τ, φ, and ψ
 
