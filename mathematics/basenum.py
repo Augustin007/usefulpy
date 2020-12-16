@@ -55,6 +55,25 @@ class basenum(object):
 >>> int(y)
 465
 >>> '''
+        if 'e' in strint and base == 10:
+            nindex = strint.index('e')
+            before = strint[:nindex]
+            sn = strint[nindex+1]
+            try: after = int(strint[nindex+2:])
+            except: raise ValueError('This is not a base', str(base), 'number')
+            if sn == '-':
+                if '.' in before:
+                    nlen = before.index('.')
+                    before = before[:nlen]+before[nlen+1:]
+                else:
+                    nlen = len(before)
+                strint = '0.'+('0'*(after-nlen))+before
+            elif sn == '+':
+                if '.' in before:
+                    nlen = before.rindex('.')
+                    before = before[:-(nlen+1)]+before[-nlen:]
+                else: nlen = 0
+                strint = before + '0'*(after-nlen)
         if base not in range(0x2, 0x25): raise ValueError('This base is not within the range(0x2, 0x25)')
         if base < 10: maximum = str(base)
         else: maximum = chr(ord('a')+(base-10))
@@ -89,7 +108,7 @@ class basenum(object):
             decimal += (float(digit)*base**exponent)
             exponent-=1
         if self.Negative: decimal = 0-decimal
-        return decimal
+        return float(decimal)
 
     def __int__(self):
         '''return int(self)'''
@@ -148,6 +167,16 @@ class basenum(object):
         basenumb = (floatbase.convert(self.base))
         return basenumb
 
+    def __pow__(self, other):
+        '''return self**other'''
+        decanum = float(self)**float(other)
+        floatbase = basenum(str(decanum))
+        basenumb = (floatbase.convert(self.base))
+        return basenumb
+
+    def __rpow__(other, self):
+        '''return self**other'''
+        return _validation.tryint(float(self)**float(other))
 
     def __rmul__(other, self):
         '''return self*other'''
