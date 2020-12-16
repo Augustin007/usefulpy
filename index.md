@@ -58,9 +58,9 @@ _note: it imports the_ `datetime` _module, as well as namedtuple and deque from 
 ## mathematics
 ### version 1.2.3
 
-Contains a lot of useful mathematical stuff, for
+Contains a lot of useful mathematical stuff.
 
-_note, imports the whole math module, two classes from statistics, reduce from functools, imports validation, imports formatting... is that all?_
+_note: imports the_ `math` _and_ `cmath` _modules,_ `fraction.Fraction as fraction`, `decimal.Decimal as num`, `reduce` _from_ `functools`_,_ `validation`_,_ `formatting`_... is that all?_
 
 Useable functions in mathematics: AngleType, Composite, DegreesToRadians, Expression, Heron, LawofCos, LawofSin, Phi, Prime, PrimeOrComposite, RadiansToDegrees, TriangleType, basenum, cbrt, create, e, eq, factor, findgcd, fromNumBaseFormat, fsum, gcd2, i, icbrt, irrational, irt, isTriangle, j, k, kappa, lcf, ln, log, makefraction, phi, pi, pow, prepare, psi, quaternion, rho, rt, sigma, summation, validation, var, Φ, κ, π, ρ, ς, σ, τ, φ, and ψ
 
