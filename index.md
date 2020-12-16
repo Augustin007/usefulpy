@@ -83,21 +83,13 @@ mathematics is divided into several programs, though `from usefulpy.mathematics 
  - `rt`, `irt`, `cbrt`, `icbrt`: root functions not in `math` and `cmath`
  - `odd`/`even`: return `True` if number is odd or even.
  - `summation`/`Σ`/`Sigma`: Summation
- - 
 
-Useable functions in mathematics: AngleType, Composite, DegreesToRadians, Expression, Heron, LawofCos, LawofSin, Phi, Prime, PrimeOrComposite, RadiansToDegrees, TriangleType, basenum, cbrt, create, e, eq, factor, findgcd, fromNumBaseFormat, fsum, gcd2, i, icbrt, irrational, irt, isTriangle, j, k, kappa, lcf, ln, log, makefraction, phi, pi, pow, prepare, psi, quaternion, rho, rt, sigma, summation, validation, var, Φ, κ, π, ρ, ς, σ, τ, φ, and ψ
-
-Also useable is the entire math module, as well as the statistics Decimal (as num) and Fraction (as fraction)
-
-Includes several constants, variables with both their english and greek names. 
-Includes a quaternion class, for using quaternions. 
-A basenum class, for working in different number systems. 
-Triangle stuff, angles, valid triangle, law of cosines and law of sines functions. 
-Prime and composites functions. 
-Factoring numbers. 
-Least commmon factor functions.
-
-I am constructing an 'expression' class for algebraic expressions... still in progress. 
+#### triangles
+#### PrimeComposite
+#### basenum
+#### quaternion
+#### eq
+#### algebraicsolver
 
 ## formatting
 ### version 1.2.3
