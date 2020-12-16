@@ -11,7 +11,7 @@ You can check it as
 is_integer(x)
 ```
 
-Which leads to 
+Which calls 
 ```Python
 def is_integer(s):
     '''Check if an object is an integer can be turned into an integer without
