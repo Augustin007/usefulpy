@@ -31,7 +31,9 @@ RELEASE NOTES:
   Version 1.2.2
    Mostly some small bugfixes and clearer commenting throughout
   Version 1.2.3
-   Several bugfixes, some work on algebraic solver and improvements on eq 
+   Several bugfixes, some work on algebraic solver and improvements on eq
+  Version 1.2.4
+   Heavy improvements in nmath, small bugfixes throughout
 
 SECTIONS:
 PrimeComposite v1.1.1
