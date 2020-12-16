@@ -34,6 +34,8 @@ mathematics v1.2.3
 
 '''
 
+__version__ = '1.1.2'
+
 try: import validation, formatting, mathematics
 except: from usefulpy import validation, formatting, mathematics
 
