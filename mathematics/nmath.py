@@ -33,19 +33,17 @@ __version__ = '2.1.1'
 
 #Primary importations
 from functools import reduce as _reduce
-import warnings
-from decimal import Decimal as num
-from fractions import Fraction as fraction
 from usefulpy import validation as _validation
-
 import cmath as _cmath
 import math as _math
-
 from math import e, pi, tau, nan, inf
 from cmath import infj, nanj
 
-from cmath import phase, polar, rect
+import warnings
+from decimal import Decimal as num
+from fractions import Fraction as fraction
 
+from cmath import phase, polar, rect
 from math import ceil, comb, copysign, dist, erf, erfc, expm1, fabs, factorial
 from math import floor, fmod, frexp, fsum, gamma, hypot, ldexp, lgamma, modf
 from math import nextafter, perm, prod, remainder, trunc, ulp
@@ -288,9 +286,9 @@ def summation(start, finish, function = lambda x: x):
 
 Σ = Sigma = summation #Summation is usually noted with a capital greek Sigma
 
-pi = π = pi # π, ratio of diameter to circumference in circle
-tau = τ = tau # τ, ratio of diameter to circumference in circle
-e = e #e, number where f(x)=e^x, its derivative, f'(x) also equals e^x
+π = pi # π, ratio of diameter to circumference in circle
+τ = tau # τ, ratio of diameter to circumference in circle
+#e, number where f(x)=e^x, its derivative, f'(x) also equals e^x
 Phi = Φ = (1+sqrt(5))/2 #1/(1+1/(1+1/(1+1/(1+1/(1+1/(1+1/(1+1/(1+1/(...)))))))))
 #also (a+a*Φ)/a*Φ = a/a*Φ, golden ratio
 phi = φ = (1-sqrt(5))/2 #another solution for Φ, signified by lowecase phi
