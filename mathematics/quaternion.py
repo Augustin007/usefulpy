@@ -28,10 +28,13 @@ RELEASE NOTES:
    i, j, and k are added as variables.
   Version 1.2.2
    Some more testing and thus... more bug fixes
-
+ 1.3
+  Version 1.3.1
+   Small internal changes, addition of __pow__, but not complete, only works
+   with integers.
 '''
 
-__version__ = '1.2.1'
+__version__ = '1.3.1'
 
 from usefulpy import validation as _validation
 try: from nmath import *
@@ -268,7 +271,7 @@ class quaternion(object):
             current = 1
             for l in range(int(other)): current *= self
             return current
-        else: raise NotImplementedError('Raising quaternions to non-integer powers has not been implemented yet')
+        raise NotImplementedError('Raising quaternions to non-integer powers has not been implemented yet')
 
     def __rpow__(other, self):
         '''return other**self'''
@@ -276,15 +279,9 @@ class quaternion(object):
             other = _validation.trynumber(complex(other))
             self**other
         except: pass
-        if _validation.is_integer(other) and other>=0:
-            current = 1
-            for l in range(int(other)): current *= self
-            return current
-        else:
-            print('2')
-            r, theta = polar(self)
-            print(r, theta)
-            return _validation.trynumber((r**other)*cis(theta*other))
+        raise NotImplementedError
+        r, theta = polar(self)
+        return _validation.trynumber((r**other)*cis(theta*other))
 
 i = quaternion(b = 1)
 j = quaternion(c = 1)
