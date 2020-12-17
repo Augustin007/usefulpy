@@ -160,7 +160,7 @@ _Algebraic expressions/algebraic simplification_ ***Work in progress.***
 - `cap`: Yes, I am aware there is a similar method for str, which capitalizes the first character and lowercases the rest, this one only capitalizes the first
 - `punctuate`: adds a punctuation and strips of old punctuation
 - `a_an`: returns `'a'` or `'an'` depending on the nextword argument
-- `translate`/`scour`: translate .replaces a string with all keys in a list, scour removes all instances of something in a list/str
+- `translate`/`scour`: translate `.replace`s a string with all keys in a list, scour removes all instances of something in a list/str
 - `write`/`ComposeNumber`/`syllables`/`unformat`: write adds commas to string numbers, syllables counts syllables in a word/phrase, compose number writes out an input integer (`ComposeNumber(100)` returns `'one hundred'`, unformat .lowers the text, replaces any written out greek letters (for example: pi with π) or written out numbers (`unformat('two hundred forty three thousand six hundred twelve')` returns `'243612'`.
 
 #### Multline class
