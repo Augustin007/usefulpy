@@ -148,33 +148,30 @@ _Algebraic expressions/algebraic simplification_ ***Work in progress.***
 ## formatting
 ### version 1.2.3
 
-Contains a few stuff for formatting output. (and a few other odds and ends that I'm not very sure how they got there)
+#### Data
+- `vowels`: a string with all the vowels
+- `endingpuncuation`/`phrasepuncuation`/`inwordpunctuation`: strings containing punctuation marks
+- `greek_letters`: a dictionary containing written out greek letters and their character counterparts
+- `subscript`: a dictionary with subscript number characters.
+- `colors`(`colors.fg`/`colors.bg`): Data for character formatting.
 
 
-Useable functions in formatting: ComposeNumber, Syllables, a_an, cap, colors, endingpuncuation, greek_letters, inwordpunctuation, multline, phrasepuncuation, punctuate, scour, subscript, translate, unformat, validation, vowels, and write
+#### Functions
+- `cap`: Yes, I am aware there is a similar method for str, which capitalizes the first character and lowercases the rest, this one only capitalizes the first
+- `punctuate`: adds a punctuation and strips of old punctuation
+- `a_an`: returns `'a'` or `'an'` depending on the nextword argument
+- `translate`/`scour`: translate .replaces a string with all keys in a list, scour removes all instances of something in a list/str
+- `write`/`ComposeNumber`/`syllables`/`unformat`: write adds commas to string numbers, syllables counts syllables in a word/phrase, compose number writes out an input integer (`ComposeNumber(100)` returns `'one hundred'`, unformat .lowers the text, replaces any written out greek letters (for example: pi with π) or written out numbers (`unformat('two hundred forty three thousand six hundred twelve')` returns `'243612'`.
 
-ComposeNumber makes the written version of the number ex:(ComposeNumber(10) returns 'ten')
-
-a_an takes the next word as an argument, and returns 'a' or 'an' as the next word demands.
-
-unformat removes any caps from text. It also takes any written numbers and makes them regular numbers in the text, as well as written greek letters.
-
-scour removes all instances of something from a list or string
-
-write adds commas to numbers.
-
-cap capitalizes the first letter of the input string.
-
-multline is an class in progress that is supposed to cocinate and deal with strings that can span various lines as if they were single line 
-
-so, in theory:
-
+#### Multline class
+Formatting includes a `multline` class, still a bit confusing and in its early stages but, in theory, cocinate and deal with strings that can span various lines as if they were single line 
+in theory:
+```
 ' 3 '   '12'   ' 3 12'
-
 '---' + '--' = '-----'
-
 ' 4 '   '13'   ' 4 13'
-
+```
+(of course, in the IDLE this would look different)
 
 ## Versions
 
