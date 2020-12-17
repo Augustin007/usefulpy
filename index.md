@@ -97,7 +97,7 @@ mathematics is divided into several programs, though `from usefulpy.mathematics 
  - `gcd`/`gcd2`/`findgcd`: use `gcd` for most cases, `gcd2` is meant to work with more classes, but isn't wuite developed, `findgcd` is for a larger number of arguments.
 
 
-#### basenum
+#### basenum 1.1.2
 A basenum class:
 ```python
 >>> x = basenum('3a2', 16)
