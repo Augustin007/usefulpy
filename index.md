@@ -2,17 +2,17 @@
 Filled with simple resources and modules for a cleaner looking program, Usefulpy is a module filled with many useful functions and modules in various subjects geared to cut down and simplify some little bits of code that can become messy or repetitive.
 
 So instead of checking, say
-```Python
+```python
 float(x) == int(float(x))
 ```
 
 You can check it as
-```Python
+```python
 is_integer(x)
 ```
 
 Which calls 
-```Python
+```python
 def is_integer(s):
     '''Check if an object is an integer can be turned into an integer without
 losing any value'''
