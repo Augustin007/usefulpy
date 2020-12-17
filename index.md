@@ -57,7 +57,6 @@ _note: it imports the_ `datetime` _module, as well as namedtuple and deque from 
 
 ## mathematics
 ### version 1.2.4
-_(latest release contains version 1.2.3)_
 Contains a lot of useful mathematical stuff.
 
 _note: imports the_ `math` _and_ `cmath` _modules,_ `fraction.Fraction as fraction`, `decimal.Decimal as num`, `reduce` _from_ `functools`_,_ `validation`_,_ `formatting`_,_ `warnings`_... is that all?_
@@ -79,17 +78,72 @@ mathematics is divided into several programs, though `from usefulpy.mathematics 
  - `sqrt`, `isqrt`, `exp`, `isclose`, `isfinite`, `isinf`, `isnan`, `ln`, `log`: functions that call `math` and `cmath` versions but are modified to work both for real and complex numbers, instead of only one at a time.
  - `RadiansToDegrees`/`DegreesToRadians`: self explanatory
  - `radians`/`degrees`: functions that set the nmath setting to radians or degrees (default is radians)
- - `acos`, `acosh`, `asin`, `asinh`, `atan`, `atanh`, `asec`, `asech`, `acsc`, `acsch`, `acot`, `acoth`, `cos`, `cosh`, `sin`, `sinh`, `tan`, `tanh`, `sec`, `sech`, `csc`, `csch`, `cot`, `coth`, `cis`: Trigonometric functions, work with real and complex numbers, more functions than available with math and cmath and closer responses for quarter degrees. 
+ - `acos`, `acosh`, `asin`, `asinh`, `atan`, `atanh`, `asec`, `asech`, `acsc`, `acsch`, `acot`, `acoth`, `cos`, `cosh`, `sin`, `sinh`, `tan`, `tanh`, `sec`, `sech`, `csc`, `csch`, `cot`, `coth`, `cis`: Trigonometric functions, work with real and complex numbers, more functions than available with math and cmath and closer responses for quarter circles. 
  - `rt`, `irt`, `cbrt`, `icbrt`: root functions not in `math` and `cmath`
  - `odd`/`even`: return `True` if number is odd or even.
  - `summation`/`Σ`/`Sigma`: Summation
 
-#### triangles
-#### PrimeComposite
+#### triangles 1.1.2
+ - `isTriangle`: Checks whether a triangle can be formed out of three side lengths.
+ - `TriangelType`/`AngleType`: returns the type of triangle/angle
+ - `LawofCos`/`LawofSin`: Use the law of cos/sin to determine the missing argument.
+ - `Heron`: Uses Heron's formula to get area of triangle.
+
+#### PrimeComposite 1.1.1
+ - `PrimeOrComposite`: return `'Prime'` and `'Composite'`
+ - `Prime`/`Composite`: return `True` if prime/composite
+ - `factor`: return a list containing the factors of any given number
+ - `lcm`: least common multiple
+ - `gcd`/`gcd2`/`findgcd`: use `gcd` for most cases, `gcd2` is meant to work with more classes, but isn't wuite developed, `findgcd` is for a larger number of arguments.
+
+
 #### basenum
-#### quaternion
-#### eq
-#### algebraicsolver
+A basenum class:
+```python
+>>> x = basenum('3a2', 16)
+>>> x
+3a2₁₆
+>>> y = x/2
+>>> y
+1d1₁₆
+>>> float(x)
+930.0
+>>> int(y)
+465
+>>> basenum('101', 2)
+101₂
+>>> _.convert(4)
+11₄
+>>> _+basenum('10.1', 2)
+13.2₄
+>>> float(_)
+7.5
+>>> 
+```
+
+#### quaternion 1.3.1
+A quaternion class:
+```python
+>>> quaternion(1, 2, 3, 4)
+(1+2i+3j+4k)
+>>> quaternion(1+3j)
+(1+3i)
+>>> 
+```
+
+#### eq 2.2.1
+This program stores the 'eq' class. It takes a string of an expression of a
+function and returns an 'eq' object, which can be called with a number which
+replaces the variable with a number.
+
+Note: I originally created this for a specific sceneario in a graphing program
+I created that used this to make a turtle graph an input equation. While I am
+sure that there are other practical uses for this, some areas are only develope
+as necessary within the original program, though I have attempted to broaden its
+abilities.
+
+#### algebraicsolver 
+_Algebraic expressions/algebraic simplification_ ***Work in progress.*** 
 
 ## formatting
 ### version 1.2.3
@@ -136,3 +190,9 @@ Most changes are to the mathematics section.
 - validation 1.1.2
 - formatting 1.2.2
 - mathematics 1.2.3
+  - nmath 1.1.2
+  - triangles 1.1.2
+  - PrimeComposite 1.1.1
+  - eq 2.1.5
+  - algebraicsolver pr 5 (1.1.1)
+  - quaternion 1.2.2
