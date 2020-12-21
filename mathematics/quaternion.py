@@ -283,8 +283,23 @@ class quaternion(object):
         r, theta = polar(self)
         return _validation.trynumber((r**other)*cis(theta*other))
 
+    def __polar__(self):
+        r = abs(self)
+        theta1 = atan(self.i/self.real)
+        theta2 = atan(self.j/hypot(self.i, self.real))
+        theta3 = atan(self.k/hypot(self.real, self.i, self.j))
+        return (r, theta1, theta2, theta3)
 i = quaternion(b = 1)
 j = quaternion(c = 1)
 k = quaternion(d = 1)
+tesseract = quaternion(1, 1, 1, 1)
+
+def hyperrect(r, theta1, theta2, theta3):
+    real = r*cos(theta1)*cos(theta2)*cos(theta3)
+    i = r*sin(theta1)*cos(theta2)*cos(theta3)
+    j = r*sin(theta2)*cos(theta3)
+    k = r*sin(theta3)
+    return quaternion(real, i, j, k)
+
 
 #eof
