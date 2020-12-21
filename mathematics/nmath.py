@@ -296,6 +296,19 @@ def summation(start, finish, function = lambda x: x):
     rangelist[0] = function(rangelist[0])
     return _reduce((lambda x, y: x+function(y)), rangelist)
 
+def sigmoid(x, /):
+    epow = e**-x
+    return 1/(1+epow)
+
+def square(x, /):
+    return x**2
+
+def cube(x, /):
+    return x**3
+
+def tesser(x, /):
+    return x**4
+
 Σ = Sigma = summation #Summation is usually noted with a capital greek Sigma
 
 π = pi # π, ratio of diameter to circumference in circle
@@ -313,5 +326,8 @@ kappa = κ = (3+sqrt(13))/2 #Bronze ratio, 3+1/(3+1/(3+1/(3+1/(3+1/(...)))))
 psi = ψ = (1+(cbrt((29+3*sqrt(93))/2))+(cbrt((29-3*sqrt(93))/2)))/3
 #ψ, supergolden ratio x**3 = x**2+1
 #all the numbers I could think of...
+
+monster = 808017424794512875886459904961710757005754368000000000
+
 
 #eof
