@@ -292,6 +292,20 @@ def even(num, /):
 
 def summation(start, finish, function = lambda x: x):
     '''Σ'''
+    if finish == inf: #This is not true infinite summation, but it does give an
+        #approximation, (this does mean that it can be stuck in an infinite
+        #loop... not yet sure how to counter this accurately and efficiently.
+        #but eventually a number gets to big or to small for python to handle
+        #This temporary version is mostly for a few _experimental functions
+        #(see line 346) which uses this to simulate an infinite taylor series
+        #aproxmiating trigonometric expressions, where it stays (from my
+        #observations and experiments) mostly in the 75-100 range before a number
+        #is 'too large to convert to a float'.
+        sm = function(start)
+        while True:
+            start += 1
+            try: sm += function(start)
+            except: return sm
     rangelist = list(range(start, finish+1))
     rangelist[0] = function(rangelist[0])
     return _reduce((lambda x, y: x+function(y)), rangelist)
@@ -329,5 +343,29 @@ psi = ψ = (1+(cbrt((29+3*sqrt(93))/2))+(cbrt((29-3*sqrt(93))/2)))/3
 
 monster = 808017424794512875886459904961710757005754368000000000
 
+'''
+This section forward is for expirimental functions.
+'''
+class _experiment: 
+    #math denotes with a t refers to Taylor series
+    def tcos(theta, /):
+        #uses taylor series to get cos(theta),
+        #lessening dependens on python's builtin math
+        def iteration(n):
+            trueiter = 2*n
+            sign = (-1)**n
+            denom = factorial(trueiter)
+            return sign * (theta**trueiter)/denom
+        return summation(0, inf, iteration)
+
+    def tsin(theta, /):
+        def iteration(n):
+            #uses taylor series to get sin(theta),
+            #lessening dependens on python's builtin math
+            trueiter = 2*n+1
+            sign = (-1)**n
+            denom = factorial(trueiter)
+            return sign * (theta**trueiter)/denom
+        return summation(0, inf, iteration)
 
 #eof
