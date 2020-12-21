@@ -115,7 +115,7 @@ class quaternion(object):
         '''return self-other'''
         if type(self) != type(other):
             other = quaternion(other)
-        real = self.real+other.real
+        real = self.real-other.real
         i = self.i-other.i
         j = self.j-other.j
         k = self.k-other.k
@@ -292,7 +292,7 @@ class quaternion(object):
 i = quaternion(b = 1)
 j = quaternion(c = 1)
 k = quaternion(d = 1)
-tesseract = quaternion(1, 1, 1, 1)
+tesseract = 1+i+j+k
 
 def hyperrect(r, theta1, theta2, theta3):
     real = r*cos(theta1)*cos(theta2)*cos(theta3)
