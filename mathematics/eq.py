@@ -53,7 +53,9 @@ RELEASE NOTES:
   2.1.6
    Bugfixes... made to work with nmath > 2.1.1
    more functions
-
+ 2.2
+  2.2.1
+   Calculus foundations being laid... adding the 'derivate'
 '''
 
 __version__ = '2.1.6'
