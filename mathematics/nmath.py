@@ -27,6 +27,8 @@ RELEASE NOTES:
   Version 2.1.1
    Reworked a lot of little details to allow for use with complex numbers
    throughout.
+  Version 2.2.1
+   Several new functions.
 '''
 
 __version__ = '2.1.1'
@@ -346,26 +348,30 @@ monster = 808017424794512875886459904961710757005754368000000000
 '''
 This section forward is for expirimental functions.
 '''
-class _experiment: 
+class _experiment:
     #math denotes with a t refers to Taylor series
-    def tcos(theta, /):
-        #uses taylor series to get cos(theta),
-        #lessening dependens on python's builtin math
-        def iteration(n):
-            trueiter = 2*n
-            sign = (-1)**n
-            denom = factorial(trueiter)
-            return sign * (theta**trueiter)/denom
-        return summation(0, inf, iteration)
+    class t:
+        def cos(theta, /):
+            def iteration(n):
+                trueiter = 2*n
+                sign = (-1)**n
+                denom = factorial(trueiter)
+                return sign * (theta**trueiter)/denom
+            return summation(0, inf, iteration)
 
-    def tsin(theta, /):
-        def iteration(n):
-            #uses taylor series to get sin(theta),
-            #lessening dependens on python's builtin math
-            trueiter = 2*n+1
-            sign = (-1)**n
-            denom = factorial(trueiter)
-            return sign * (theta**trueiter)/denom
-        return summation(0, inf, iteration)
+        def sin(theta, /):
+            def iteration(n):
+                trueiter = 2*n+1
+                sign = (-1)**n
+                denom = factorial(trueiter)
+                return sign * (theta**trueiter)/denom
+            return summation(0, inf, iteration)
+    def polar(z, /):
+        try: return z.__polar__() #Catch a quaternion class.
+        except:pass
+        if _validation.is_float(z): z = float(z)
+        z = complex(z)
+        return (abs(z), atan(z.imag/z.real))
+
 
 #eof
