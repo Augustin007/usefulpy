@@ -19,6 +19,8 @@ RELEASE NOTES:
  1.1
   Version 1.1.1
    Basenum class can hold a number in a certain counting system
+  Version 1.1.2
+   Some bug fixes and implementation of __pow__
 
 '''
 
