@@ -32,8 +32,8 @@ RELEASE NOTES:
 '''
 __version__ = '1.2.3'
 
-try: import validation
-except: from usefulpy import validation
+try: import validation as _validation
+except: from usefulpy import validation as _validation
 import warnings
 
 vowels = 'aeiou'
@@ -51,7 +51,7 @@ inwordpunctuation = '-_'
 #replacements['Uψlon']='Υ'
 #replacements['Eψlon']='Ε'
 #replacements[' ']=''
-#replacements['eψlon']='ε'
+s#replacements['eψlon']='ε'
 #replacements['uψlon']='υ'
 #
 #This is the way I did it.
@@ -85,7 +85,7 @@ def a_an(nextword):
 def punctuate(n, witha = '.'):
     '''adds a punctuation, strips of old punctuation'''
     if witha not in endingpuncuation: raise ValueError
-    n.strip(endingpuncuation)
+    n.rstrip(endingpuncuation)
     n += witha
     return n
 
@@ -169,7 +169,7 @@ written-out greek-letters or numbers. Et cetera'''
             word=listtext[index]
             add=2
         else: add = 1
-        listtext[index] = validation.trynumber(word)
+        listtext[index] = _validation.trynumber(word)
         if word in numbers: listtext[index] = numbers[word]
         if word in greek_letters: listtext[index] = greek_letters[word]
         index += add
@@ -181,13 +181,13 @@ written-out greek-letters or numbers. Et cetera'''
     hundredsgroup = 0
     postpointruncount = ''
     for word in listtext:
-        if validation.is_integer(word) or validation.is_float(word):
+        if _validation.is_integer(word) or _validation.is_float(word):
             if is_postpoint:
                 postpointruncount += str(word)
             elif is_prevnum:
                 if len(str(prevnum)) <= len(str(word)):
                     runcount += hundredsgroup
-                    runcount = validation.trynumber(str(runcount) + str(word))
+                    runcount = _validation.trynumber(str(runcount) + str(word))
                 else:
                     hundredsgroup += word
             else:
@@ -208,7 +208,7 @@ written-out greek-letters or numbers. Et cetera'''
             multfactor = furtherplaces[word]
             if is_postpoint:
                 nn = float(postpointruncount)*multfactor
-                if validation.is_integer(nn):
+                if _validation.is_integer(nn):
                     is_postpoint = False
                     postpointruncount = ''
                     runcount= nn
@@ -240,7 +240,7 @@ written-out greek-letters or numbers. Et cetera'''
                     if is_dozen:
                         runcount = (runcount + hundredsgroup)*12
                         hundredsgroup = 0
-                    runtext.append(str(validation.trynumber(runcount + hundredsgroup)))
+                    runtext.append(str(_validation.trynumber(runcount + hundredsgroup)))
                     runcount = 0
                     hundredsgroup = 0
                 is_prevnum = False
@@ -255,7 +255,7 @@ written-out greek-letters or numbers. Et cetera'''
             runtext.append(postpointruncount)
             postpointruncount = ''
         else:
-            runtext.append(str(validation.trynumber(runcount + hundredsgroup)))
+            runtext.append(str(_validation.trynumber(runcount + hundredsgroup)))
             runcount = 0
             hundredsgroup = 0
         is_prevnum = False
@@ -266,8 +266,8 @@ written-out greek-letters or numbers. Et cetera'''
 def write(text):
     '''Adds comas to numbers.'''
     if ' ' in text: return ' '.join(map(write, text.split()))
-    if '.' not in text: num = validation.tryint(text)
-    else: num = validation.tryfloat(text)
+    if '.' not in text: num = _validation.tryint(text)
+    else: num = _validation.tryfloat(text)
     if type(num) is int:
         numstr = str(num)
         nicenum = ''
@@ -586,7 +586,7 @@ class multline(object):
         if center not in range(height1): raise ValueError
         def halves(num):
             def odd(num): return num%2 != 0
-            if not validation.is_integer(num): raise TypeError
+            if not _validation.is_integer(num): raise TypeError
             num = int(num)
             print('half of', num)
             if odd(num): return (num//2, (num//2)+1)
