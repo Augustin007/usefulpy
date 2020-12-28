@@ -89,6 +89,21 @@ def punctuate(n, witha = '.'):
     n += witha
     return n
 
+def multisplit(string, *by, whitespacetoo = False):
+    if not by: return string.split()
+    if whitespacetoo:
+        run = string.split()
+    else:
+        splitter = by[0]
+        by = by[1:]
+        run = string.split(splitter)
+    for splitter in by:
+        nrun = []
+        for n in run:
+            nrun.extend(n.split(splitter))
+        run = nrun
+    return scour(run)
+
 def translate(self, translator):
     '''Translate all items in treanslator'''
     for old, new in translator.items(): self=self.replace(old, new)
