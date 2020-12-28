@@ -45,7 +45,8 @@ import warnings
 from decimal import Decimal as num
 from fractions import Fraction as fraction
 
-from cmath import phase, polar, rect
+#comments after imports refer to those already in the 'experiment' section
+from cmath import phase, polar, rect #phase, polar, rect
 from math import ceil, comb, copysign, dist, erf, erfc, expm1, fabs, factorial
 from math import floor, fmod, frexp, fsum, gamma, hypot, ldexp, lgamma, modf
 from math import nextafter, perm, prod, remainder, trunc, ulp
@@ -64,8 +65,8 @@ def exp(x, /):
     except: return _cmath.exp(x)
 
 def isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0):
-    try: return _math.isclose(a, b, rel_tol=1e-09, abs_tol=0.0)
-    except: return _cmath.isclose(a, b, rel_tol=1e-09, abs_tol=0.0)
+    tol, difference = max((abs(abs(b)*rel_tol)), abs(abs_tol)), abs(a-b)
+    return tol >= difference
 
 def isfinite(x, /):
     try: return _math.isfinite(x)
@@ -96,9 +97,18 @@ def makefraction(numer, denom = 1):
         numer *= 10
     return fraction(int(numer), int(denom))
 
-def rt(nth, num, /):
-    '''return nth root of num'''
-    return _validation.tryint(num**(1/nth))
+def rt(nth, of):
+    '''Find the nth root of of'''
+    if not _validation.is_float(nth): raise TypeError
+    nth = int(nth)
+    squared = of
+    power = nth
+    guess = squared
+    while True:
+        change = ((guess**power) -  squared)/(power*guess**(power - 1))
+        guess -= change
+        if (abs(change) < (1e-15)): break
+    return guess
 
 def irt(nth, num, /):
     '''return integer nth root of num'''
@@ -366,6 +376,18 @@ class _experiment:
                 denom = factorial(trueiter)
                 return sign * (theta**trueiter)/denom
             return summation(0, inf, iteration)
+
+        def tan(theta, /):
+            def iteration(n):
+                pass
+
+    def phase(z, /):
+        try: return z.__polar__()[1:]
+        except:pass
+        if _validation.is_float(z): z = float(z)
+        z = complex(z)
+        return atan(z.imag/z.real)
+
     def polar(z, /):
         try: return z.__polar__() #Catch a quaternion class.
         except:pass
@@ -373,5 +395,7 @@ class _experiment:
         z = complex(z)
         return (abs(z), atan(z.imag/z.real))
 
+    def rect(r, phi, /):
+        return r*cis(phi)
 
 #eof
