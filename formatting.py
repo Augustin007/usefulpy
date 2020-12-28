@@ -51,7 +51,7 @@ inwordpunctuation = '-_'
 #replacements['Uψlon']='Υ'
 #replacements['Eψlon']='Ε'
 #replacements[' ']=''
-s#replacements['eψlon']='ε'
+#replacements['eψlon']='ε'
 #replacements['uψlon']='υ'
 #
 #This is the way I did it.
