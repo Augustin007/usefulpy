@@ -42,36 +42,59 @@ except: from usefulpy.mathematics.nmath import *
 
 class quaternion(object):
     '''A quaternion class'''
-    def __init__(self, a = None, b = None, c = None, d = None):
-        '''__init__ for quaternion class:
+    def __new__(cls, a = None, b = None, c = None, d = None):
+        '''__new__ for quaternion class:
 >>> quaternion(1, 2, 3, 4)
 (1+2i+3j+4k)
 >>> quaternion(1+3j)
 (1+3i)
 >>> '''
+        self = super(quaternion, cls).__new__(cls)
+        
         if a == None: a = 0
-        if type(a) == quaternion:
-            self.real = a.real
-            self.i = a.i
-            self.j = a.j
-            self.k = a.k
-            return
-        if type(a) == complex:
-            if b != None or c != None or d != None: raise ValueError
-            self.real = a.real
-            self.i = a.imag
-            self.j = 0
-            self.k = 0
-            return
+
+        if b == None and c == None and d == None:
+            
+            if type(a) is quaternion:
+                self.real = _validation.trynumber(a.real)
+                self.i = _validation.trynumber(a.i)
+                self.j = _validation.trynumber(a.j)
+                self.k = _validation.trynumber(a.k)
+                return self
+            if type(a) is complex:
+                self.real = _validation.trynumber(a.real)
+                self.i = _validation.trynumber(a.imag)
+                self.j = 0
+                self.k = 0
+                return self
+            if _validation.is_float(a):
+                self.real = _validation.trynumber(a)
+                self.i = 0
+                self.j = 0
+                self.k = 0
+                return self
+            raise TypeError
+
+        
         if b == None: b = 0
         if c == None: c = 0
         if d == None: d = 0
+
+        allnums = True
         for num in (a, b, c, d):
-            if not _validation.is_float(num):raise ValueError
-        self.real = a
-        self.i = b
-        self.j = c
-        self.k = d
+            if not _validation.is_float(num): allnums = False
+
+        if allnums:
+            self.real = _validation.trynumber(a)
+            self.i = _validation.trynumber(b)
+            self.j = _validation.trynumber(c)
+            self.k = _validation.trynumber(d)
+            return self
+        qsum = 0
+        for multer, num in zip((1, i, j, k), (a, b, c, d)):
+            qsum += multer*num
+        return qsum
+        
 
     def __complex__(self):
         '''return complex(self) if j and k are empty'''
@@ -105,11 +128,11 @@ class quaternion(object):
         i = self.i+other.i
         j = self.j+other.j
         k = self.k+other.k
-        return _validation.trynumber(quaternion(real, i, j, k))
+        return quaternion(real, i, j, k)
 
     def __radd__(other, self):
         '''return self+other'''
-        return _validation.trynumber(other+self)
+        return other+self
 
     def __sub__(self, other):
         '''return self-other'''
@@ -119,11 +142,11 @@ class quaternion(object):
         i = self.i-other.i
         j = self.j-other.j
         k = self.k-other.k
-        return _validation.trynumber(quaternion(real, i, j, k))
+        return quaternion(real, i, j, k)
 
     def __rsub__(other, self):
         '''return self-other'''
-        return _validation.trynumber(self+(-1*other))
+        return self+(-1*other)
 
     def __mul__(self, other):
         '''return self*other'''
@@ -135,7 +158,7 @@ class quaternion(object):
         i = a*f + b*e + c*h - d*g
         j = a*g - b*h + c*e + d*f
         k = a*h + b*g - c*f + d*e
-        return _validation.trynumber(quaternion(real, i, j, k))
+        return quaternion(real, i, j, k)
 
     def __rmul__(other, self):
         '''return self*other'''
@@ -147,10 +170,10 @@ class quaternion(object):
         i = a*f + b*e + c*h - d*g
         j = a*g - b*h + c*e + d*f
         k = a*h + b*g - c*f + d*e
-        return _validation.trynumber(quaternion(real, i, j, k))
+        return quaternion(real, i, j, k)
 
     def floor(self):
-        return _validation.trynumber(floor(self.real), floor(self.i), floor(self.j), floor(self.k))
+        return floor(self.real), floor(self.i), floor(self.j), floor(self.k)
 
     def __floordiv__(self, other):
         n = self/other
@@ -166,13 +189,13 @@ class quaternion(object):
         '''return self/other'''
         if type(self) != type(other):
             other = quaternion(other)
-        another = self*(other.converse())
+        another = quaternion(self*(other.converse()))
         divfactor=((abs(other))**2)
-        another.real = another.real/divfactor
-        another.i = another.i/divfactor
-        another.j = another.j/divfactor
-        another.k = another.k/divfactor
-        return _validation.trynumber(another)
+        real = another.real/divfactor
+        i = another.i/divfactor
+        j = another.j/divfactor
+        k = another.k/divfactor
+        return quaternion(real, i, j, k)
 
     def __rtruediv__(other, self):
         '''return self/other'''
@@ -200,40 +223,7 @@ class quaternion(object):
 >>> x.converse()
 1-1i-5j
 >>> '''
-        return _validation.trynumber(quaternion(self.real, -self.i, -self.j, -self.k))
-
-    def __lt__(self, other):
-        '''return self<other'''
-        if not type(other) is self.__class__: other = self.__class__(other)
-        if self.real != other.real: return self.real<other.real
-        if self.i != other.i: return self.i<other.i
-        if self.j != other.j: return self.j<other.j
-        return self.k<other.k
-        
-
-    def __gt__(self, other):
-        '''return self>other'''
-        if not type(other) is self.__class__: other = self.__class__(other)
-        if self.real != other.real: return self.real>other.real
-        if self.i != other.i: return self.i>other.i
-        if self.j != other.j: return self.j>other.j
-        return self.k>other.k
-
-    def __le__(self, other):
-        '''return self<=other'''
-        if not type(other) is self.__class__: other = self.__class__(other)
-        if self.real != other.real: return self.real<other.real
-        if self.i != other.i: return self.i<other.i
-        if self.j != other.j: return self.j<other.j
-        return self.k<=other.k
-
-    def __ge__(self, other):
-        '''return self>=other'''
-        if not type(other) is self.__class__: other = self.__class__(other)
-        if self.real != other.real: return self.real>other.real
-        if self.i != other.i: return self.i>other.i
-        if self.j != other.j: return self.j>other.j
-        return self.k>=other.k
+        return quaternion(self.real, -self.i, -self.j, -self.k)
 
     def __eq__(self, other):
         '''return self==other'''
@@ -271,6 +261,8 @@ class quaternion(object):
             current = 1
             for l in range(int(other)): current *= self
             return current
+        if _validation.is_float(other):
+            pass
         raise NotImplementedError('Raising quaternions to non-integer powers has not been implemented yet')
 
     def __rpow__(other, self):
