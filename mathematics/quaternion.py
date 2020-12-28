@@ -293,5 +293,23 @@ def hyperrect(r, theta1, theta2, theta3):
     k = r*sin(theta3)
     return quaternion(real, i, j, k)
 
+#from string tools
+def fromstring(string):
+    string = string.replace('i', '*i')
+    string = string.replace('+*i', '+i')
+    string = string.replace('/*i', '/i')
+    string = string.replace('**i', '*i')
+    string = string.replace('-*i', '-i')
+    string = string.replace('j', '*j')
+    string = string.replace('+*j', '+j')
+    string = string.replace('/*j', '/j')
+    string = string.replace('**j', '*j')
+    string = string.replace('-*j', '-j')
+    string = string.replace('k', '*k')
+    string = string.replace('+*k', '+k')
+    string = string.replace('/*k', '/k')
+    string = string.replace('**k', '*k')
+    string = string.replace('-*k', '-k')
+    return quaternion(eval(string))
 
 #eof
