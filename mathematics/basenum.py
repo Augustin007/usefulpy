@@ -39,7 +39,7 @@ def fromNumBaseFormat(text):
         if not base.isdigit(): raise ValueError('This could not be converted into a basenum object')
         return basenum(num, int(base))
     else:
-        if _validation.is_float(text): return basenum(text)
+        if _validation.is_float(text): return eval(text)
         else: raise ValueError('This could not be converted into a basenum object')
 
 class basenum(object):
@@ -224,11 +224,13 @@ class basenum(object):
 
     def __eq__(self, other):
         '''return self==other'''
-        return float(self)==float(other)
+        try: return float(self)==float(other)
+        except: return False
 
     def __ne__(self, other):
         '''return self!=other'''
-        return float(self)!=float(other)
+        try: return float(self)!=float(other)
+        except: return True
 
     def __repr__(self):
         '''IDLE representation'''
