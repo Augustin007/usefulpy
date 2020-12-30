@@ -99,16 +99,22 @@ def makefraction(numer, denom = 1):
 
 def rt(nth, of):
     '''Find the nth root of of'''
-    if not _validation.is_float(nth): raise TypeError
-    nth = int(nth)
-    squared = of
-    power = nth
-    guess = squared
+    if not _validation.is_integer(nth): raise TypeError
+    try: nth = int(nth)
+    except: nth = int(float(nth))
+    is_negative= False
+    try:
+        if of < 0:
+            is_negative = True
+            of = -of
+    except: pass
+    approx = of
     while True:
-        change = ((guess**power) -  squared)/(power*guess**(power - 1))
-        guess -= change
+        change = ((approx**nth) -  of)/(nth*approx**(nth - 1))
+        approx -= change
         if (abs(change) < (1e-15)): break
-    return guess
+    if not is_negative: return approx
+    else: return approx * 1j
 
 def irt(nth, num, /):
     '''return integer nth root of num'''
