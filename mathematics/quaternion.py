@@ -115,11 +115,11 @@ variations of input'''
 
     def is_versor(self, /):
         '''return True if quaternion is a versor (unit quaternion)'''
-        return isclose(1, abs(self) rel_tol = 0, abs_tol = 1e-14)
+        return isclose(1, abs(self), rel_tol = 0, abs_tol = 1e-14)
 
     def is_unit(self, /):
         '''return True if distance from 0 is a single unit'''
-        return isclose(1, abs(self) rel_tol = 0, abs_tol = 1e-14)
+        return isclose(1, abs(self), rel_tol = 0, abs_tol = 1e-14)
 
     def conjugate(self, /):
         '''return the mathematical conjugate of self'''
@@ -200,7 +200,7 @@ quaternion'''
         '''return abs(self)'''
         return hypot(self.real, self.i, self.j, self.k)
 
-   def __add__(self, other, /):
+    def __add__(self, other, /):
         '''return self+other'''
         if type(self) != type(other):
             other = quaternion(other)
