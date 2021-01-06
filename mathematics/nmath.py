@@ -1,6 +1,6 @@
 '''
 File: nmath.py
-Version: 1.1.2
+Version: 2.2.1
 Author: Austin Garcia
 
 This file is essentially the importation of the math module, but a few small
