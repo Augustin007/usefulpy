@@ -47,7 +47,7 @@ class camera(object):
         thetaz = self.thetaz
         x, y, z = (self.x, self.y, self.z)
         #print(x, y, z)
-        self.location = (x, y, z)
+        self.location = Point3d(x, y, z)
         self.pre1 = cos(thetaz)
         self.pre2 = sin(thetaz)
         self.pre3 = -cos(thetax)
