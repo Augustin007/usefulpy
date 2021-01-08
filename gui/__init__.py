@@ -263,6 +263,11 @@ class Canvas(Tkinter.Canvas):
         self.bind("<ButtonPress-1>", self.mousePressed)
         self.bind("<ButtonRelease-1>", self.mouseReleased)
         self.bind("<B1-Motion>", self.mouseDragged)
+        self.double_click = lambda self, event: None
+        self.pressed = lambda self, event: None
+        self.released = lambda self, event: None
+        self.drag = lambda self, event: None
+        
 
     # Mouse event handling methods.  One or more of these methods can 
     # be overridden in the subclass to implement the required actions.
@@ -273,22 +278,22 @@ class Canvas(Tkinter.Canvas):
     def mouseDoubleClicked(self, event):
         """Triggered when the mouse is
         double-clicked in the area of this canvas."""
-        return
+        return self.double_click(self, event)
 
     def mousePressed(self, event):
         """Triggered when the mouse is
         pressed in the area of this canvas."""
-        return
+        return self.pressed(self, event)
         
     def mouseReleased(self, event):
         """Triggered when the mouse is
         released in the area of this canvas."""
-        return
+        return self.released(self, event)
 
     def mouseDragged(self, event):
         """Triggered when the mouse is
         dragged in the area of this canvas."""
-        return
+        return self.drag(self, event)
 
     def getWidth(self):
         """Returns the width of the canvas."""
