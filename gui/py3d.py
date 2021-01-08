@@ -90,7 +90,7 @@ class space(object):
 
         at.delete('all')
 
-        while tempspace:
+        while tempspace: #nesting here is a bit deep, can probably be improved.
             distance = max(distances)
             if distance < cam.renderdistance:
                 
@@ -115,7 +115,25 @@ class space(object):
                         except: pass
                 
     def freezecanvas(self, canvas):
+        cam = self.runningCanvases[canvas]
         del self.runningCanvases[canvas]
+        self.frozenCanvases[canvas] = cam
+
+    def pop(self, canvas):
+        try:
+            del self.runningCanvases[canvas]
+            return canvas
+        except: pass
+        try:
+            del self.frozenCanvases[canvas]
+            return canvas
+        except: pass
+        raise f'canvas {canvas} is not displaying this universe.'
+
+    def unfreezecanvas(self, canvas):
+        cam = self.frozenCanvases[canvas]
+        del self.frozenCanvases[canvas]
+        self.runningCanvases[canvas] = cam
 
     def __iter__(self):
         return self.space.__iter__()
@@ -459,7 +477,7 @@ class figure2d(object):
         #print(self.color)
         
         for point in self: arglist.extend((point.x, point.y))
-        ncanvas.create_polygon(*arglist, fill = self.color)
+        ncanvas.create_polygon(*arglist, fill = self.color, outline = self.outline)
 
     def __iter__(self):
         return self.points.__iter__()
