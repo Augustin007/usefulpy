@@ -85,26 +85,36 @@ class space(object):
         self.runningCanvases[at] = cam
         cam.runningCanvases.append(at)
         tempspace = self.space.copy()
-        distances = [Distance(cam.pos, fig.pos) for fig in tempspace]
+        distances = [Distance(cam.posa, fig.pos) for fig in tempspace]
 
         at.delete('all')
 
-        while True:
+        while tempspace:
             distance = max(distances)
             if distance < cam.renderdistance:
                 
                 figindex = distances.index(distance)
                 fig = tempspace.pop(figindex)
                 distances.pop(figindex)
-                if fig is cam: break
+                if fig is not cam:
+    
+                    minidistances = [Distance(cam.posa, pane.pos) for pane in fig]
+                    fig = list(fig)
+                    while minidistances:
+                        
+                        minidistance = max(minidistances)
+                        paneindex = minidistances.index(minidistance)
+                        minidistances.pop(paneindex)
+                        pane = fig.pop(paneindex)
+                        try:
+                            npoints = [cam.project(point, at) for point in pane]
+                            #print(pane.color)
+                            squishedfig = figure2d(*npoints, color = pane.color)
+                            squishedfig.project_to_canvas(at)
+                        except: pass
                 
-                for pane in fig:
-                    npoints = [cam.project(point, at) for point in pane]
-                    squishedfig = figure2d(*npoints)
-                    squishedfig.project_to_canvas(at)
-                
-            
-            
+    def freezecanvas(self, canvas):
+        del self.runningCanvases[canvas]
 
     def __iter__(self):
         return self.space.__iter__()
@@ -154,6 +164,7 @@ class _camera(object):
         self.x31 = -10*self.pre8
         self.y31 = -10*self.pre7
         self.z31 = -10*self.pre3
+        self.posa = Point3d(self.x3, self.y3, self.z3)
         if self.runningCanvases: self.universe._recieve_update_msg()
 
     #Rotations
@@ -387,24 +398,24 @@ class _camera(object):
     def __repr__(self):
         return f'<(py3d._camera at {self.pos}, facing: ({self.thetax}, {self.thetaz}), field of vision (fov): {self.fov}, render distance: {self.renderdistance}>'
 
-    def view(figure): #view a 3d figure #will return polygons squished into 2d
-        f''
-
     def __iter__(self):
         if self.shape: return self.shape.__iter__()
         return ().__iter__()
 
 class figure3d(object):
     def __new__(cls, *polygons):
+        #for polygon in polygons:
+        #    print(polygon.color)
         self = super(figure3d, cls).__new__(cls)
         npolygons = []
         #print(polygons)
         for polygon in polygons:
             #print('>>'+str(polygon))
-            if type(polygon) is not figure2d:
+            if type(polygon) is not figure2d3d:
                 #print('')
                 polygon=figure2d3d(*polygon)
             npolygons.append(polygon)
+            #print(polygon.color)
         self.polygons=tuple(npolygons)
         xsum, ysum, zsum = 0, 0, 0
         lnth = 0
@@ -421,9 +432,9 @@ class figure3d(object):
         return self.polygons.__iter__()
 
 class figure2d(object):
-    def __new__(cls, *points):
+    def __new__(cls, *points, color ='black'):
         self = super(figure2d, cls).__new__(cls)
-        #
+        self.color = color
         #print(points)
         npoints=[]
         for point in points:
@@ -442,16 +453,20 @@ class figure2d(object):
 
     def project_to_canvas(self, ncanvas):
         arglist = []
+        #print(self.color)
         for point in self: arglist.extend((point.x, point.y))
-        ncanvas.create_polygon(*arglist)
+        ncanvas.create_polygon(*arglist, fill = self.color)
 
     def __iter__(self):
         return self.points.__iter__()
 
 class figure2d3d(object):
-    def __new__(cls, *points):
+    def __new__(cls, *points, color = 'black'):
         self = super(figure2d3d, cls).__new__(cls)
+        #print(color)
         npoints=[]
+        self.color = color
+        #print(self.color)
         #print(points)
         for point in points:
             npoint=tuple(point)
@@ -465,7 +480,7 @@ class figure2d3d(object):
             xsum += point.x
             ysum += point.y
             zsum += point.z
-        self.averagepoint = Point3d(xsum/lnth, ysum/lnth, zsum/lnth)
+        self.pos = Point3d(xsum/lnth, ysum/lnth, zsum/lnth)
         return self
 
     def __iter__(self):
@@ -516,20 +531,22 @@ def rescale(point, to):
 
 def _main(): #this acts as a mini-driver.
     from usefulpy.gui.__init__ import Frame
-    global canv, area, cam
+    global canv, area, cam, cube
     canv = Frame(width = 200, height =200).addCanvas(height = 200)
     area = space()
-    cubepoints = (((-1, -1, -1),(-1, 1, -1), (-1, 1, 1), (-1, -1, 1)),
-                 ((-1,-1,-1), (-1, 1, -1), (1, 1, -1), (1, -1, -1)),
-                 ((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1)),
-                 ((-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1)),
-                 ((-1, 1, 1), (1, 1, 1), (1, -1, 1), (-1, -1, 1)),
-                 ((1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1)))
-    
-    cube = figure3d(*cubepoints)
+    cubefigs = (
+        figure2d3d((-1, -1, -1),(-1, 1, -1), (-1, 1, 1), (-1, -1, 1), color = 'blue'),
+        figure2d3d((-1,-1,-1), (-1, 1, -1), (1, 1, -1), (1, -1, -1), color = 'red'),
+        figure2d3d((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1), color = 'blue'),
+        figure2d3d((-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1), color = 'green'),
+        figure2d3d((-1, 1, 1), (1, 1, 1), (1, -1, 1), (-1, -1, 1), color = 'red'),
+        figure2d3d((1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1), color = 'black'))
+    #for fig in cubefigs:
+    #    print('>>', fig.color)
+    cube = figure3d(*cubefigs)
     area.addfigure(cube)
     cam = area.addcamera('cam', fov=10, thetax=64.6, thetaz=9)
-    print(area.space)
+    #print(area.space)
     area.setview('cam')
     area.view_in_canvas(canv)
 
