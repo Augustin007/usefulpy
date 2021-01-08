@@ -52,7 +52,6 @@ RELEASE NOTES:
    Increased handling
   Version 2.1.4:
    Stiched panes of 3d figures. (there was a gap between the panes)
-   
 
 '''
 
@@ -531,7 +530,9 @@ is facing, keeping the z-location still'''
         return ().__iter__()
 
 class figure3d(object):
-    '''3d figure for a space, built of figure2d3ds'''
+    '''3d figure for a space, built of figure2d3ds
+Polygons do not need to be perfectly closed, but it is recommended
+to avoid small bugs'''
     def __new__(cls, *polygons):
         '''__new__ for figure3d'''
         #for polygon in polygons:
@@ -599,7 +600,10 @@ class figure2d(object):
         return self.points.__iter__()
 
 class figure2d3d(object):
-    '''2d figures with 3d points, can be 'folded' into a third dimension'''
+    '''2d figures with 3d points.
+These points technically do not need to be in the same plane,
+but can be 'folded' into a third dimension, though this does cause some
+wierd overlaying at certain angles.'''
     def __new__(cls, *points, color = 'black', outline = None):
         '''__new__ for figure2d3d'''
         self = super(figure2d3d, cls).__new__(cls)
@@ -697,9 +701,9 @@ def _main():
     #print(area.space)
     area.setview('cam')
     area.view_in_canvas(canv)
-    for x in range(72):
-        cam.tiltright(5)
-        time.sleep(0.5)
+    for x in range(360):
+        cam.tiltright(1)
+        time.sleep(0.05)
 
 if __name__ == '__main__':
     import tkinter
