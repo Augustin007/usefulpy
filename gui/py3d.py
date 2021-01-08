@@ -41,6 +41,7 @@ class space(object):
         if name in self.cameras: raise KeyError(f'camera {name} already exists in this space')
         self.cameras[name] = newcam
         self.space.append(newcam)
+        self.runningCanvases = {}
         return newcam
 
     def addfigure(self, figure):
@@ -62,6 +63,15 @@ class space(object):
         if self.view is None: raise Exception('self.view is not defined')
         return self._view_from(self.view, at)
 
+    def _recieve_update_msg(self):
+        for canv in self.runningCanvases:
+            self._update(canv)
+
+    def _update(self, canv):
+        if canv not in self.runningCanvases: raise ValueError
+        cam = self.runningCanvases[canv]
+        self._view_from(cam, canv)
+
     def view_from(self, cam, at):
         if type(cam) is str:
             if to not in self.cameras: raise KeyError(f'{cam} not found')
@@ -72,8 +82,12 @@ class space(object):
         return self._view_from(self.view, at)
 
     def _view_from(self, cam, at):
+        self.runningCanvases[at] = cam
+        cam.runningCanvases.append(at)
         tempspace = self.space.copy()
         distances = [Distance(cam.pos, fig.pos) for fig in tempspace]
+
+        at.delete('all')
 
         while True:
             distance = max(distances)
@@ -113,7 +127,9 @@ class _camera(object):
         self.fov = fov
         self.is_visible = visible
         self.shape = shape
+        self.runningCanvases = []
         self._precompute() #computations
+        
 
     def _precompute(self):
         # stuff its going to use tons of times so I might as well calculate
@@ -138,6 +154,7 @@ class _camera(object):
         self.x31 = -10*self.pre8
         self.y31 = -10*self.pre7
         self.z31 = -10*self.pre3
+        if self.runningCanvases: self.universe._recieve_update_msg()
 
     #Rotations
     #rs (rotation section) = self.pre[n]*([d]-self.[d]3)
@@ -368,7 +385,7 @@ class _camera(object):
         self._precompute()
 
     def __repr__(self):
-        return f'<(py3d._camera at {self.pos}, facing: ({self.thetax}, {self.thetaz}), field of vision (fov): {self.fov}>'
+        return f'<(py3d._camera at {self.pos}, facing: ({self.thetax}, {self.thetaz}), field of vision (fov): {self.fov}, render distance: {self.renderdistance}>'
 
     def view(figure): #view a 3d figure #will return polygons squished into 2d
         f''
@@ -407,11 +424,11 @@ class figure2d(object):
     def __new__(cls, *points):
         self = super(figure2d, cls).__new__(cls)
         #
-        print(points)
+        #print(points)
         npoints=[]
         for point in points:
             npoint=tuple(point)
-            print(npoint)
+            #print(npoint)
             pnt2ds=Point2d(*npoint)
             npoints.append(pnt2ds)
         self.points=tuple(npoints)
@@ -498,9 +515,9 @@ def rescale(point, to):
     return Point2d(x, y)
 
 def _main(): #this acts as a mini-driver.
-    from breezypythongui import EasyFrame
-    global canv
-    canv = EasyFrame(width = 200, height =200).addCanvas(height = 200)
+    from usefulpy.gui.__init__ import Frame
+    global canv, area, cam
+    canv = Frame(width = 200, height =200).addCanvas(height = 200)
     area = space()
     cubepoints = (((-1, -1, -1),(-1, 1, -1), (-1, 1, 1), (-1, -1, 1)),
                  ((-1,-1,-1), (-1, 1, -1), (1, 1, -1), (1, -1, -1)),
