@@ -52,9 +52,13 @@ RELEASE NOTES:
    Increased handling
   Version 2.1.4:
    Stiched panes of 3d figures. (there was a gap between the panes)
+ 2.2
+  Version 2.2.1:
+   Heavy testing and debugging in movement... no more upside-down/backward/
+   inverted movement when trying to navigate a 3d space. Also nicer loading.
 
 '''
-
+__version__ = '2.2.1'
 from usefulpy.mathematics.nmath import *
 import usefulpy.validation as _validation
 degrees()
@@ -201,6 +205,7 @@ class _camera(object):
         assert _validation.is_float(fov)
         assert _validation.is_float(renderdistance)
         assert (shape is None) or (type(shape) is figure3d)
+        #Note... may want to add limits for angular movement
         #x, y, z, camera's coordinates
         #theta, rho camera angles
         #fov, distance of pane from point
@@ -215,7 +220,11 @@ class _camera(object):
         self.is_visible = bool(visible)
         self.shape = shape
         self.runningCanvases = []
+        #self.objects = [] 
         self._precompute() #computations
+
+    #def addobject(self, obj): #These will use project1.
+    #    self.objects.append(obj)
 
     def _precompute(self):
         '''stuff its going to use tons of times so I might as well calculate
@@ -296,7 +305,7 @@ class _camera(object):
         '''projection to y of point'''
         yrot = self._yr(x, y, z)
         zrot = self._zr(x, y, z)
-        if zrot > 0: return yrot/zrot #zrot > 0 means object is behind
+        if zrot > 0: return -yrot/zrot #zrot > 0 means object is behind
 
     def _project_to_x1(self, x, y, z):
         '''projection to x of point (ignores position and fov)'''
@@ -308,7 +317,7 @@ class _camera(object):
         '''projection to y of point (ignores position and fov)'''
         yrot = self._yr1(x, y, z)
         zrot = self._zr1(x, y, z)
-        if zrot != 0: return yrot/zrot
+        if zrot != 0: return -yrot/zrot
 
     def projectx(self, point):
         '''projection to x of point'''
@@ -342,14 +351,14 @@ class _camera(object):
         xrot = self._xr(x, y)
         yrot = self._yr(x, y, z)
         zrot = self._zr(x, y, z)
-        if zrot > 0: return Point2d(xrot/zrot, yrot/zrot)
+        if zrot > 0: return Point2d(xrot/zrot, -yrot/zrot)
 
     def _project1(self, x, y, z):
         '''projection of 3d point to 2d (ignores position and fov)'''
         xrot = self._xr1(x, y)
         yrot = self._yr1(x, y, z)
         zrot = self._zr1(x, y, z)
-        if zrot > 0: return Point2d(xrot/zrot, yrot/zrot)
+        if zrot > 0: return Point2d(xrot/zrot, -yrot/zrot)
 
     def project1(self, point, at):
         '''projection of 3d point to 2d (ignores position and fov)'''
@@ -411,8 +420,8 @@ class _camera(object):
     def fdxy(self, amount): ##Not tested
         '''move the cam fd along the x and y axis in the direction the camera
 is facing, keeping the z-location still'''
-        xrat = cos(self.thetaz)
-        yrat = sin(self.thetaz)
+        xrat = sin((-self.thetaz)%360)
+        yrat = cos((-self.thetaz)%360)
         self.x += amount*xrat
         self.y += amount*yrat
         self._precompute()
@@ -438,8 +447,8 @@ is facing, keeping the y-location still'''
     def bkxy(self, amount): ##Not tested
         '''move the cam bk along the x and y axis in the direction the camera
 is facing, keeping the z-location still'''
-        xrat = cos(self.thetaz)
-        yrat = sin(self.thetaz)
+        xrat = sin((-self.thetaz)%360)
+        yrat = cos((-self.thetaz)%360)
         self.x -= amount*xrat
         self.y -= amount*yrat
         self._precompute()
@@ -465,19 +474,19 @@ is facing, keeping the y-location still'''
     def rt(self, amount):
         '''move the cam rt along the x and y axis in the direction the camera
 is facing, keeping the z-location still'''
-        xrat = sin(self.thetax + 90)
-        zrat = cos(self.thetax + 90)
+        xrat = cos((-self.thetaz)%360)
+        yrat = -sin((-self.thetaz)%360)
         self.y += amount*yrat
-        self.z += amount*zrat
+        self.x += amount*xrat
         self._precompute()
 
     def lt(self, amount):
         '''move the cam lt along the x and y axis in the direction the camera
 is facing, keeping the z-location still'''
-        xrat = sin(self.thetax - 90)
-        zrat = cos(self.thetax - 90)
+        xrat = -cos((-self.thetaz)%360)
+        yrat = sin((-self.thetaz)%360)
         self.y += amount*yrat
-        self.z += amount*zrat
+        self.x += amount*xrat
         self._precompute()
 
     def up(self, amount):
@@ -502,9 +511,9 @@ is facing, keeping the z-location still'''
 
     def fd(self, amount): ##Not tested
         '''fd according to heading, moving all axis'''
-        xrat = cos(self.thetaz)*sin(self.thetax)
-        yrat = sin(self.thetaz)*sin(self.thetax)
-        zrat = cos(self.thetax)
+        xrat = sin((-self.thetaz)%360)*sin(self.thetax)
+        yrat = cos((-self.thetaz)%360)*sin(self.thetax)
+        zrat = -cos(self.thetax)
         self.x += amount*xrat
         self.y += amount*yrat
         self.z += amount*zrat
@@ -512,12 +521,16 @@ is facing, keeping the z-location still'''
 
     def bk(self, amount): ##Not tested
         '''bk according to heading, moving all axis'''
-        xrat = cos(self.thetaz)*sin(self.thetax)
-        yrat = sin(self.thetaz)*sin(self.thetax)
-        zrat = cos(self.thetax)
+        xrat = sin((-self.thetaz)%360)*sin(self.thetax)
+        yrat = cos((-self.thetaz)%360)*sin(self.thetax)
+        zrat = -cos(self.thetax)
         self.x -= amount*xrat
         self.y -= amount*yrat
         self.z -= amount*zrat
+        self._precompute()
+
+    def setfov(self, to):
+        self.fov = to
         self._precompute()
 
     def __repr__(self):
@@ -681,29 +694,53 @@ def rescale(point, to):
 
 def _main():
     '''this acts as a mini-driver.'''
-    from usefulpy.gui.__init__ import Frame
+    from usefulpy.gui import Frame
     import time
-    global canv, area, cam, cube
+    global canv, area, cam, loadingcube, cube2
     canv = Frame(width = 800, height =800).addCanvas(width = 800, height =800)
     area = space()
-    cubefigs = (
-        figure2d3d((-1, -1, -1),(-1, 1, -1), (-1, 1, 1), (-1, -1, 1), color = 'blue'),
-        figure2d3d((-1,-1,-1), (-1, 1, -1), (1, 1, -1), (1, -1, -1), color = 'red'),
-        figure2d3d((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1), color = 'blue'),
+    cubefigs = ( # I had the colors aranged in four 6*20 tables and had python randomly
+        #choose the colors
+        figure2d3d((-1, -1, -1),(-1, 1, -1), (-1, 1, 1), (-1, -1, 1), color = 'orange'),
+        figure2d3d((-1,-1,-1), (-1, 1, -1), (1, 1, -1), (1, -1, -1), color = 'DarkGrey'),
+        figure2d3d((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1), color = 'chocolate3'),
         figure2d3d((-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1), color = 'green'),
-        figure2d3d((-1, 1, 1), (1, 1, 1), (1, -1, 1), (-1, -1, 1), color = 'red'),
-        figure2d3d((1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1), color = 'black'))
+        figure2d3d((-1, 1, 1), (1, 1, 1), (1, -1, 1), (-1, -1, 1), color = 'YellowGreen'),
+        figure2d3d((1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1), color = 'brown2')
+        )
     #for fig in cubefigs:
     #    print('>>', fig.color)
-    cube = figure3d(*cubefigs)
-    area.addfigure(cube)
-    cam = area.addcamera('cam', fov=10, thetax=120, thetaz=140)
+    loadingcube = figure3d(*cubefigs)
+    area.addfigure(loadingcube)
+    cam = area.addcamera('cam', fov=10, thetax=60, thetaz=140)
     #print(area.space)
+    cube2 = figure3d( # I had the colors aranged in four 6*20 tables and had python randomly
+        #choose the colors
+        figure2d3d((2, 2, -0.5),(2, 3, -0.5), (2, 3, 0.5), (2, 2, 0.5), color = 'CadetBlue'),
+        figure2d3d((2, 2,-0.5), (2, 3, -0.5), (3, 3, -0.5), (3, 2, -0.5), color = 'CadetBlue1'),
+        figure2d3d((2, 2, -0.5), (3, 2, -0.5), (3, 2, 0.5), (2, 2, 0.5), color = 'CadetBlue2'),
+        figure2d3d((2, 3, -0.5), (2, 3, 0.5), (3, 3, 0.5), (3, 3, -0.5), color = 'CadetBlue4'),
+        figure2d3d((2, 3, 0.5), (3, 3, 0.5), (3, 2, 0.5), (2, 2, 0.5), color = 'CadetBlue1'),
+        figure2d3d((3, 2, -0.5), (3, 3, -0.5), (3, 3, 0.5), (3, 2, 0.5), color = 'CadetBlue3')
+        )
+    
     area.setview('cam')
     area.view_in_canvas(canv)
+    
+    
     for x in range(360):
         cam.tiltright(1)
-        time.sleep(0.05)
+        cam.tiltup(5)
+        time.sleep(0.01)
+    
+    area.freezecanvas(canv)
+    cam.setfov(1)
+    cam.tp((-2, -2, 0))
+    cam.seth((90, -45))
+    area.addfigure(cube2)
+    area.unfreezecanvas(canv)
+    time.sleep(0.1)
+    area._update(canv)
 
 if __name__ == '__main__':
     import tkinter
