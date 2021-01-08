@@ -9,13 +9,15 @@ hopefully
 from usefulpy.mathematics.nmath import *
 degrees()
 
+#a bit different than what I usually do, I don't use guis much, I like math
+#
 #Not sure how to make this into a frame... in fact, I didn't think this through
 #I only worked out the math part in my head, checked it on desmos
 # (see https://www.desmos.com/calculator/bnk7wnndk1) and ... opened the .py
 # document...
 #ooh! Speaking of math... fourier series! I should make something for those too,
 #fourier.py, does that go in gui or math, fourier animations are fun.
-
+#
 #The first part is passing a 3d point into a 2d point
 #The way this works (yes... this is an excuse to rant about how great math is
 #the 'give an impassioned rant' button in 3b1b's website is another great excuse)
@@ -27,19 +29,92 @@ from collections import namedtuple
 Point3d = namedtuple('Point3d', ('x', 'y', 'z'))
 Point2d = namedtuple('Point2d', ('x', 'y'))
 
-class camera(object):
-    def __init__(self, fov = 0.5, x = 0, y= 0, z=0, thetax = 0, thetaz= 0):
+class space(object):
+    def __init__(self):
+        self.space = []
+        self.cameras = {}
+        self.view = None
+
+    def addcamera(self, name, fov=0.5, x=0, y=0, z=0, thetax=0, thetaz=0, visible=False, shape=None, renderdistance=12):
+        if type(name) is not str: raise TypeError('name must be str')
+        newcam = _camera(self, fov, x, y, z, thetax, thetaz, visible=visible, shape=shape, renderdistance=renderdistance)
+        if name in self.cameras: raise KeyError(f'camera {name} already exists in this space')
+        self.cameras[name] = newcam
+        self.space.append(newcam)
+        return newcam
+
+    def addfigure(self, figure):
+        self.space.append(figure)
+        return figure
+
+    def setview(self, to):
+        if type(to) is str:
+            if to not in self.cameras: raise KeyError(f'{to} not found')
+            self.view = self.cameras[to]
+            return
+        if type(to) is _camera:
+            if to.universe != self: raise ValueError(f'{to} not in this universe')
+            self.view = to
+            return
+        raise TypeError(f'{to} should be str or py3d._camera')
+
+    def view_in_canvas(self, at):
+        if self.view is None: raise Exception('self.view is not defined')
+        return self._view_from(self.view, at)
+
+    def view_from(self, cam, at):
+        if type(cam) is str:
+            if to not in self.cameras: raise KeyError(f'{cam} not found')
+            cam = self.cameras[cam]
+        if type(cam) is _camera:
+            if cam.universe != self: raise ValueError(f'{cam} not in this universe')
+        else: raise TypeError(f'{to} should be str or py3d._camera')
+        return self._view_from(self.view, at)
+
+    def _view_from(self, cam, at):
+        tempspace = self.space.copy()
+        distances = [Distance(cam.pos, fig.pos) for fig in tempspace]
+
+        while True:
+            distance = max(distances)
+            if distance < cam.renderdistance:
+                
+                figindex = distances.index(distance)
+                fig = tempspace.pop(figindex)
+                distances.pop(figindex)
+                if fig is cam: break
+                
+                for pane in fig:
+                    npoints = [cam.project(point, at) for point in pane]
+                    squishedfig = figure2d(*npoints)
+                    squishedfig.project_to_canvas(at)
+                
+            
+            
+
+    def __iter__(self):
+        return self.space.__iter__()
+
+def Distance(pointa, pointb):
+    return hypot(*[x - y for x, y in zip(pointa, pointb)])
+
+class _camera(object):
+    def __init__(self, universe, fov=0.5, x=0, y=0, z=0, thetax=0, thetaz=0, visible=False, shape=None, renderdistance=12):
         #x, y, z, camera's coordinates
         #theta, rho camera angles
         #fov, distance of pane from point
         self.x = x
         self.y = y
         self.z = z
-        
+        self.universe = universe #This is the space that the camera exists in
         self.thetax = thetax
         self.thetaz = thetaz
+        self.renderdistance = renderdistance
         self.fov = fov
-        self._precompute()
+        self.is_visible = visible
+        self.shape = shape
+        self._precompute() #computations
+
     def _precompute(self):
         # stuff its going to use tons of times so I might as well calculate
         # now
@@ -47,7 +122,8 @@ class camera(object):
         thetaz = self.thetaz
         x, y, z = (self.x, self.y, self.z)
         #print(x, y, z)
-        self.location = Point3d(x, y, z)
+        self.pos = Point3d(x, y, z)
+        self.heading = (thetax, thetaz)
         self.pre1 = cos(thetaz)
         self.pre2 = sin(thetaz)
         self.pre3 = -cos(thetax)
@@ -113,21 +189,53 @@ class camera(object):
     def _project_to_x1(self, x, y, z):
         xrot = self._xr1(x, y)
         zrot = self._zr1(x, y, z)
-        return xrot/zrot
+        if zrot != 0: return xrot/zrot
 
     def _project_to_y1(self, x, y, z):
         yrot = self._yr1(x, y, z)
         zrot = self._zr1(x, y, z)
-        return yrot/zrot
+        if zrot != 0: return yrot/zrot
 
-    def project(self, point):
-        #point arg should be a Point3d object.
-        tx, ty, tz = point.x, point.y, point.z
-        return Point2d(self._project_to_x(tx, ty, tz), self._project_to_y(tx, ty, tz))
+    def projectx(self, point):
+        x, y, z = point
+        return self._project_to_x(x, y, z)
 
-    def project1(self, point):
-        tx, ty, tz = point.x, point.y, point.z
-        return Point2d(self._project_to_x1(tx, ty, tz), self._project_to_y1(tx, ty, tz))
+    def projecty(self, point):
+        x, y, z = point
+        return self._project_to_y(x, y, z)
+
+    def projectx1(self, point):
+        x, y, z = point
+        return self._project_to_x1(x, y, z)
+
+    def projectx2(self, point):
+        x, y, z = point
+        return self._project_to_y1(x, y, z)
+
+    def project(self, point, at):
+        x, y, z = point
+        pt2ds = self._project(x, y, z)
+        if pt2ds is None: return
+        return rescale(pt2ds, at)
+
+    def _project(self, x, y, z):
+        xrot = self._xr(x, y)
+        yrot = self._yr(x, y, z)
+        zrot = self._zr(x, y, z)
+        if zrot > 0: return Point2d(xrot/zrot, yrot/zrot)
+
+    def _project1(self, x, y, z):
+        xrot = self._xr1(x, y)
+        yrot = self._yr1(x, y, z)
+        zrot = self._zr1(x, y, z)
+        if zrot > 0: return Point2d(xrot/zrot, yrot/zrot)
+
+    def project1(self, point, at):
+        x, y, z = point
+        pt2ds = self._project1(x, y, z)
+        if pt2ds is None: return
+        return rescale(pt2s, at)
+        
 
     def tiltup(self, degrees):
         self.thetax += degrees
@@ -211,6 +319,36 @@ class camera(object):
         self.z -= amount*zrat
         self._precompute()
 
+    def rt(self, amount):
+        xrat = sin(self.thetax + 90)
+        zrat = cos(self.thetax + 90)
+        self.y += amount*yrat
+        self.z += amount*zrat
+        self._precompute()
+
+    def lt(self, amount):
+        xrat = sin(self.thetax - 90)
+        zrat = cos(self.thetax - 90)
+        self.y += amount*yrat
+        self.z += amount*zrat
+        self._precompute()
+
+    def up(self, amount):
+        self.z += amount
+        self._precompute()
+
+    def dn(self, amount):
+        self.z -= amount
+        self._precompute()
+
+    def tp(self, to):
+        self.x, self.y, self.z = to
+        self._precompute()
+
+    def seth(self, to):
+        self.thetax, self.thetaz = to
+        self._precompute()
+
     def fd(self, amount): ##Not tested
         xrat = cos(self.thetaz)*sin(self.thetax)
         yrat = sin(self.thetaz)*sin(self.thetax)
@@ -230,11 +368,160 @@ class camera(object):
         self._precompute()
 
     def __repr__(self):
-        return f'<(py3d.camera at point{self.location} facing({self.thetax}, {self.thetaz})>'
+        return f'<(py3d._camera at {self.pos}, facing: ({self.thetax}, {self.thetaz}), field of vision (fov): {self.fov}>'
 
-    #def view(figure) #view a 3d figure #will return polygons squished into 2d
+    def view(figure): #view a 3d figure #will return polygons squished into 2d
+        f''
+
+    def __iter__(self):
+        if self.shape: return self.shape.__iter__()
+        return ().__iter__()
+
+class figure3d(object):
+    def __new__(cls, *polygons):
+        self = super(figure3d, cls).__new__(cls)
+        npolygons = []
+        #print(polygons)
+        for polygon in polygons:
+            #print('>>'+str(polygon))
+            if type(polygon) is not figure2d:
+                #print('')
+                polygon=figure2d3d(*polygon)
+            npolygons.append(polygon)
+        self.polygons=tuple(npolygons)
+        xsum, ysum, zsum = 0, 0, 0
+        lnth = 0
+        for polygon in self.polygons:
+            for point in polygon.points:
+                lnth += 1
+                xsum += point.x
+                ysum += point.y
+                zsum += point.z
+        self.pos = Point3d(xsum/lnth, ysum/lnth, zsum/lnth)
+        return self
+
+    def __iter__(self):
+        return self.polygons.__iter__()
+
+class figure2d(object):
+    def __new__(cls, *points):
+        self = super(figure2d, cls).__new__(cls)
+        #
+        print(points)
+        npoints=[]
+        for point in points:
+            npoint=tuple(point)
+            print(npoint)
+            pnt2ds=Point2d(*npoint)
+            npoints.append(pnt2ds)
+        self.points=tuple(npoints)
+        xsum, ysum = 0,0
+        lnth = len(self.points)
+        for point in self.points:
+            xsum += point.x
+            ysum += point.y
+        self.averagepoint = Point2d(xsum/lnth, ysum/lnth)
+        return self
+
+    def project_to_canvas(self, ncanvas):
+        arglist = []
+        for point in self: arglist.extend((point.x, point.y))
+        ncanvas.create_polygon(*arglist)
+
+    def __iter__(self):
+        return self.points.__iter__()
+
+class figure2d3d(object):
+    def __new__(cls, *points):
+        self = super(figure2d3d, cls).__new__(cls)
+        npoints=[]
+        #print(points)
+        for point in points:
+            npoint=tuple(point)
+            #print(npoint)
+            pnt3ds=Point3d(*npoint)
+            npoints.append(pnt3ds)
+        self.points=tuple(npoints)
+        xsum, ysum, zsum = 0, 0, 0
+        lnth = len(self.points)
+        for point in self.points:
+            xsum += point.x
+            ysum += point.y
+            zsum += point.z
+        self.averagepoint = Point3d(xsum/lnth, ysum/lnth, zsum/lnth)
+        return self
+
+    def __iter__(self):
+        return self.points.__iter__()
+
+class line_segment3d(object):
+    def __new__(cls, a, b):
+        self = super(line_segment3d, cls).__new__(cls)
+        a, b = tuple(a), tuple(b)
+        self.pointa=Point3d(*a)
+        self.pointb=Point3d(*b)
+        return self
+
+    def __iter__(self):
+        return (self.pointa, self.pointb).__iter__()
+
+'''
+create_polygon(self, *args, **kw)
+Create polygon with coordinates x1,y1,...,xn,yn.
+'''
+
+class line_segment2d(object):
+    def __new__(self, a, b):
+        self = super(line_segment2d, cls).__new__(cls)
+        a, b = tuple(a), tuple(b)
+        self.pointa=Point2d(*a)
+        self.pointb=Point2d(*b)
+        return self
+
+    def __iter__(self):
+        (self.pointa, self.pointb).__iter__()
+
+def rescale(point, to):
+    h = int(to.getHeight())
+    w = int(to.getWidth())
+    x, y = point
+    scale = max(h, w)//2
+    xadj = w//2
+    yadj = h//2
+
+    x *= scale
+    y *= scale
+
+    x += xadj
+    y += yadj
+
+    return Point2d(x, y)
+
+def _main(): #this acts as a mini-driver.
+    from breezypythongui import EasyFrame
+    global canv
+    canv = EasyFrame(width = 200, height =200).addCanvas(height = 200)
+    area = space()
+    cubepoints = (((-1, -1, -1),(-1, 1, -1), (-1, 1, 1), (-1, -1, 1)),
+                 ((-1,-1,-1), (-1, 1, -1), (1, 1, -1), (1, -1, -1)),
+                 ((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1)),
+                 ((-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1)),
+                 ((-1, 1, 1), (1, 1, 1), (1, -1, 1), (-1, -1, 1)),
+                 ((1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1)))
+    
+    cube = figure3d(*cubepoints)
+    area.addfigure(cube)
+    cam = area.addcamera('cam', fov=10, thetax=64.6, thetaz=9)
+    print(area.space)
+    area.setview('cam')
+    area.view_in_canvas(canv)
+
+if __name__ == '__main__':
+    import tkinter
+    _main()
 
 
-#class figure3d (a set of interconnecting 2d figures)
-#class figure2d (a set of interconnecting 1d lines)
-#class line_segment (a pair of points)
+    
+
+
+
