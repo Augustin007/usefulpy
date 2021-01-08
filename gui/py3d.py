@@ -71,6 +71,7 @@ class space(object):
         if canv not in self.runningCanvases: raise ValueError
         cam = self.runningCanvases[canv]
         self._view_from(cam, canv)
+        canv.update()
 
     def view_from(self, cam, at):
         if type(cam) is str:
@@ -79,7 +80,7 @@ class space(object):
         if type(cam) is _camera:
             if cam.universe != self: raise ValueError(f'{cam} not in this universe')
         else: raise TypeError(f'{to} should be str or py3d._camera')
-        return self._view_from(self.view, at)
+        return self._view_from(cam, at)
 
     def _view_from(self, cam, at):
         self.runningCanvases[at] = cam
@@ -109,7 +110,7 @@ class space(object):
                         try:
                             npoints = [cam.project(point, at) for point in pane]
                             #print(pane.color)
-                            squishedfig = figure2d(*npoints, color = pane.color)
+                            squishedfig = figure2d(*npoints, color = pane.color, outline = pane.outline)
                             squishedfig.project_to_canvas(at)
                         except: pass
                 
@@ -144,8 +145,8 @@ class _camera(object):
     def _precompute(self):
         # stuff its going to use tons of times so I might as well calculate
         # now
-        thetax = self.thetax
-        thetaz = self.thetaz
+        thetax = self.thetax = self.thetax%360
+        thetaz = self.thetaz = self.thetaz%360
         x, y, z = (self.x, self.y, self.z)
         #print(x, y, z)
         self.pos = Point3d(x, y, z)
@@ -432,9 +433,11 @@ class figure3d(object):
         return self.polygons.__iter__()
 
 class figure2d(object):
-    def __new__(cls, *points, color ='black'):
+    def __new__(cls, *points, color ='black', outline = None):
         self = super(figure2d, cls).__new__(cls)
+        if outline is None: outline = color
         self.color = color
+        self.outline = outline
         #print(points)
         npoints=[]
         for point in points:
@@ -454,6 +457,7 @@ class figure2d(object):
     def project_to_canvas(self, ncanvas):
         arglist = []
         #print(self.color)
+        
         for point in self: arglist.extend((point.x, point.y))
         ncanvas.create_polygon(*arglist, fill = self.color)
 
@@ -461,11 +465,13 @@ class figure2d(object):
         return self.points.__iter__()
 
 class figure2d3d(object):
-    def __new__(cls, *points, color = 'black'):
+    def __new__(cls, *points, color = 'black', outline = None):
         self = super(figure2d3d, cls).__new__(cls)
         #print(color)
         npoints=[]
+        if outline is None: outline = color
         self.color = color
+        self.outline = outline
         #print(self.color)
         #print(points)
         for point in points:
@@ -531,8 +537,9 @@ def rescale(point, to):
 
 def _main(): #this acts as a mini-driver.
     from usefulpy.gui.__init__ import Frame
+    import time
     global canv, area, cam, cube
-    canv = Frame(width = 200, height =200).addCanvas(height = 200)
+    canv = Frame(width = 800, height =800).addCanvas(width = 800, height =800)
     area = space()
     cubefigs = (
         figure2d3d((-1, -1, -1),(-1, 1, -1), (-1, 1, 1), (-1, -1, 1), color = 'blue'),
@@ -545,10 +552,13 @@ def _main(): #this acts as a mini-driver.
     #    print('>>', fig.color)
     cube = figure3d(*cubefigs)
     area.addfigure(cube)
-    cam = area.addcamera('cam', fov=10, thetax=64.6, thetaz=9)
+    cam = area.addcamera('cam', fov=10, thetax=120, thetaz=140)
     #print(area.space)
     area.setview('cam')
     area.view_in_canvas(canv)
+    for x in range(72):
+        cam.tiltright(5)
+        time.sleep(0.5)
 
 if __name__ == '__main__':
     import tkinter
