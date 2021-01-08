@@ -1036,7 +1036,7 @@ class Frame(Tkinter.Frame):
                     sticky = N+E, command = lambda: None):
         """Creates and inserts a combo box at the row and column,
         and returns the combo box."""
-        box = EasyCombobox(self, text, values, command)
+        box = Combobox(self, text, values, command)
         self.rowconfigure(row, weight = 1)
         self.columnconfigure(column, weight = 1)
         box.grid(row = row, column = column,
@@ -1056,7 +1056,7 @@ class Frame(Tkinter.Frame):
         self.rowconfigure(row, weight = 1)
         yScroll = Tkinter.Scrollbar(frame, orient = VERTICAL)
         yScroll.grid(row = 0, column = 1, sticky = N+S)
-        listBox = EasyListbox(frame, width, height, yScroll.set, listItemSelected)
+        listBox = Listbox(frame, width, height, yScroll.set, listItemSelected)
         listBox.grid(row = 0, column = 0, sticky = N+S+E+W)
         frame.columnconfigure(0, weight = 1)
         frame.rowconfigure(0, weight = 1)
@@ -1069,7 +1069,7 @@ class Frame(Tkinter.Frame):
         """Creates and inserts a canvas at the row and column,
         and returns the canvas."""
         if not canvas:
-            canvas = EasyCanvas(self, width = width, height = height,
+            canvas = Canvas(self, width = width, height = height,
                                 background = background)
         canvas.grid(row = row, column = column,
                     rowspan = rowspan, columnspan = columnspan,
@@ -1101,7 +1101,7 @@ class Frame(Tkinter.Frame):
         and returns the menu bar."""
         if not orient in ("horizontal", "vertical"):
             raise ValueError("orient must be horizontal or vertical")
-        menuBar = EasyMenuBar(self, orient)
+        menuBar = MenuBar(self, orient)
         menuBar.grid(row = row, column = column,
                      rowspan = rowspan, columnspan = columnspan,
                      sticky = N+W)
@@ -1112,7 +1112,7 @@ class Frame(Tkinter.Frame):
                        sticky = N+S+E+W, command = lambda : 0):
         """Creates and inserts check button at the row and column,
         and returns the check button."""
-        cb = EasyCheckbutton(self, text, command)
+        cb = Checkbutton(self, text, command)
         self.rowconfigure(row, weight = 1)
         self.columnconfigure(column, weight = 1)
         cb.grid(row = row, column = column,
@@ -1123,13 +1123,13 @@ class Frame(Tkinter.Frame):
     def addRadiobuttonGroup(self, row, column,
                             rowspan = 1, columnspan = 1, orient = VERTICAL):
         """Creates and returns a radio button group."""
-        return EasyRadiobuttonGroup(self, row, column, rowspan, columnspan, orient)
+        return RadiobuttonGroup(self, row, column, rowspan, columnspan, orient)
 
     # Added 12-18-2012
     def addPanel(self, row, column,
                  rowspan = 1, columnspan = 1, background = "white"):
         """Creates and returns a panel."""
-        return EasyPanel(self, row, column, rowspan, columnspan, background)
+        return Panel(self, row, column, rowspan, columnspan, background)
 
     # Method to pop up a message box from this window.
 
