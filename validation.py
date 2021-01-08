@@ -5,11 +5,11 @@ Author: Austin Garcia
 
 This program contains many useful functions for validation of input and output.
 
-LICENSE: See license file.
+LICENSE:
+This is a section of usefulpy. See usefulpy's lisence.md file.
 
 PLATFORMS:
-This program imports datetime, collections, and random... should work on any
-python platform where these are available.
+This is a section of usefulpy. See usefulpy.__init__'s "PLATFORMS" section.
 
 INSTALLATION:
 Put this file where Python can see it.
