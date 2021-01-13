@@ -3,7 +3,8 @@ File: py3d.py
 Version: 
 Author: Austin Garcia
 
-A frame ish thing that graphs 3d objects on a Python-wrought gui...
+Bringing 3d to tkinter.
+A tkinter canvas that graphs 3d objects on a Python-wrought gui ...
 
 LICENSE:
 This is a section of usefulpy. See usefulpy's lisence.md file.
@@ -34,8 +35,8 @@ RELEASE NOTES:
    it to pass 3d point methods for moving about
    A camera has two projection possibilities. project projects a point from the
    space while project1 projects an object that seems to hover in front of it
-   though changes with orientation. (this is for an axis, for example, see new
-   axis in the desmos)
+   though changes with orientation. (this is for an axis, for example: see
+   newaxis in the desmos)
   Version 1.2.2:
    The addition of figure classes.
    Figures can now be added to a space.
@@ -56,13 +57,17 @@ RELEASE NOTES:
   Version 2.2.1:
    Heavy testing and debugging in movement... no more upside-down/backward/
    inverted movement when trying to navigate a 3d space. Also nicer loading.
+  Version 2.2.2:
+   make rectangle function... pseudo-shades the rectangles
+   this is a placeholder for the actual shading abilities.
 
 '''
-__version__ = '2.2.1'
+import time
+__version__ = '2.2.2'
 from usefulpy.mathematics.nmath import *
 import usefulpy.validation as _validation
 degrees()
-
+import tkinter
 from collections import namedtuple
 Point3d = namedtuple('Point3d', ('x', 'y', 'z'))
 Point2d = namedtuple('Point2d', ('x', 'y'))
@@ -79,6 +84,7 @@ class space(object):
 
     def addcamera(self, name, fov=0.5, x=0, y=0, z=0, thetax=0, thetaz=0, visible=False, shape=None, renderdistance=12):
         '''Adds a camera to the space'''
+        #camera shape does not work.
         if type(name) is not str: raise TypeError('name must be str')
         newcam = _camera(self, fov, x, y, z, thetax, thetaz, visible=visible, shape=shape, renderdistance=renderdistance)
         if name in self.cameras: raise KeyError(f'camera {name} already exists in this space')
@@ -156,7 +162,7 @@ class space(object):
                         pane = fig.pop(paneindex)
                         try:
                             npoints = [cam.project(point, at) for point in pane]
-                            #print(pane.color)
+                            
                             squishedfig = figure2d(*npoints, color = pane.color, outline = pane.outline)
                             squishedfig.project_to_canvas(at)
                         except: pass
@@ -184,6 +190,7 @@ class space(object):
         cam = self.frozenCanvases[canvas]
         del self.frozenCanvases[canvas]
         self.runningCanvases[canvas] = cam
+        self._update(canvas)
 
     def __iter__(self):
         '''__iter__ for space... goes through all items in the space.'''
@@ -205,14 +212,20 @@ class _camera(object):
         assert _validation.is_float(fov)
         assert _validation.is_float(renderdistance)
         assert (shape is None) or (type(shape) is figure3d)
+        #Shape does not work yet.
+
         #Note... may want to add limits for angular movement
+
         #x, y, z, camera's coordinates
         #theta, rho camera angles
-        #fov, distance of pane from point
+        #fov, distance of pane from point 'field of vision'
+
         self.x = float(x)
         self.y = float(y)
         self.z = float(z)
-        self.universe = universe #This is the space that the camera exists in
+        self.universe = universe
+        #This is the space that the camera exists in
+
         self.thetax = float(thetax)
         self.thetaz = float(thetaz)
         self.renderdistance = float(renderdistance)
@@ -220,7 +233,9 @@ class _camera(object):
         self.is_visible = bool(visible)
         self.shape = shape
         self.runningCanvases = []
-        #self.objects = [] 
+        #self.objects = []  #for project1
+        self.spnspeed = 0.0025
+        self.movspeed = 0.01
         self._precompute() #computations
 
     #def addobject(self, obj): #These will use project1.
@@ -251,6 +266,7 @@ class _camera(object):
         self.z31 = -10*self.pre3
         self.posa = Point3d(self.x3, self.y3, self.z3)
         if self.runningCanvases: self.universe._recieve_update_msg()
+        
 
     #Rotations
     #rs (rotation section) = self.pre[n]*([d]-self.[d]3)
@@ -387,37 +403,37 @@ class _camera(object):
         self.thetaz -= degrees
         self._precompute()
 
-    def fdx(self, amount):
+    def _fdx(self, amount):
         '''move cam fd along the x axis'''
         self.x += amount
         self._precompute()
 
-    def fdy(self, amount):
+    def _fdy(self, amount):
         '''move cam fd along the y axis'''
         self.y += amount
         self._precompute()
 
-    def fdz(self, amount):
+    def _fdz(self, amount):
         '''move cam fd along the z axis'''
         self.z += amount
         self._precompute()
 
-    def bkx(self, amount):
+    def _bkx(self, amount):
         '''move cam bk along the x axis'''
         self.x -= amount
         self._precompute()
 
-    def bky(self, amount):
+    def _bky(self, amount):
         '''move cam bk along the y axis'''
         self.y -= amount
         self._precompute()
 
-    def bkz(self, amount):
+    def _bkz(self, amount):
         '''move cam bk along the z axis'''
         self.z -= amount
         self._precompute()
 
-    def fdxy(self, amount): ##Not tested
+    def _fdxy(self, amount):
         '''move the cam fd along the x and y axis in the direction the camera
 is facing, keeping the z-location still'''
         xrat = sin((-self.thetaz)%360)
@@ -426,7 +442,7 @@ is facing, keeping the z-location still'''
         self.y += amount*yrat
         self._precompute()
 
-    def fdyz(self, amount): ##Not tested
+    def _fdyz(self, amount): ##Not tested
         '''move the cam fd along the y and z axis in the direction the camera
 is facing, keeping the x-location still'''
         xrat = sin(self.thetax)
@@ -435,7 +451,7 @@ is facing, keeping the x-location still'''
         self.z += amount*zrat
         self._precompute()
 
-    def fdzx(self, amount): ##Not tested
+    def _fdzx(self, amount): ##Not tested
         '''move the cam fd along the z and x axis in the direction the camera
 is facing, keeping the y-location still'''
         xrat = sin(self.thetax)
@@ -444,7 +460,7 @@ is facing, keeping the y-location still'''
         self.z += amount*zrat
         self._precompute()
 
-    def bkxy(self, amount): ##Not tested
+    def _bkxy(self, amount):
         '''move the cam bk along the x and y axis in the direction the camera
 is facing, keeping the z-location still'''
         xrat = sin((-self.thetaz)%360)
@@ -453,7 +469,7 @@ is facing, keeping the z-location still'''
         self.y -= amount*yrat
         self._precompute()
 
-    def bkyz(self, amount): ##Not tested
+    def _bkyz(self, amount): ##Not tested
         '''move the cam bk along the y and z axis in the direction the camera
 is facing, keeping the x-location still'''
         xrat = sin(self.thetax)
@@ -462,7 +478,7 @@ is facing, keeping the x-location still'''
         self.z -= amount*zrat
         self._precompute()
 
-    def bkzx(self, amount): ##Not tested
+    def _bkzx(self, amount): ##Not tested
         '''move the cam bk along the z and x axis in the direction the camera
 is facing, keeping the y-location still'''
         xrat = sin(self.thetax)
@@ -471,7 +487,7 @@ is facing, keeping the y-location still'''
         self.z -= amount*zrat
         self._precompute()
 
-    def rt(self, amount):
+    def _rt(self, amount):
         '''move the cam rt along the x and y axis in the direction the camera
 is facing, keeping the z-location still'''
         xrat = cos((-self.thetaz)%360)
@@ -480,7 +496,7 @@ is facing, keeping the z-location still'''
         self.x += amount*xrat
         self._precompute()
 
-    def lt(self, amount):
+    def _lt(self, amount):
         '''move the cam lt along the x and y axis in the direction the camera
 is facing, keeping the z-location still'''
         xrat = -cos((-self.thetaz)%360)
@@ -489,14 +505,24 @@ is facing, keeping the z-location still'''
         self.x += amount*xrat
         self._precompute()
 
-    def up(self, amount):
+    def _up(self, amount):
         '''move the cam location up (increase z value)'''
         self.z += amount
         self._precompute()
 
-    def dn(self, amount):
+    def _dn(self, amount):
         '''move the cam location dn (decrease z value)'''
         self.z -= amount
+        self._precompute()
+
+    def fdat(self, amount, heading):
+        '''fd according to heading argument, moving all axis'''
+        xrat = sin((-heading[1])%360)*sin(heading[0])
+        yrat = cos((-heading[1])%360)*sin(heading[0])
+        zrat = -cos(self.thetax)
+        self.x += amount*xrat
+        self.y += amount*yrat
+        self.z += amount*zrat
         self._precompute()
 
     def tp(self, to):
@@ -509,7 +535,7 @@ is facing, keeping the z-location still'''
         self.thetax, self.thetaz = to
         self._precompute()
 
-    def fd(self, amount): ##Not tested
+    def _fd(self, amount):
         '''fd according to heading, moving all axis'''
         xrat = sin((-self.thetaz)%360)*sin(self.thetax)
         yrat = cos((-self.thetaz)%360)*sin(self.thetax)
@@ -519,7 +545,7 @@ is facing, keeping the z-location still'''
         self.z += amount*zrat
         self._precompute()
 
-    def bk(self, amount): ##Not tested
+    def _bk(self, amount):
         '''bk according to heading, moving all axis'''
         xrat = sin((-self.thetaz)%360)*sin(self.thetax)
         yrat = cos((-self.thetaz)%360)*sin(self.thetax)
@@ -533,6 +559,18 @@ is facing, keeping the z-location still'''
         self.fov = to
         self._precompute()
 
+    def setx(self, to):
+        self.x = to
+        self._precompute()
+
+    def sety(self, to):
+        self.y = to
+        self._precompute()
+
+    def setz(self, to):
+        self.z = to
+        self._precompute()
+
     def __repr__(self):
         '''__repr__ for cam'''
         return f'<(py3d._camera at {self.pos}, facing: ({self.thetax}, {self.thetaz}), field of vision (fov): {self.fov}, render distance: {self.renderdistance}>'
@@ -542,24 +580,310 @@ is facing, keeping the z-location still'''
         if self.shape: return self.shape.__iter__()
         return ().__iter__()
 
+    def spinrt(self, amount):
+        final = amount-int(amount)
+        for x in range(int(amount)):
+            self.tiltright(1)
+            time.sleep(self.spnspeed)
+        self.tiltright(final)
+
+    def spinlt(self, amount):
+        final = amount-int(amount)
+        for x in range(int(amount)):
+            self.tiltleft(1)
+            time.sleep(self.spnspeed)
+        self.tiltleft(final)
+
+    def spinup(self, amount):
+        final = amount-int(amount)
+        for x in range(int(amount)):
+            self.tiltup(1)
+            time.sleep(self.spnspeed)
+        self.tiltup(final)
+
+    def spindn(self, amount):
+        final = amount-int(amount)
+        for x in range(int(amount)):
+            self.tiltdown(1)
+            time.sleep(self.spnspeed)
+        self.tiltdown(final)
+
+    def spinto(self, to): return NotImplemented #spin to face an angle
+    def spin(self, amount): return NotImplemented #amount is a 2d tuple
+    def goto(self, to): return NotImplemented 
+    def gotowards(self, towards): return NotImplemented 
+    def followpath(self, towards): return NotImplemented 
+    def slidefov(self, to): return NotImplemented #slides fov
+    def spintoface(self, point): return NotImplemented #spin to face a point
+    def _mvfd(self, amount, speed = None):
+        if speed == 0: return self._fd(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._fd(0.1)
+            time.sleep(nspeed)
+        self._fd(decimal)
+    def fd(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvfd(amount, speed)
+        return self._fd(amount)
+
+    def _mvbk(self, amount, speed = None):
+        if speed == 0: return self._bk(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._bk(0.1)
+            time.sleep(nspeed)
+        self._bk(decimal)
+    def bk(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvbk(amount, speed)
+
+    def _mvrt(self, amount, speed = None):
+        if speed == 0: return self._rt(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._rt(0.1)
+            time.sleep(nspeed)
+        self._rt(decimal)
+    def rt(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvrt(amount, speed)
+        return self._rt(amount)
+    def _mvlt(self, amount, speed = None):
+        if speed == 0: return self._lt(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._lt(0.1)
+            time.sleep(nspeed)
+        self._lt(decimal)
+    def lt(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvlt(amount, speed)
+        return self._lt(amount)
+    def _mvup(self, amount, speed = None):
+        if speed == 0: return self._up(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._up(0.1)
+            time.sleep(nspeed)
+        self._up(decimal)
+    def up(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvup(amount, speed)
+        return self._up(amount)
+    def _mvdn(self, amount, speed = None):
+        if speed == 0: return self._dn(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._dn(0.1)
+            time.sleep(nspeed)
+        self._dn(decimal)
+    def dn(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvdn(amount, speed)
+        return self._dn(amount)
+        return self._bk(amount)
+    def _mvfdx(self, amount, speed = None):
+        if speed == 0: return self._fdx(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._fdx(0.1)
+            time.sleep(nspeed)
+        self._fdx(decimal)
+    def fdx(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvfdx(amount, speed)
+        return self._fdx(amount)
+    def _mvfdy(self, amount, speed = None):
+        if speed == 0: return self._fdy(amount)
+    def _mvfdyz(self, amount, speed = None):
+        if speed == 0: return self._fdyz(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._fdyz(0.1)
+            time.sleep(nspeed)
+        self._fdyz(decimal)
+    def fdyz(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvfdyz(amount, speed)
+        return self._fdyz(amount)
+    def _mvfdzx(self, amount, speed = None):
+        if speed == 0: return self._fdzx(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._fdzx(0.1)
+            time.sleep(nspeed)
+        self._fdzx(decimal)
+    def fdzx(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvfdzx(amount, speed)
+        return self._fdzx(amount)
+    def _mvbkx(self, amount, speed = None):
+        if speed == 0: return self._bkx(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._bkx(0.1)
+            time.sleep(nspeed)
+        self._bkx(decimal)
+    def bkx(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvbkx(amount, speed)
+        return self._bkx(amount)
+    def _mvbky(self, amount, speed = None):
+        if speed == 0: return self._bky(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._bky(0.1)
+            time.sleep(nspeed)
+        self._bky(decimal)
+    def bky(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvbky(amount, speed)
+        return self._bky(amount)
+    def _mvbkz(self, amount, speed = None):
+        if speed == 0: return self._bkz(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._bkz(0.1)
+            time.sleep(nspeed)
+        self._bkz(decimal)
+    def bkz(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvbkz(amount, speed)
+        return self._bkz(amount)
+    def _mvbkxy(self, amount, speed = None):
+        if speed == 0: return self._bkxy(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._bkxy(0.1)
+            time.sleep(nspeed)
+        self._bkxy(decimal)
+    def bkxy(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvbkxy(amount, speed)
+        return self._bkxy(amount)
+    def _mvbkyz(self, amount, speed = None):
+        if speed == 0: return self._bkyz(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._bkyz(0.1)
+            time.sleep(nspeed)
+        self._bkyz(decimal)
+    def bkyz(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvbkyz(amount, speed)
+        return self._bkyz(amount)
+    def _mvbkzx(self, amount, speed = None):
+        if speed == 0: return self._bkzx(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._bkzx(0.1)
+            time.sleep(nspeed)
+        self._bkzx(decimal)
+    def bkzx(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvbkzx(amount, speed)
+        return self._bkzx(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._fdy(0.1)
+            time.sleep(nspeed)
+        self._fdy(decimal)
+    def fdy(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvfdy(amount, speed)
+        return self._fdy(amount)
+    def _mvfdz(self, amount, speed = None):
+        if speed == 0: return self._fdz(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._fdz(0.1)
+            time.sleep(nspeed)
+        self._fdz(decimal)
+    def fdz(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvfdz(amount, speed)
+        return self._fdz(amount)
+    def _mvfdxy(self, amount, speed = None):
+        if speed == 0: return self._fdxy(amount)
+        if speed is None: speed = self.movspeed
+        nspeed = speed/10
+        namount = amount*10
+        decimal = namount - int(namount)
+        decimal /= 10
+        for n in range(int(namount)):
+            self._fdxy(0.1)
+            time.sleep(nspeed)
+        self._fdxy(decimal)
+    def fdxy(self, amount, smooth = True, speed = None):
+        if smooth: return self._mvfdxy(amount, speed)
+        return self._fdxy(amount)
+        
+        
+
 class figure3d(object):
     '''3d figure for a space, built of figure2d3ds
 Polygons do not need to be perfectly closed, but it is recommended
 to avoid small bugs'''
     def __new__(cls, *polygons):
         '''__new__ for figure3d'''
-        #for polygon in polygons:
-        #    print(polygon.color)
         self = super(figure3d, cls).__new__(cls)
         npolygons = []
-        #print(polygons)
         for polygon in polygons:
-            #print('>>'+str(polygon))
             if type(polygon) is not figure2d3d:
-                #print('')
                 polygon=figure2d3d(*polygon)
             npolygons.append(polygon)
-            #print(polygon.color)
         self.polygons=tuple(npolygons)
         xsum, ysum, zsum = 0, 0, 0
         lnth = 0
@@ -584,11 +908,9 @@ class figure2d(object):
         if outline is None: outline = color
         self.color = color
         self.outline = outline
-        #print(points)
         npoints=[]
         for point in points:
             npoint=tuple(point)
-            #print(npoint)
             pnt2ds=Point2d(*npoint)
             npoints.append(pnt2ds)
         self.points=tuple(npoints)
@@ -603,7 +925,6 @@ class figure2d(object):
     def project_to_canvas(self, ncanvas):
         '''project it to a canvas'''
         arglist = []
-        #print(self.color)
         
         for point in self: arglist.extend((point.x, point.y))
         ncanvas.create_polygon(*arglist, fill = self.color, outline = self.outline)
@@ -620,19 +941,18 @@ wierd overlaying at certain angles.'''
     def __new__(cls, *points, color = 'black', outline = None):
         '''__new__ for figure2d3d'''
         self = super(figure2d3d, cls).__new__(cls)
-        #print(color)
-        npoints=[]
+        
         if outline is None: outline = color
         self.color = color
         self.outline = outline
-        #print(self.color)
-        #print(points)
+        
+        npoints=[]
         for point in points:
             npoint=tuple(point)
-            #print(npoint)
             pnt3ds=Point3d(*npoint)
             npoints.append(pnt3ds)
         self.points=tuple(npoints)
+        
         xsum, ysum, zsum = 0, 0, 0
         lnth = len(self.points)
         for point in self.points:
@@ -640,6 +960,7 @@ wierd overlaying at certain angles.'''
             ysum += point.y
             zsum += point.z
         self.pos = Point3d(xsum/lnth, ysum/lnth, zsum/lnth)
+
         return self
 
     def __iter__(self):
@@ -648,32 +969,32 @@ wierd overlaying at certain angles.'''
 
 class line_segment3d(object):
     '''A line segment through 3 dimensions, not implimented'''
-    def __new__(cls, a, b):
+    def __new__(cls, *args, color = 'black'):
         self = super(line_segment3d, cls).__new__(cls)
-        a, b = tuple(a), tuple(b)
-        self.pointa=Point3d(*a)
-        self.pointb=Point3d(*b)
+        self.points = tuple(map(Point3d, args))
+        self.color = color
         return self
 
     def __iter__(self):
-        return (self.pointa, self.pointb).__iter__()
-
-'''
-create_polygon(self, *args, **kw)
-Create polygon with coordinates x1,y1,...,xn,yn.
-'''
+        return self.points.__iter__()
 
 class line_segment2d(object):
     '''a line segment through 2 dimensions, not implimented'''
-    def __new__(self, a, b):
+    def __new__(self, *args, color = 'black'):
         self = super(line_segment2d, cls).__new__(cls)
-        a, b = tuple(a), tuple(b)
-        self.pointa=Point2d(*a)
-        self.pointb=Point2d(*b)
+        self.points = tuple(map(Point2d, args))
+        self.color = color
         return self
 
     def __iter__(self):
-        (self.pointa, self.pointb).__iter__()
+        return self.points.__iter__()
+
+    def project_to_canvas(self, ncanvas):
+        '''project it to a canvas'''
+        arglist = []
+        
+        for point in self: arglist.extend((point.x, point.y))
+        ncanvas.create_line(*arglist, fill = self.color)
 
 def rescale(point, to):
     '''rescales points to window from the 3d projection'''
@@ -692,55 +1013,89 @@ def rescale(point, to):
 
     return Point2d(x, y)
 
+_tstcnv = tkinter.Canvas()
+def make_rectangular_prism(point1, point2, *colors):
+    assert len(colors)<= 6
+    if not colors: colors = ('black')
+    if len(colors) == 1:
+        try:
+            color = colors[0]
+            #temporary mini-shading method... wouldn't actually work when
+            #lighting is introduced
+            tstc = (f'{color}1', f'{color}2', f'{color}3', f'{color}', f'{color}3', f'{color}4')
+            for color in tstc:
+                _tstcnv.create_polygon(0, 0, 1, 1, fill = color)
+            colors = tstc
+        except:
+            pass
+    if len(colors) < 6:
+        lnth = len(colors)
+        colors = [colors[n%lnth] for n in range(6)]
+    zipped_points = tuple(zip(point1, point2))
+    x = x1, x2 = zipped_points[0]
+    y = y1, y2 = zipped_points[1]
+    z = z1, z2 = zipped_points[2]
+    rectangular_prism = figure3d(
+        figure2d3d((x1, y2, z2), (x2, y2, z2), (x2, y1, z2), (x1, y1, z2), color = colors[0]),
+        figure2d3d((x1, y2, z1), (x1, y2, z2), (x2, y2, z2), (x2, y2, z1), color = colors[1]),
+        figure2d3d((x2, y1, z1), (x2, y2, z1), (x2, y2, z2), (x2, y1, z2), color = colors[2]),
+        figure2d3d((x1, y1, z1), (x2, y1, z1), (x2, y1, z2), (x1, y1, z2), color = colors[3]),
+        figure2d3d((x1, y1, z1), (x1, y2, z1), (x1, y2, z2), (x1, y1, z2), color = colors[4]),
+        figure2d3d((x1, y1, z1), (x1, y2, z1), (x2, y2, z1), (x2, y1, z1), color = colors[5])
+        )
+    return rectangular_prism
+
 def _main():
     '''this acts as a mini-driver.'''
     from usefulpy.gui import Frame
-    import time
-    global canv, area, cam, loadingcube, cube2
+    global canv, area, cam, loadingcube, cube1, cube2, cube3
     canv = Frame(width = 800, height =800).addCanvas(width = 800, height =800)
     area = space()
-    cubefigs = ( # I had the colors aranged in four 6*20 tables and had python randomly
-        #choose the colors
-        figure2d3d((-1, -1, -1),(-1, 1, -1), (-1, 1, 1), (-1, -1, 1), color = 'orange'),
-        figure2d3d((-1,-1,-1), (-1, 1, -1), (1, 1, -1), (1, -1, -1), color = 'DarkGrey'),
-        figure2d3d((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1), color = 'chocolate3'),
-        figure2d3d((-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1), color = 'green'),
-        figure2d3d((-1, 1, 1), (1, 1, 1), (1, -1, 1), (-1, -1, 1), color = 'YellowGreen'),
-        figure2d3d((1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1), color = 'brown2')
+    
+    cubefigs = (
+        #I had the colors aranged in four 6*20 tables and had python
+        #randomly choose the colors
+        figure2d3d((-1, -1, -1),(-1, 1, -1), (-1, 1, 1), (-1, -1, 1), color = 'orange'), #touching chocolate3, green
+        figure2d3d((-1,-1,-1), (-1, 1, -1), (1, 1, -1), (1, -1, -1), color = 'DarkGrey'), #bottom
+        figure2d3d((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1), color = 'chocolate3'), #touching orange, brown2
+        figure2d3d((-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1), color = 'green'), #touching brown2, orange
+        figure2d3d((-1, 1, 1), (1, 1, 1), (1, -1, 1), (-1, -1, 1), color = 'YellowGreen'), #top
+        figure2d3d((1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1), color = 'brown2') #touching green, chocolate3
         )
-    #for fig in cubefigs:
-    #    print('>>', fig.color)
+    
     loadingcube = figure3d(*cubefigs)
+    #I know it doesn't need to 'load' anything
+    #but it looks nice as a loading symbol.
     area.addfigure(loadingcube)
     cam = area.addcamera('cam', fov=10, thetax=60, thetaz=140)
-    #print(area.space)
-    cube2 = figure3d( # I had the colors aranged in four 6*20 tables and had python randomly
-        #choose the colors
-        figure2d3d((2, 2, -0.5),(2, 3, -0.5), (2, 3, 0.5), (2, 2, 0.5), color = 'CadetBlue'),
-        figure2d3d((2, 2,-0.5), (2, 3, -0.5), (3, 3, -0.5), (3, 2, -0.5), color = 'CadetBlue1'),
-        figure2d3d((2, 2, -0.5), (3, 2, -0.5), (3, 2, 0.5), (2, 2, 0.5), color = 'CadetBlue2'),
-        figure2d3d((2, 3, -0.5), (2, 3, 0.5), (3, 3, 0.5), (3, 3, -0.5), color = 'CadetBlue4'),
-        figure2d3d((2, 3, 0.5), (3, 3, 0.5), (3, 2, 0.5), (2, 2, 0.5), color = 'CadetBlue1'),
-        figure2d3d((3, 2, -0.5), (3, 3, -0.5), (3, 3, 0.5), (3, 2, 0.5), color = 'CadetBlue3')
-        )
+
+    
+
+    cube1 = make_rectangular_prism((2, 2, -0.5), (3, 3, 0.5), 'CadetBlue')
+    cube2 = make_rectangular_prism((-1, -1, -1), (0, 0, 0), 'brown')
+    cube3 = make_rectangular_prism((3, 2, 0), (4, 3, 1), 'DarkGoldenrod')
+    
+    #there should be pyramids, but I haven't made one.
     
     area.setview('cam')
     area.view_in_canvas(canv)
     
     
     for x in range(360):
-        cam.tiltright(1)
+        cam.tiltright(2)
         cam.tiltup(5)
-        time.sleep(0.01)
+        time.sleep(0.005)
     
     area.freezecanvas(canv)
-    cam.setfov(1)
+    area.space.pop(0)
+    cam.setfov(0.2)
     cam.tp((-2, -2, 0))
     cam.seth((90, -45))
+    area.addfigure(cube1)
     area.addfigure(cube2)
+    area.addfigure(cube3)
     area.unfreezecanvas(canv)
     time.sleep(0.1)
-    area._update(canv)
 
 if __name__ == '__main__':
     import tkinter
