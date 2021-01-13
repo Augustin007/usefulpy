@@ -1,0 +1,9 @@
+{"rad":
+  {"type": "angle",
+   "value": "tau"
+  },
+ "deg":
+  {"type": "angle",
+   "value": 360
+  }
+}
