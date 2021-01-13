@@ -57,6 +57,7 @@ class quaternion(object):
     def __new__(cls, a = None, b = None, c = None, d = None):
         '''__new__ for quaternion class, works well (hopefully) for most
 variations of input'''
+        #print(a, b, c, d)
 
         self = super(quaternion, cls).__new__(cls)
         
@@ -82,6 +83,9 @@ variations of input'''
                 self.j = 0
                 self.k = 0
                 return self
+            if is_inf(a):
+                pass
+                
             if type(a) is str: return fromstring(a)
             raise TypeError
 
@@ -103,6 +107,7 @@ variations of input'''
         qsum = 0
 
         for multer, num in zip((1, i, j, k), (a, b, c, d)):
+            #print(qsum)
             qsum += multer*num
 
         return qsum
