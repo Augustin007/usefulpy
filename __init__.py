@@ -41,8 +41,8 @@ except: from usefulpy import validation, formatting, mathematics, quickthreads
 
 import warnings
 
-try: import IDLE.IDLE as IDLE
-except: import usefulpy.IDLE as IDLE
+try: from IDLE import IDLE
+except: from usefulpy.IDLE import IDLE
 
 if __name__ == '__main__': IDLE()
 #eof
