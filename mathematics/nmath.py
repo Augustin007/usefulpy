@@ -51,10 +51,18 @@ from fractions import Fraction as fraction
 
 import cmath as _cmath
 import math as _math
+import json as _json
+import os as _os
 
 from math import comb, copysign, dist, erf, erfc, expm1, fabs, factorial
 from math import fmod, frexp, fsum, gamma, hypot, ldexp, lgamma, modf
 from math import nextafter, perm, prod, remainder, trunc, ulp
+
+#Some of the values here are not acurate enough for perfect use
+try: conversions = _json.loads(open('Conversions.json').read())
+except:
+    try: conversions = _json.loads(open('usefulpy'+_os.sep+'mathematics'+_os.sep+'Conversions.json').read())
+    except: conversions = _json.loads(open('mathematics'+_os.sep+'Conversions.json').read())
 
 def _reduce(function, sequence):
     it = iter(sequence); value = next(it)
@@ -164,7 +172,7 @@ _b = ((29-3*_radical)/2)**(1/3)
 _sum = (1+_a+_b)
 ψ = psi = _sum/3
 
-# Its a bit of a tongue twister, but the number nicknamed monster is the
+# Its a bit of a tongue twister, but: the number nicknamed monster is the
 #Number of sets of symmetries in the largest finite group of sets of symmetries
 monster = 808017424794512875886459904961710757005754368000000000
 
@@ -305,16 +313,10 @@ def ceil(x, /):
     except: pass
     return ceil(x.real) + ceil(x.imag)*1j if type(x) is complex else x.ceil()
 
-conversions = { #just radians and degrees for now, 
-    #I would like to move this to a .json file
-    'rad' : {'type': 'angle', 'value':tau},
-    'deg' : {'type': 'angle', 'value':360}
-    }
-
 def convert(value, frm, to):
     if frm == to: return value
     assert conversions[frm]['type'] == conversions[to]['type']
-    valuefrm, valueto = conversions[frm]['value'], conversions[to]['value']
+    valuefrm, valueto = eval(conversions[frm]['value']), eval(conversions[to]['value'])
     return _validation.trynumber((value/valuefrm)*valueto)
 
 #miscillaneous
@@ -456,7 +458,8 @@ def rect(r, phi, /):
 #trig
 _circles = {
     'rad': tau,
-    'deg': 360
+    'deg': 360,
+    'grad':400
     }
 
 _angle = 'rad'
@@ -472,49 +475,38 @@ def radians():
 def degrees():
     _changeto('deg')
 
+def grad():
+    _changeto('grad')
+
 def acos(θ, /):
     try: ans = _math.acos(θ)
     except: ans = _cmath.acos(θ)
-    if _angle == 'deg':
-        return convert(ans, 'rad', 'deg')
-    return ans
-
+    return convert(ans, 'rad', _angle)
 
 def acosh(θ, /):
     try: ans = _math.acosh(θ)
     except: ans = _cmath.acosh(θ)
-    if _angle == 'deg':
-        return convert(ans, 'rad', 'deg')
-    return ans
-
+    return convert(ans, 'rad', _angle)
 
 def asin(θ, /):
     try: ans = _math.asin(θ)
     except: ans = _cmath.asin(θ)
-    if _angle == 'deg':
-        return convert(ans, 'rad', 'deg')
-    return ans
+    return convert(ans, 'rad', _angle)
 
 def asinh(θ, /):
     try: ans = _math.asinh(θ)
     except: ans = _cmath.asinh(θ)
-    if _angle == 'deg':
-        return convert(ans, 'rad', 'deg')
-    return ans
+    return convert(ans, 'rad', _angle)
 
 def atan(θ, /):
     try: ans = _math.atan(θ)
     except: ans = _cmath.atan(θ)
-    if _angle == 'deg':
-        return convert(ans, 'rad', 'deg')
-    return ans
+    return convert(ans, 'rad', _angle)
 
 def atanh(θ, /):
     try: ans = _math.atanh(θ)
     except: ans = _cmath.atanh(θ)
-    if _angle == 'deg':
-        return convert(ans, 'rad', 'deg')
-    return ans
+    return convert(ans, 'rad', _angle)
 
 def asec(θ, /):
     try: return acos(1/θ)
@@ -549,14 +541,12 @@ def cos(θ, /):
         if θ == 2*qc: return -1
         if θ == 0: return 1
     except: pass
-    if _angle == 'deg':
-        θ = convert(θ, 'deg', 'rad')
+    θ = convert(θ, _angle, 'rad')
     try: return _math.cos(θ)
     except: return _cmath.cos(θ)
 
 def cosh(θ, /):
-    if _angle == 'deg':
-        θ = convert(θ, 'deg', 'rad')
+    θ = convert(θ, _angle, 'rad')
     try: return _math.cosh(θ)
     except: return _cmath.cosh(θ)
 
@@ -569,14 +559,12 @@ def sin(θ, /):
         if θ == 2*qc: return 0
         if θ == 0: return 0
     except: pass
-    if _angle == 'deg':
-        θ = convert(θ, 'deg', 'rad')
+    θ = convert(θ, _angle, 'rad')
     try: return _math.sin(θ)
     except: return _cmath.sin(θ)
 
 def sinh(θ, /):
-    if _angle == 'deg':
-        θ = convert(θ, 'deg', 'rad')
+    θ = convert(θ, _angle, 'rad')
     try: return _math.sinh(θ)
     except: return _cmath.sinh(θ)
 
@@ -589,14 +577,12 @@ def tan(θ, /):
         if θ == 2*qc: return 0
         if θ == 0: return 0
     except: pass
-    if _angle == 'deg':
-        θ = convert(θ, 'deg', 'rad')
+    θ = convert(θ, _angle, 'rad')
     try: return _math.tan(θ)
     except: return _cmath.tan(θ)
 
 def tanh(θ, /):
-    if _angle == 'deg':
-        θ = convert(θ, 'deg', 'rad')
+    θ = convert(θ, _angle, 'rad')
     try: return _math.tanh(θ)
     except: return _cmath.tanh(θ)
 
