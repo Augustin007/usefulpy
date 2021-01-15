@@ -36,8 +36,11 @@ RELEASE NOTES:
  2.1
   Version 2.1.1
    quaternion class recreated, is now immutable, much more broad reach
-   implimented. __pow__ now works for integers more often, but still has some
+   implimented. __pow__ now works for floats more often, but still has some
    problems
+  Version 2.1.2
+   improved __pow__ somewhat, still has problems (gah!)
+   improved look of repr and str.
 '''
 
 __version__ = '2.1.1'
@@ -187,11 +190,21 @@ quaternion'''
         for val in nList:
             if val == 0: List.pop(count)
             else: count+=1
-        return ' + '.join(List)
+        return '+'.join(List).replace('+-', '-')
 
     def __repr__(self, /):
         '''IDLE representation'''
-        return '('+str(self)+')'
+        List = [self.real, self.i, self.j, self.k]
+        nList = List.copy()
+        List = list(map(str, List))
+        List[1] += 'i'
+        List[2] += 'j'
+        List[3] += 'k'
+        count = 0
+        for val in nList:
+            if val == 0: List.pop(count)
+            else: count+=1
+        return '('+'+'.join(List).replace('+-', '-')+')'
 
     def __bool__(self, /):
         return self != 0
