@@ -36,39 +36,15 @@ mathematics v1.2.3
 
 __version__ = '1.1.2'
 
-try: import validation, formatting, mathematics
-except: from usefulpy import validation, formatting, mathematics
+try: import validation, formatting, mathematics, quickthreads
+except: from usefulpy import validation, formatting, mathematics, quickthreads
 
 import warnings
 
 def python():
     '''return to python's regular IDLE'''
+try: import IDLE.IDLE as IDLE
+except: import usefulpy.IDLE as IDLE
 
-def IDLE():
-    while True:
-        try:
-            Temporary_Variable_Of_Input = input('>>> ')
-            while Temporary_Variable_Of_Input != 'python()':
-                doraise = False
-                try:
-                    if '_' in Temporary_Variable_Of_Input and '_' not in multisplit(Temporary_Variable_Of_Input, '+', '-', '/', '*', '(', ')', '.', '__', '.', whitespacetoo = True):
-                        doraise = True
-                        _ = fromNumBaseFormat(Temporary_Variable_Of_Input)
-                    else:
-                        try:
-                            _ = eval(Temporary_Variable_Of_Input)
-                        except:               
-                            _ = trynumber(fromstring(Temporary_Variable_Of_Input))
-                    if _ != None:
-                        print(repr(_))
-                except BaseException as error:
-                    if doraise: warnings.warn(error)
-                    try: exec(Temporary_Variable_Of_Input)
-                    except BaseException as error:
-                        warnings.warn(error)
-                Temporary_Variable_Of_Input = input('>>> ')
-            return
-        except BaseException as error:
-            warnings.warn(error)
-
+if __name__ == '__main__': IDLE()
 #eof
