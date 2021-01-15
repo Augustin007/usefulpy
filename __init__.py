@@ -41,8 +41,6 @@ except: from usefulpy import validation, formatting, mathematics, quickthreads
 
 import warnings
 
-def python():
-    '''return to python's regular IDLE'''
 try: import IDLE.IDLE as IDLE
 except: import usefulpy.IDLE as IDLE
 
