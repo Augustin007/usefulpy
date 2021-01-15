@@ -9,7 +9,7 @@ from usefulpy.quickthreads import *
 
 _hold = object()
 def _usefulpy_correct_syntax(scource):
-    if '"""' in scource or "'''" in scource: #Not Implimented
+    if '"""' in scource or "'''" in scource:
         inchar = ''
         instr = False
         eschar = False
