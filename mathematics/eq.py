@@ -80,9 +80,10 @@ translations = {'cos':'\\cos ', 'sin':'\\sin ', 'tan':'\\tan ', 'sec':'\\sec ',
                 'ψ': '\x0epsi ', '**':'^', '\\sq\\rt':'\\sqrt', '\\cb\\rt':'\\cbrt',
                 'floor':'\\floor ', 'c\x0ee il':'\\ceil ', 'd\x0ee rivat\x0ee ':'\\derivate ',
                 '\\s\x0ee c':'\\sec ', '\\arcsec ':'\\arcs\x0ee c '}
-constants = {'\x0epi': π, '\x0etau': τ, '\x0ee': e, '\x0ephi': Φ, '\x0elphi': φ,
-             '\x0erho': ρ, '\x0esigma': σ, '\x0elsigma': ς, '\x0ekappa': κ,
-             '\x0epsi': ψ}
+#fixme. not updated to new variables in nmath
+#constants = {'\x0epi': π, '\x0etau': τ, '\x0ee': e, '\x0ephi': Φ, '\x0elphi': φ,
+#             '\x0erho': ρ, '\x0esigma': σ, '\x0elsigma': ς, '\x0ekappa': κ,
+#             '\x0epsi': ψ}
 mathfuncs = {'\\cos': (cos, (1,)), '\\sin': (sin, (1,)), '\\tan': (tan, (1,)),
              '\\arccos': (acos, (1,)), '\\arcsin': (asin, (1,)),
              '\\arctan' : (atan, (1,)), '\\log': (log, (1, (2, ))),
