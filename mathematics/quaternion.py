@@ -86,10 +86,9 @@ variations of input'''
                 self.j = 0
                 self.k = 0
                 return self
-            if is_inf(a):
-                pass
-                
             if type(a) is str: return fromstring(a)
+            if isinf(a):
+                pass
             raise TypeError
 
         if b == None: b = 0
