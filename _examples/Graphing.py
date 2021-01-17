@@ -5,9 +5,10 @@ Author: Austin Garcia
 
 Graphing calculator for python
 
+This is where my eq class was originally created
+
 PLATFORMS:
-Should run on a platform where my Useful and Ken Lamberts 'breezypythongui' are
-available.
+Should run on a python platform where my usefulpy is available
 
 INSTALLATION:
 Put this file where Python can see it.
@@ -42,7 +43,7 @@ RELEASE NOTES:
  2.1
   2.1.1
    Version 2.1.1-20w05d
-    Redesigning system
+    Modified for use with Usefulpy
 '''
 
 __version__ = '2.1.1-20w05d'
@@ -52,12 +53,12 @@ __version__ = '2.1.1-20w05d'
 from tkinter import *
 import turtle
 from turtle import Turtle, tracer
+from usefulpy.gui import strField
 
 ###  Part 2  ###
 ###   Data   ###
 from usefulpy.validation import tryint, is_float
 from usefulpy.formatting import translate, greek_letters
-from usefulpy.gui import strField
 replacements = greek_letters
 replacements['lσ']='ς'
 replacements['Uψlon']='Υ'
@@ -272,8 +273,8 @@ and returns the text field."""
 
     def clearCanvas(self):
         self.refreshCanvas()
-        self.screen._delete("all")
-        self.scanvas.config(cursor="")
+        self.screen._delete('all')
+        self.scanvas.config(cursor='')
         self.configGUI(NORMAL, DISABLED, DISABLED)
 
     def calculate(self):
