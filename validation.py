@@ -1,6 +1,6 @@
 '''
 File: validation.py
-Version: 1.1.2
+Version: 1.2.1
 Author: Austin Garcia
 
 This program contains many useful functions for validation of input and output.
@@ -23,9 +23,14 @@ RELEASE NOTES:
   Version 1.1.2:
    An updated description and various bug fixes. Cleaner looking code with more
    comments. Addition of several different biases, now imports random.
+ 1.2
+  Version 1.2.1
+    ——Friday, the fifteenth day of the firstmonth Janurary, 2021——
+  Code is shorter by about fifty lines, and yet its functionality have
+  increased... Simplicity is better! Who knew?
 
 '''
-__version__ = '1.1.2'
+__version__ = '1.2.1'
 import datetime
 from collections import namedtuple, deque
 
@@ -47,6 +52,10 @@ losing any value'''
     try: return int(float(s)) == float(s)
     except: return False
 
+def are_integers(*a):
+    '''Return True if is_integer is True for all objects in a'''
+    return False not in (is_integer(s) for s in a)
+
 def intinput(Prompt = '', beginning = '', ending = None, \
              Chastisement = _chastise):
     '''Continue to repeat an input prompt until the prompt can be converted
@@ -58,141 +67,35 @@ into an integer.'''
 
 def tryint(s):
     '''Try to turn an object into an integer'''
-    if is_integer(s): return int(float(s))
+    if type(s) is int: return s
+    if is_integer(s):
+        try: return int(s)
+        except: return int(float(s))
     return s
-
-#Necessary for 'fromrepr', essentially a dictionary with a single item.
-class _keyob(object):
-    '''Support for fromrepr'''
-    def __init__(self, arg:str):
-        self.k = arg[:arg.index(':')]
-        self.y = arg[arg.index(':')+1:]
 
 def fromrepr(s:str):
-    '''not perfect, but it is supposed to be the inverse of repr(x)=s'''
-    #If the s is a number
-    if is_float(s):
-        if '.' not in s: return int(s)
-        return float(s)
-
-    #Boolean and Nonetype values
-    if s == 'True': return True
-    if s == 'None': return
-    if s == 'False': return False
-
-    #if it is a string
-    if (s[0] in ('"', "'")) and (s[-1] == x[0]):
-        s = s[1:-1]
-
-        #I originally used a for loop, but I switched it for a while loop.
-        #escape characters have an added // in the repr
-        count = 0
-        while count < len(s):
-            if s[count] == '\\' and s[count+1] != '\\':
-                s = s[:count]+s[count+1:]
-            else: count +=1
-        return s
-
-    #iterables
-    if s[0] == '[' and s[-1] == ']':
-        return makelist(s)
-    if s[0] == '(' and s[-1] == ')':
-        return tuple(makelist(s))
-    if s[0] == '{' and s[-1] == '}':
-        nlist = makelist(s)
-        #this hopefully accounts for dictionaries correctly, and doesn't leave
-        if _keyob in map(type, nlist):
-            ndict = {}
-            for ob in nlist: ndict[ob.k] = ob.y
-            return ndict
-        return set(nlist)
-    if ':' in s: return _keyob(s)
-
-    #If all else fail.
-    return s
+    '''Supposed to be the inverse of repr(x)=s'''
+    try: return eval(s)
+    except: return s
 
 def makelist(*s):
     '''Makes a list out of nearly any input of any type'''
     if len(s) == 0: return []
-    if len(s) > 1: return list(s)
+    if len(s) > 1: return [makelist(n) for n in s]
     s = s[0]
     if type(s) is list: return s
     if type(s) in (tuple, set): return list(s)
     if type(s) is str:
-        inverses = str.maketrans('({[]})',')}][{(')
-        if (s[0] in ('(', '[', '{')) and (s[0] == s[-1].translate(inverses)):
-            #the list
-            runlist = []
-            
-            # is it nested an interator
-            in_iter = False
-            #what started the iterator, and the iterator within an iterator, etc
-            neststarters = deque()
-            # I am using a deque object because they are
-            # more efficient
-            #
-            #depth level
-            level = 0 
-
-            #is it within a string?
-            instr = False
-            #was the string started with a '"' or a "'"?
-            strstart = ''
-            #is the escapecharacter being used?
-            eschar = False
-
-            #What is the current object of the list.
-            runobject = ''
-            for x in s[1:-1]:
-                if not instr and not in_iter:
-                    if x in ('(', '[', '{'):
-                        in_iter = True
-                        level += 1
-                        runobject += x
-                        neststarters.append(x)
-                    elif x in ('"', "'"):
-                        instr = True
-                        runobject += x
-                        strstart = x
-                    elif x in (','):
-                        runlist.append(fromrepr(runobject))
-                        runobject = ''
-                    elif x == ' ':
-                        pass
-                    else:
-                        runobject += x
-                elif instr:
-                    runobject += x
-                    if x == strstart and not eschar:
-                        instr = False
-                    if x == '\\': eschar = True
-                    else: eschar = False
-                elif in_iter:
-                    runobject += x
-                    if x in ('"', "'"):
-                        instr = True
-                        strstart = x
-                    elif x in ('(', '[', '{'):
-                        in_iter = True
-                        level += 1
-                        neststarters.append(x)
-                    elif x == neststarters[-1]:
-                        neststarters.popleft()
-                        level -= 1
-                        if level == 0:
-                            in_iter = False
-            if runobject: runlist.append(fromrepr(runobject))
-            return runlist
-        else: return s.split()
+        try: return makelist(eval(s))
+        except: return s.split()
     try: return [x for x in s]
     except: return [s]
 
 def is_intlist(s):
     '''Check if a list is composed solely of integers'''
     try:
-        Numbers = list(map(float, makelist(s)))
-        Valid = list(map(is_integer, Numbers))
-        return not (False in Valid)
+        Valid = list(map(is_integer, s))
+        return all(Valid)
     except: return False
 
 def intlistinput(Prompt = '', beginning = '', ending = None, \
@@ -208,6 +111,10 @@ def is_float(s):
     '''Check if an object can be turned into a float'''
     try: return float(s)==float(s)
     except: return False
+
+def are_floats(*a):
+    '''Return True if is_integer is True for all objects in a'''
+    return False not in (is_float(s) for s in a)
 
 def floatinput(Prompt = '', beginning = '', ending = None, \
                Chastisement = _chastise):
@@ -276,7 +183,42 @@ validquery'''
 
 def isbool(s):
     '''Check if s is a boolean value'''
-    return type(s) == bool
+    return s in ('True', 'False') if type(s) is str else type(s) is bool
+
+def bool(x):
+    return bool({'True':True, 'False':False}.get(x))
+
+def boolinput(Prompt):
+    return bool(validation.validinput(is_bool, Prompt))
+
+def fromdatainput(data, prompt = ''):
+    datum = input(prompt)
+    while datum not in data: datum = input(prompt)
+    return datum
+
+def multicheck(data, checks, threshhold = 1):
+    try: data = iter(data)
+    except: data = iter((data,))
+    try: checks = iter(checks)
+    except: checks = iter((checks,))
+    count = 0
+    for n in data:
+        for c in checks:
+            if c(n): count += 1
+            if count >= threshhold: return True
+    return False
+
+def multi_in(data1, data2, threshhold = 1):
+    try: data1 = iter(data1)
+    except: data1 = iter((data1,))
+    try: data2 = iter(data2)
+    except: data2 = iter((data2,))
+    count = 0
+    for n in data1:
+        if n in data2: count += 1
+        if count >= threshhold: return True
+    return False 
+    
 
 def YesOrNo(Response):
     '''Check if a text is an affirmative or a negative'''
@@ -304,6 +246,17 @@ into a boolean value, this includes variations of Yes and No.'''
 
 del _chastise
 
+def is_numeric(s):
+    try:
+        s += 1
+        s -= 1.0
+        s *= 2
+        s /= 2.0
+        s **= 2
+        s **= (1/2)
+        return True
+    except: return False
+
 def validdate(year, month, day):
     '''Check if a year, month, day combo is valid'''
     try: datetime.date(year, month, day); return True
@@ -327,42 +280,66 @@ def trytype(ntype, *s):
     if validquery(ntype, *s): return ntype(*s)
     return s
 
-tryfloat = lambda s:trytype(float, s)
+def is_iterable(n):
+    try:
+        for l in n: pass
+        return True
+    except: return False
 
-trynumber = lambda s: tryint(tryfloat(s))
+def flatten(iterable):
+    assert is_iterable(iterable)
+    itertype = type(iterable)
+    new_iterable = []
+    for n in iterable:
+        if is_iterable(n):
+            new_iterable.extend(list(flatten(n)))
+            continue
+        new_iterable.append(n)
+    return itertype(new_iterable)
 
-from random import randint as rint, random as rnum
+def tryfloat(s):
+    s = tryeval(s)
+    try: return float(s)
+    except: return s
 
-def lowbias(low, high):
-    '''return a random integer from low to high, lower numbers have higher
-weights'''
-    return rint(low, rint(low, rint(low, high)))
+def tryeval(s):
+    if type(s) is str:
+        try: return eval(s)
+        except: return s
+    return s
 
-def highbias(low, high):
-    '''return a random integer from low to high, higher numbers have higher
-weights'''
-    return rint(rint(rint(low, high), high), high)
+def valideval(s):
+    if type(s) is str:
+        try:
+            eval(s)
+            return True
+        except: return False
+    return False
+def validexec(s):
+    if type(s) is str:
+        try:
+            exec(s)
+            return True
+        except: return False
+    return False
 
-def centerbias(low, high):
-    '''return a random integer from low to high, center numbers have higher
-weights'''
-    return rint(rint(low, high//2), rint(high//2, high))
+def is_complex(s):
+    try:
+        complex(s)
+        return True
+    except: return False
 
-def outerbias(low, high):
-    '''return a random number from low to high, outermost numbers have
-higher weights'''
-    return choice((highbias, lowbias))(low, high)
+def trycomplex(s):
+    s = tryeval(s)
+    try: return complex(s)
+    except: return s
 
-def rbool():
-    '''return a random boolean value'''
-    return choice((True, False))
-
-def truebias(chance = 75):
-    '''return a random boolean value, biased to True,or a chance% to return
-True'''
-    return rint(1, 100) <= chance
-
-def falsebias(chance = 75):
-    '''return a random boolean value, biased to False, or a chance% to return
-False'''
-    return rint(1, 100) >= chance
+def trynumber(s):
+    s = tryeval(s)
+    if type(s) in (int, float, complex): return s
+    if is_integer(s):
+        try: return int(s)
+        except: return int(float(s))
+    if is_float(s): return float(s)
+    if is_complex(s): return complex(s)
+    return s
