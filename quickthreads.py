@@ -1,6 +1,10 @@
 from _thread import *
 from threading import *
 import time
+import warnings
+
+#if __name__ != '__name__': warnings.warn(Warning('This is not a completed code'))
+# It is incomplete but the functions are useable, so ...
 
 def _raise(error):
     raise error
