@@ -30,6 +30,7 @@ RELEASE NOTES:
   Version 1.2.3
    More bug fixes
 '''
+##Unreviewed for Usefulpy 1.2.1
 __version__ = '1.2.3'
 
 try: import validation as _validation
@@ -104,27 +105,27 @@ def multisplit(string, *by, whitespacetoo = False):
         run = nrun
     return scour(run)
 
-def translate(self, translator):
+def translate(string, translater):
     '''Translate all items in treanslator'''
-    for old, new in translator.items(): self=self.replace(old, new)
-    return self
+    for old, new in translater.items(): string=string.replace(old, new)
+    return string
 
-def scour(self, of= ''):
-    if type(self) is str:
-        if type(of) is str: return self.replace(of, '')
-        for key in of: self=self.replace(key, '')
-        return self
-    if type(self) is list:
+def scour(obj, of= ''):
+    if type(obj) is str:
+        if type(of) is str: return obj.replace(of, '')
+        for key in of: obj=obj.replace(key, '')
+        return obj
+    if type(obj) is list:
         if type(of) is str:
             count = 0
-            for c in self.copy():
-                if c == of: self.pop(count)
+            for c in obj.copy():
+                if c == of: obj.pop(count)
                 else: count += 1
-            return self
-        for c in self.copy():
-            if c in of: self.pop(count)
-            else: count += 1
-        return self
+            return obj
+        for c in obj.copy():
+            if c in of: obj.pop(count)
+            else: obj += 1
+        return obj
 
 def unformat(text: str, /, query = 1):
     '''Remove all capitals from text, strip it of extra spaces, translate
