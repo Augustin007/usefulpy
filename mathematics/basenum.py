@@ -1,6 +1,6 @@
 '''
 File: basenum.py
-Version: 1.1.1
+Version: 1.1.2
 Author: Austin Garcia
 
 A basenum class, can hold numbers in a any counting system
@@ -21,10 +21,10 @@ RELEASE NOTES:
    Basenum class can hold a number in a certain counting system
   Version 1.1.2
    Some bug fixes and implementation of __pow__
-
 '''
-
-__version__ = '1.1.1'
+##Usefulpy 1.1.2
+__version__ = '1.1.2'
+__author__ = 'Austin Garcia'
 
 from usefulpy import validation as _validation
 
