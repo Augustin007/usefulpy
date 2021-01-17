@@ -23,6 +23,11 @@ RELEASE NOTES:
    useful functions...
   Version 1.1.2:
    Bugfixes and improvements throughout.
+  Version 1.2.1:
+     ——  ——
+   Addition of more programs that contain more functions. Addition of usefulpy
+   IDLE.
+   
 
 SECTIONS:
 validation v1.1.2
@@ -45,4 +50,5 @@ try: from IDLE import IDLE
 except: from usefulpy.IDLE import IDLE
 
 if __name__ == '__main__': IDLE()
+
 #eof
