@@ -43,7 +43,10 @@ RELEASE NOTES:
    Rewrote on another document, cleaning up, improving, and adding functions
    throughout
 '''
+##Usefulpy 1.2.1
 __version__='3.1.1'
+__author__ = 'Austin Garcia'
+
 from usefulpy import validation as _validation
 
 from decimal import Decimal as number
@@ -58,11 +61,13 @@ from math import comb, copysign, dist, erf, erfc, expm1, fabs, factorial
 from math import fmod, frexp, fsum, gamma, hypot, ldexp, lgamma, modf
 from math import nextafter, perm, prod, remainder, trunc, ulp
 
+dirlist = __file__.split(_os.sep)
+dirlist[-1] = 'Conversions.json'
+
+_conversions_file_name = _os.sep.join(dirlist)
+
 #Some of the values here are not acurate enough for perfect use
-try: conversions = _json.loads(open('Conversions.json').read())
-except:
-    try: conversions = _json.loads(open('usefulpy'+_os.sep+'mathematics'+_os.sep+'Conversions.json').read())
-    except: conversions = _json.loads(open('mathematics'+_os.sep+'Conversions.json').read())
+conversions = _json.loads(open(_conversions_file_name).read())
 
 def _reduce(function, sequence):
     it = iter(sequence); value = next(it)
@@ -180,18 +185,22 @@ Avogadro = 6.02214076e+23
 
 #checks
 def odd(num, /):
+    '''Return True if num is odd'''
     return num%2 != 0
 
 def even(num, /):
+    '''Return True if num is even'''
     return num%2 == 0
 
 def isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0):
+    '''Return True if a is close to b'''
     if isnan(a) or isnan(b): return False
     if isinf(a) or isinf(b): return a == b
     tol, difference = max((abs(abs(b)*rel_tol)), abs(abs_tol)), abs(a-b)
     return tol >= difference
 
 def isinf(x, /):
+    '''Return True if x is inf in any direction'''
     if x in (inf, infj, neg_inf, neg_infj): return True
     try:
         if x.real in (inf, neg_inf): return True
@@ -203,6 +212,7 @@ def isinf(x, /):
         return x.k in (inf, neg_inf)
 
 def isnan(x, /):
+    '''Return True if x is nan in any way'''
     if x in (nan, nanj): return True
     try:
         if (x.real in nan): return True
@@ -214,49 +224,53 @@ def isnan(x, /):
         return x.k in (nan)
 
 def isfinite(x, /):
+    '''Return True if x is finite'''
     return not (isnan(x) or isinf(x))
 
 #Broadening abilities
 class math_tuple(tuple):
     '''A tuple modified for math work'''
     def __add__(self, other):
-        '''return self+other'''
+        '''Return self+other'''
         return math_tuple([n+other for n in self])
     def __radd__(self, other):
-        '''return other+self'''
+        '''Return other+self'''
         return math_tuple([other+n for n in self])
     def __sub__(self, other):
-        '''return self-other'''
+        '''Return self-other'''
         return math_tuple([n-other for n in self])
     def __rsub__(self, other):
-        '''return other-self'''
+        '''Return other-self'''
         return math_tuple([other-n for n in self])
     def __mul__(self, other):
-        '''return self*other'''
+        '''Return self*other'''
         return math_tuple([n*other for n in self])
     def __rmul__(self, other):
-        '''return other*self'''
+        '''Return other*self'''
         return math_tuple([other*n for n in self])
     def __truediv__(self, other):
-        '''return self/other'''
+        '''Return self/other'''
         return math_tuple([n/other for n in self])
     def __rtruediv__(self, other):
-        '''return other/self'''
+        '''Return other/self'''
         return math_tuple([other/n for n in self])
     def __pow__(self, other):
-        '''return self**other'''
+        '''Return self**other'''
         return math_tuple([n**other for n in self])
     def __rpow__(self, other):
-        '''return other**self'''
+        '''Return other**self'''
         return math_tuple([other**n for n in self])
     def floor(self):
+        '''Return floor(self)'''
         return math_tuple([floor(n) for n in self])
     def ceil(self):
+        '''Return ceil(self)'''
         return math_tuple([ceil(n) for n in self])
 
 _setting = 'approx'
 _mathfuncs = {}
 def add_mathfunc(name, approx, exact, *argnames):
+    '''Create a math function'''
     tmp = ['self']
     tmp.extend(argnames)
     
@@ -292,12 +306,14 @@ def add_mathfunc(name, approx, exact, *argnames):
     
     tmp = mathfunc(name, approx, exact)
     exec(f'global {name}\n{name} = tmp')
+    return tmp
 
 def pm(a, b):
-    '''return a ± b'''
+    '''Return a ± b'''
     return math_tuple((a+b, a-b))
 
 def floor(x, /):
+    '''Return the floor of x'''
     try:
         if x > 0: return int(x)
         else:
@@ -306,6 +322,7 @@ def floor(x, /):
     return floor(x.real) + floor(x.imag)*1j if type(x) is complex else x.floor()
 
 def ceil(x, /):
+    '''Return the ceil of x'''
     try:
         if x > 0:
             return int(x) if _validation.is_integer(x) else int(x) + 1
@@ -314,6 +331,7 @@ def ceil(x, /):
     return ceil(x.real) + ceil(x.imag)*1j if type(x) is complex else x.ceil()
 
 def convert(value, frm, to):
+    '''Convert value from 'frm' units to 'to' units.'''
     if frm == to: return value
     assert conversions[frm]['type'] == conversions[to]['type']
     valuefrm, valueto = eval(conversions[frm]['value']), eval(conversions[to]['value'])
@@ -341,12 +359,13 @@ def summation(start, finish, function = lambda x: x):
     return _reduce((lambda x, y: x+function(y)), rangelist)
 
 def sigmoid(x, /):
+    '''Sigmoid function'''
     epow = exp(-x)
     return 1/(1+epow)
 
 #powers and exponents
 def rt(nth, of):
-    '''Find the nth root of (n has to be an integer'''
+    '''Find the nth root of (n must be an integer)'''
     assert _validation.is_integer(nth)
     try: nth = int(nth)
     except: nth = int(float(nth))
@@ -369,7 +388,7 @@ def rt(nth, of):
 
     
 def irt(nth, num, /):
-    '''return integer nth root of num'''
+    '''Return floor nth root of num'''
     assert _validation.is_integer(nth)
     try: nth = int(nth)
     except: nth = int(float(nth))
@@ -386,59 +405,72 @@ def irt(nth, num, /):
         return a
 
 def exp(x, /):
-    '''return e to the power of x'''
+    '''Return e to the power of x'''
     try: return _math.exp(x)
     except: pass
     try: return _cmath.exp(x)
     except: return e**x
 
 def expm1(x, /):
-    try: return _math.exp(x)
+    '''Return e**x-1'''
+    try: return _math.expm1(x)
     except: return exp(x)-1
 
 def sqrt(x, /):
+    '''Return the square root of x'''
     try: return _math.sqrt(x)
     except: pass
     try: return _cmath.sqrt(x)
     except: return rt(2, x)
 
 def isqrt(x, /):
+    '''Return the floored square root of x'''
     try: return _math.isqrt(x)
     except: return floor(sqrt(x))
 
 def cbrt(x, /):
+    '''Return the cube root of x'''
     return rt(3, x)
 
 def icbrt(x, /):
+    '''Return the floored cube root of x'''
     return irt(3, x)
 
 def square(x, /):
+    '''Return x**2'''
     return x*x
 
 def cube(x, /):
+    '''Return x**3'''
     return x*x*x
 
 def tesser(x, /):
+    '''Return x**4'''
     return x*x*x*x
 
 def ln(x, /):
+    '''Return the natural logarithm of x'''
     try: return _math.log(x)
     except: return _cmath.log(x)
 
 def log(x, base = 10, /):
+    '''Return the log base 'base' of x'''
     try: return _math.log(x, base)
     except: return _cmath.log(x, base)
 
 def log2(x, /):
+    '''Return the log base 2 of x'''
     try: return _math.log2(x)
     except: return log(x, 2)
 
 def log1p(x, /):
+    '''Return the natural logarithm of x+1'''
     try: return _math.log1p(x)
     except: return ln(x+1)
 #complex
 
 def phase(z, /):
+    '''Return angle of number'''
     try: return z.__polar__()[1:]
     except:pass
     if _validation.is_float(z): z = float(z)
@@ -446,6 +478,7 @@ def phase(z, /):
     return atan(z.imag/z.real)
 
 def polar(z, /):
+    '''Return a number in polar form'''
     try: return z.__polar__() #Catch a quaternion class.
     except:pass
     if _validation.is_float(z): z = float(z)
@@ -453,6 +486,7 @@ def polar(z, /):
     return (abs(z), _math.atan2(z.imag, z.real))
 
 def rect(r, phi, /):
+    '''Create complex back from polar form'''
     return r*cis(phi)
 
 #trig
@@ -470,69 +504,85 @@ def _changeto(to):
     _angle, _circle = to, _circles[to]
 
 def radians():
+    '''Change setting to radians'''
     _changeto('rad')
 
 def degrees():
+    '''Change setting to degrees'''
     _changeto('deg')
 
 def grad():
+    '''Change setting to grad'''
     _changeto('grad')
 
 def acos(θ, /):
+    '''Return the arc cosine of θ'''
     try: ans = _math.acos(θ)
     except: ans = _cmath.acos(θ)
     return convert(ans, 'rad', _angle)
 
 def acosh(θ, /):
+    '''Return the inverse hyperbolic cosine of θ'''
     try: ans = _math.acosh(θ)
     except: ans = _cmath.acosh(θ)
     return convert(ans, 'rad', _angle)
 
 def asin(θ, /):
+    '''Return the arc sine of θ'''
     try: ans = _math.asin(θ)
     except: ans = _cmath.asin(θ)
     return convert(ans, 'rad', _angle)
 
 def asinh(θ, /):
+    '''Return the inverse hyperbolic sine of θ'''
     try: ans = _math.asinh(θ)
     except: ans = _cmath.asinh(θ)
     return convert(ans, 'rad', _angle)
 
 def atan(θ, /):
+    '''Return the arc tangent of θ'''
     try: ans = _math.atan(θ)
     except: ans = _cmath.atan(θ)
     return convert(ans, 'rad', _angle)
 
 def atanh(θ, /):
+    '''Return the inverse hyperbolic tangent of θ'''
     try: ans = _math.atanh(θ)
     except: ans = _cmath.atanh(θ)
     return convert(ans, 'rad', _angle)
 
 def asec(θ, /):
+    '''Return the arc secant of θ'''
     try: return acos(1/θ)
     except ZeroDivisionError: return nan
 
 def asech(θ, /):
+    '''Return the inverse hyperbolic secant of θ'''
     try: return acosh(1/θ)
     except ZeroDivisionError: return nan
 
 def acsc(θ, /):
+    '''Return the arc cosecant of θ'''
     try: return asin(1/θ)
     except ZeroDivisionError: return nan
 
 def acsch(θ, /):
+    '''Return the inverse hyperbolic cosecant of θ'''
     try: return asinh(1/θ)
     except ZeroDivisionError: return nan
 
 def acot(θ, /):
+    '''Return the arc cotangent of θ'''
     try: return atan(1/θ)
     except ZeroDivisionError: return nan
 
 def acoth(θ, /):
+    '''Return the inverse hyperbolic cotangent of θ'''
     try: return atanh(1/θ)
     except ZeroDivisionError: return nan
 
 def cos(θ, /):
+    '''Return the cosine of θ'''
     try:
         θ = θ%_circle
         qc = _circle/4
@@ -546,11 +596,13 @@ def cos(θ, /):
     except: return _cmath.cos(θ)
 
 def cosh(θ, /):
+    '''Return the hyperbolic cosine of θ'''
     θ = convert(θ, _angle, 'rad')
     try: return _math.cosh(θ)
     except: return _cmath.cosh(θ)
 
 def sin(θ, /):
+    '''Return the sine of θ'''
     try:
         θ = θ%_circle
         qc = _circle/4
@@ -564,11 +616,13 @@ def sin(θ, /):
     except: return _cmath.sin(θ)
 
 def sinh(θ, /):
+    '''Return the hyperbolic sine of θ'''
     θ = convert(θ, _angle, 'rad')
     try: return _math.sinh(θ)
     except: return _cmath.sinh(θ)
 
 def tan(θ, /):
+    '''Return the tangent of θ'''
     try:
         θ = θ%_circle
         qc = _circle/4
@@ -582,35 +636,43 @@ def tan(θ, /):
     except: return _cmath.tan(θ)
 
 def tanh(θ, /):
+    '''Return the hyperbolic tangent of θ'''
     θ = convert(θ, _angle, 'rad')
     try: return _math.tanh(θ)
     except: return _cmath.tanh(θ)
 
 def sec(θ, /):
+    '''Return the secant of θ'''
     try: return 1/cos(θ)
     except ZeroDivisionError: return nan
 
 def sech(θ, /):
+    '''Return the hyperbolic secant of θ'''
     try: return 1/cosh(θ)
     except ZeroDivisionError: return nan
 
 def csc(θ, /):
+    '''Return the cosecant of θ'''
     try: return 1/sin(θ)
     except ZeroDivisionError: return nan
 
 def csch(θ, /):
+    '''Return the hyperbolic cosecant of θ'''
     try: return 1/sinh(θ)
     except ZeroDivisionError: return nan
 
 def cot(θ, /):
+    '''Return the cotangent of θ'''
     try: return 1/tan(θ)
     except ZeroDivisionError: return nan
 
 def coth(θ, /):
+    '''Return the hyperbolic cotangent of θ'''
     try: return 1/tanh(θ)
     except ZeroDivisionError: return nan
 
 def cis(θ, /):
+    '''Return cos(θ) + isin(θ)'''
     return cos(θ)+(1j*sin(θ))
 
 class _experiment:
