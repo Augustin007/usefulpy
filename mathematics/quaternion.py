@@ -46,8 +46,13 @@ RELEASE NOTES:
 __version__ = '2.1.1'
 
 from usefulpy import validation as _validation
-try: from nmath import *
-except: from usefulpy.mathematics.nmath import *
+try:
+    from nmath import *
+    from PrimeComposite import *
+except:
+    from usefulpy.mathematics.nmath import *
+    from usefulpy.mathematics.PrimeComposite import *
+
 
 class quaternion(object):
     '''A quaternion class:
@@ -311,10 +316,8 @@ quaternion'''
             for l in range(int(other)): current *= self
             return quaternion(current)
         if _validation.is_float(other):
-            power, root = makefraction(other).as_integer_ratio()
-            current = 1
-            for l in range(int(power)): current *= self
-            return quaternion(rt(root, current))
+            first, power, root = _validation.flatten((int(other), fraction(str(other-int(other))).as_integer_ratio()))
+            return (self**first)*rt(root, (self**power))
         raise NotImplementedError('Raising quaternions to non-real powers has not been implemented yet')
 
     def __rpow__(other, self, /):
