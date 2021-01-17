@@ -102,7 +102,8 @@ def _output(object, outnum):
 
 
 def IDLE():
-    '''An IDLE for '''
+    '''An IDLE for usefulpy. Returns a dictionary containing all variables
+created during the IDLE (without including internal workings)'''
     In = []
     count_9b134ijhqrg8 = 0
     Out = {}
@@ -110,13 +111,12 @@ def IDLE():
         try:
             #long strings of random characters to prevent accidental overwriting 
             tmpvarofinp_039eifojv1u39fnb = input(f'In [{count_9b134ijhqrg8}]: ').rstrip()
-            while not tmpvarofinp_039eifojv1u39fnb: tmpvarofinp_039eifojv1u39fnb = input(f'In [{count_9b134ijhqrg8}]: ').rstrip()
+            while not tmpvarofinp_039eifojv1u39fnb: tmpvarofinp_039eifojv1u39fnb = input(f'\nIn [{count_9b134ijhqrg8}]: ').rstrip()
             while tmpvarofinp_039eifojv1u39fnb != 'quit()':
                 if tmpvarofinp_039eifojv1u39fnb.endswith(':'):
                     tmpholdervarofobj_012984t099w0vfher8=tmpvarofinp_039eifojv1u39fnb
                     line23_r9j2q0iqenv = ' '*(len(str(count_9b134ijhqrg8))+3)+'--: '
                     tmpvarofinp_039eifojv1u39fnb = input(line23_r9j2q0iqenv)
-                    
                     while tmpvarofinp_039eifojv1u39fnb:
                         tmpholdervarofobj_012984t099w0vfher8 += '\n'+tmpvarofinp_039eifojv1u39fnb
                         tmpvarofinp_039eifojv1u39fnb = input(line23_r9j2q0iqenv).rstrip()
@@ -131,8 +131,8 @@ def IDLE():
                     output1223efresv423 = eval(correctedtext10932jf20h)
                     if output1223efresv423 == None:
                         count_9b134ijhqrg8+=1
-                        tmpvarofinp_039eifojv1u39fnb = input(f'In [{count_9b134ijhqrg8}]: ').rstrip()
-                        while not tmpvarofinp_039eifojv1u39fnb: tmpvarofinp_039eifojv1u39fnb = input(f'In [{count_9b134ijhqrg8}]: ').rstrip()
+                        tmpvarofinp_039eifojv1u39fnb = input(f'\nIn [{count_9b134ijhqrg8}]: ').rstrip()
+                        while not tmpvarofinp_039eifojv1u39fnb: tmpvarofinp_039eifojv1u39fnb = input(f'\nIn [{count_9b134ijhqrg8}]: ').rstrip()
                         continue
                     _output(output1223efresv423, count_9b134ijhqrg8)
                     Out[count_9b134ijhqrg8] = output1223efresv423
@@ -147,10 +147,17 @@ def IDLE():
                         raise_separately(error)
                         time.sleep(1)
                 count_9b134ijhqrg8+=1
-                tmpvarofinp_039eifojv1u39fnb = input(f'In [{count_9b134ijhqrg8}]: ').rstrip()
-                while not tmpvarofinp_039eifojv1u39fnb: tmpvarofinp_039eifojv1u39fnb = input(f'In [{count_9b134ijhqrg8}]: ').rstrip()
-            del tmpvarofinp_039eifojv1u39fnb, _, __, ___, old_n_138f23rfw3
-            del old__n_138f23rfw3, count_9b134ijhqrg8, In, Out, correctedtext10932jf20h
+                tmpvarofinp_039eifojv1u39fnb = input(f'\nIn [{count_9b134ijhqrg8}]: ').rstrip()
+                while not tmpvarofinp_039eifojv1u39fnb: tmpvarofinp_039eifojv1u39fnb = input(f'\nIn [{count_9b134ijhqrg8}]: ').rstrip()
+            del In, Out, tmpvarofinp_039eifojv1u39fnb, count_9b134ijhqrg8
+            try: del correctedtext10932jf20h, output1223efresv423
+            except: pass
+            try: del _
+            except: pass
+            try: del __, old_n_138f23rfw3
+            except: pass
+            try: del ___, old__n_138f23rfw3
+            except: pass
             return locals()
         except BaseException as error:
             raise_separately(error)
