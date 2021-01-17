@@ -1,3 +1,30 @@
+'''
+File: IDLE.py
+Version: 1.1.1
+Author: Austin Garcia
+
+A IDLE for Usefulpy.
+
+LICENSE:
+This is a section of usefulpy. See usefulpy's lisence.md file.
+
+PLATFORMS:
+This is a section of usefulpy. See usefulpy.__init__'s "PLATFORMS" section.
+
+INSTALLATION:
+Put this file where Python can see it.
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+     ——Wednesday the thirteenth of the firstmonth Janurary, 2021——
+   Run IDLE() to use Usefulpy's personal IDLE
+'''
+##Usefulpy 1.2.1
+__version__ = '1.1.1'
+__author__ = 'Austin Garcia'
+
 from usefulpy.mathematics import *
 from usefulpy.validation import *
 from usefulpy.formatting import *
@@ -102,8 +129,17 @@ def _output(object, outnum):
 
 
 def IDLE():
-    '''An IDLE for usefulpy. Returns a dictionary containing all variables
-created during the IDLE (without including internal workings)'''
+    '''An IDLE for usefulpy. Return a dictionary containing all variables
+created during the IDLE (without including internal workings)
+
+Based on ipython...
+A list named In stores all previous inputs.
+A dictionary named Out stores all previous outputs.
+_ refers to previous output
+__ refers to output two previous
+___ refers to output three previous
+naming a variable In or Out may cause Errors
+'''
     In = []
     count_9b134ijhqrg8 = 0
     Out = {}
@@ -168,3 +204,5 @@ if __name__ == '__main__':
     for localvariablename_1093jf32, localvariablevalue_1039jf10fnbc in IDLElocalvariables_120324jw3hngv.items():
         exec(f'{localvariablename_1093jf32} = localvariablevalue_1039jf10fnbc')
     del IDLElocalvariables_120324jw3hngv
+
+#eof
