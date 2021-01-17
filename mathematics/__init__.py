@@ -1,5 +1,5 @@
 '''
-usefulmodules.mathematics
+usefulpy mathematics
 Version: 1.2.3
 Author: Austin Garcia
 
@@ -34,6 +34,8 @@ RELEASE NOTES:
    Several bugfixes, some work on algebraic solver and improvements on eq
   Version 1.2.4
    Heavy improvements in nmath, small bugfixes throughout
+  Version 1.2.5
+   Small improvement throughout.
 
 SECTIONS:
 PrimeComposite v1.1.1
@@ -53,8 +55,11 @@ algebraicsolvers pr 5 (1.1.1)
  Algebraic expressions/algebraic simplification
 quaternion v1.2.2
  a quaternion class
-
 '''
+## Usefulpy 1.2.1
+__version__ = '1.2.5
+__author__ = 'Austin Garcia'
+
 try:
     from PrimeComposite import *
     from nmath import *
