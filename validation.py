@@ -28,9 +28,11 @@ RELEASE NOTES:
     ——Friday, the fifteenth day of the firstmonth Janurary, 2021——
   Code is shorter by about fifty lines, and yet its functionality have
   increased... Simplicity is better! Who knew?
-
 '''
+##Usefulpy 1.2.1
+__author__ = 'Austin Garcia'
 __version__ = '1.2.1'
+
 import datetime
 from collections import namedtuple, deque
 
@@ -54,7 +56,7 @@ losing any value'''
 
 def are_integers(*a):
     '''Return True if is_integer is True for all objects in a'''
-    return False not in (is_integer(s) for s in a)
+    return all(map(is_integer, a))
 
 def intinput(Prompt = '', beginning = '', ending = None, \
              Chastisement = _chastise):
@@ -114,7 +116,7 @@ def is_float(s):
 
 def are_floats(*a):
     '''Return True if is_integer is True for all objects in a'''
-    return False not in (is_float(s) for s in a)
+    return all(map(is_float, a))
 
 def floatinput(Prompt = '', beginning = '', ending = None, \
                Chastisement = _chastise):
@@ -158,15 +160,13 @@ def validinput(validquery, *Prompt, returnclass = str, numinputs = None, \
                ninput = None):
     '''Continue to repeat an input prompt until the prompt is validated by
 validquery'''
-    '''
-    This part is a big mess despite its simple job. there can be multiple
-    prompts at once. and numinputs is the number of inputs... this will overide
-    number of prompts if specified. validquery is the function that returns True
-    when the input is valid, the returnclass is the function or type that
-    the final input is put through. ninput is the type of input required for
-    the arguments and the various input prompts...
-    like I said... big mess
-    '''
+    '''This part is a big mess despite its simple job. there can be multiple
+prompts at once. and numinputs is the number of inputs... this will overide
+number of prompts if specified. validquery is the function that returns True
+when the input is valid, the returnclass is the function or type that
+the final input is put through. ninput is the type of input required for
+the arguments and the various input prompts...
+like I said... big mess'''
     #Making sure there is a prompt (and thus, an input taken)
     if len(Prompt) == 0: Prompt = ('',)
     #if numinputs is not specified
@@ -183,20 +183,27 @@ validquery'''
 
 def isbool(s):
     '''Check if s is a boolean value'''
-    return s in ('True', 'False') if type(s) is str else type(s) is bool
+    n = type(s)
+    return s in ('True', 'False') if n is str else n is bool
 
 def bool(x):
+    '''bool(c) -> bool'''
     return bool({'True':True, 'False':False}.get(x))
 
 def boolinput(Prompt):
+    '''Continue to repeat an input prompt until the input is 'True' or 'False'.'''
     return bool(validation.validinput(is_bool, Prompt))
 
 def fromdatainput(data, prompt = ''):
+    '''Continue to repeat an input prompt until the input is a value from the
+list 'data'.'''
     datum = input(prompt)
     while datum not in data: datum = input(prompt)
     return datum
 
 def multicheck(data, checks, threshhold = 1):
+    '''Check checks on data, threshold is the number of checks that need
+to return a True value'''
     try: data = iter(data)
     except: data = iter((data,))
     try: checks = iter(checks)
@@ -204,11 +211,15 @@ def multicheck(data, checks, threshhold = 1):
     count = 0
     for n in data:
         for c in checks:
-            if c(n): count += 1
-            if count >= threshhold: return True
+            try:
+                if c(n): count += 1
+                if count >= threshhold: return True
+            except: pass
     return False
 
 def multi_in(data1, data2, threshhold = 1):
+    '''Check if any item in data1 is in data2. Threshold is the number of
+matches there has to be'''
     try: data1 = iter(data1)
     except: data1 = iter((data1,))
     try: data2 = iter(data2)
@@ -247,6 +258,7 @@ into a boolean value, this includes variations of Yes and No.'''
 del _chastise
 
 def is_numeric(s):
+    '''Return True if s supports all arithmetic operations.'''
     try:
         s += 1
         s -= 1.0
@@ -281,12 +293,14 @@ def trytype(ntype, *s):
     return s
 
 def is_iterable(n):
+    '''Check if n is iterable'''
     try:
         for l in n: pass
         return True
     except: return False
 
 def flatten(iterable):
+    '''Flatten an iterable into a single dimension'''
     assert is_iterable(iterable)
     itertype = type(iterable)
     new_iterable = []
@@ -298,24 +312,30 @@ def flatten(iterable):
     return itertype(new_iterable)
 
 def tryfloat(s):
+    '''Convert s to a float if is_float(s)'''
     s = tryeval(s)
     try: return float(s)
     except: return s
 
 def tryeval(s):
+    '''Tries to evaluate a string if it is a string. returns input if it cannot
+be evaluated'''
     if type(s) is str:
         try: return eval(s)
         except: return s
     return s
 
 def valideval(s):
+    '''Returns True if a string can be evaluated'''
     if type(s) is str:
         try:
             eval(s)
             return True
         except: return False
     return False
+
 def validexec(s):
+    '''Return True if it can be executed. Note: will trigger the code.'''
     if type(s) is str:
         try:
             exec(s)
@@ -324,22 +344,28 @@ def validexec(s):
     return False
 
 def is_complex(s):
+    '''Return True if s can be interpreted as a complex number'''
+    s = tryeval(s)
     try:
         complex(s)
         return True
     except: return False
 
 def trycomplex(s):
+    '''Tries to convert s into a complex number'''
     s = tryeval(s)
     try: return complex(s)
     except: return s
 
 def trynumber(s):
+    '''Convert it into the simplest of an int, float, or complex'''
     s = tryeval(s)
-    if type(s) in (int, float, complex): return s
+    if type(s) in (int, float, complex): return tryint(s)
     if is_integer(s):
         try: return int(s)
         except: return int(float(s))
     if is_float(s): return float(s)
     if is_complex(s): return complex(s)
     return s
+
+#eof
