@@ -183,7 +183,7 @@ class space(object):
             del self.frozenCanvases[canvas]
             return canvas
         except: pass
-        raise f'canvas {canvas} is not displaying this universe.'
+        raise ValueError(f'canvas {canvas} is not displaying this universe.')
 
     def unfreezecanvas(self, canvas):
         '''unfreeze 3d updates to a canvas'''
@@ -643,6 +643,7 @@ is facing, keeping the z-location still'''
         self._bk(decimal)
     def bk(self, amount, smooth = True, speed = None):
         if smooth: return self._mvbk(amount, speed)
+        return self._bk(amount)
 
     def _mvrt(self, amount, speed = None):
         if speed == 0: return self._rt(amount)
