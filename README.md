@@ -2,7 +2,7 @@
 
 _Usefulpy site has not been updated in a while, it only includes things from 1.1.2 and before_
 
-#A note on documentation
+# A note on documentation
 
 ### Triple quotes:
 
