@@ -56,17 +56,19 @@ algebraicsolvers pr 5 (1.1.1)
 quaternion v1.2.2
  a quaternion class
 '''
-## Usefulpy 1.2.1
-__version__ = '1.2.5
+##UPDATED TO: Usefulpy 1.2.1
+
+### INFO ###
+__version__ = '1.2.5'
 __author__ = 'Austin Garcia'
 
+### IMPORTS ###
 try:
     from PrimeComposite import *
     from nmath import *
     from triangles import *
     from basenum import *
     from eq import *
-    from algebraicsolver import *
     from quaternion import *
 except:
     from usefulpy.mathematics.PrimeComposite import *
@@ -74,7 +76,6 @@ except:
     from usefulpy.mathematics.triangles import *
     from usefulpy.mathematics.basenum import *
     from usefulpy.mathematics.eq import *
-    from usefulpy.mathematics.algebraicsolver import *
     from usefulpy.mathematics.quaternion import *
 
 #eof
