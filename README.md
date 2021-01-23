@@ -41,7 +41,7 @@ from 'quaternion.py'
 ##print(a, b, c, d)
 ```
 
-Triple `###` on each side of the name of a segment of code; these serve to partition the code into several parts. Search for the `###` and to the headers of these sections.
+Triple `###` on each side of the name of a segment of code; these serve to partition the code into several parts. Search for the `###` to find the headers of these sections.
 
 from '__init__.py' for usefulpy
 ```python
