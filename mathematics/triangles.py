@@ -23,7 +23,7 @@ RELEASE NOTES:
    Changed some variable names and importations. More comments.
 
 '''
-
+##UPDATEME: Unreviewed for Usefulpy 1.2.1
 __version__ = '1.1.2'
 
 try: from nmath import *
