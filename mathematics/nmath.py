@@ -43,7 +43,10 @@ RELEASE NOTES:
    Rewrote on another document, cleaning up, improving, and adding functions
    throughout
 '''
-##Usefulpy 1.2.1
+
+##UPDATED TO: Usefulpy 1.2.1
+##TODO: Update for use with quaternions
+
 __version__='3.1.1'
 __author__ = 'Austin Garcia'
 
@@ -52,6 +55,7 @@ from usefulpy import validation as _validation
 from decimal import Decimal as number
 from fractions import Fraction as fraction
 
+import operator as _op
 import cmath as _cmath
 import math as _math
 import json as _json
@@ -215,13 +219,12 @@ def isnan(x, /):
     '''Return True if x is nan in any way'''
     if x in (nan, nanj): return True
     try:
-        if (x.real in nan): return True
-        else: return x.imag in (nan)
+        if x.real == nan: return True
+        else: return x.imag == nan
     except:
-        if x.real in (nan): return True
-        if x.i in (nan): return True
-        if x.j in (nan): return True
-        return x.k in (nan)
+        if x.i == nan: return True
+        if x.j == nan: return True
+        return x.k == nan
 
 def isfinite(x, /):
     '''Return True if x is finite'''
@@ -349,11 +352,23 @@ def summation(start, finish, function = lambda x: x):
         #aproxmiating trigonometric expressions, where it stays (from my
         #observations and experiments) mostly in the 75-100 range before a number
         #is 'too large to convert to a float'.
-        sm = function(start)
-        while True:
+        prev = 10
+        prev1 = 10
+        prev2 = 10
+        change = function(start)
+        sm = 0
+        #print('in')
+        while not all(map(lambda x: abs(x)<1e-25, (change, prev, prev1, prev2))):
             start += 1
-            try: sm += function(start)
+            try:
+                print(sm, '+', change)
+                sm += change
+                prev2 = prev1
+                prev1 = prev
+                prev = change
+                change = function(start)
             except: return sm
+        return sm
     rangelist = list(range(start, finish+1))
     rangelist[0] = function(rangelist[0])
     return _reduce((lambda x, y: x+function(y)), rangelist)
