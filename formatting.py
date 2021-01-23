@@ -32,6 +32,7 @@ RELEASE NOTES:
 '''
 ##UPDATEME: Unreviewed for Usefulpy 1.2.1
 __version__ = '1.2.3'
+__author__ = 'Austin Garcia'
 
 try: import validation as _validation
 except: from usefulpy import validation as _validation
@@ -42,20 +43,21 @@ endingpuncuation = '.?!'
 phrasepuncuation = ',–—()"\';:'
 inwordpunctuation = '-_'
 
-#The letters are in an inconsistant and incorrect order to prevent the attempt
-#to translate 'Upsilon' for example, returning Uψlon, though adding 'lσ'='ς'
-#Uψlon = 'Υ', 'uψlon'='υ', 'Eψlon' ='Ε', 'eψlon' ='ε' may be advisable in a
-#gui environment that translates the letters as they are typed.
+# The letters are in an inconsistant and incorrect order to prevent the attempt
+# to translate 'Upsilon' for example, returning Uψlon, though adding 'lσ'='ς'
+# Uψlon = 'Υ', 'uψlon'='υ', 'Eψlon' ='Ε', 'eψlon' ='ε' may be advisable in a
+# gui environment that translates the letters as they are typed.
 #
-#replacements = formatting.greek_letters
-#replacements['lσ']='ς'
-#replacements['Uψlon']='Υ'
-#replacements['Eψlon']='Ε'
-#replacements[' ']=''
-#replacements['eψlon']='ε'
-#replacements['uψlon']='υ'
+# This is the way I did it.
+# 
+# replacements = formatting.greek_letters
+# replacements['lσ']='ς'
+# replacements['Uψlon']='Υ'
+# replacements['Eψlon']='Ε'
+# replacements['eψlon']='ε'
+# replacements['uψlon']='υ'
 #
-#This is the way I did it.
+
 
 greek_letters = {'alpha': 'α', 'beta': 'β', 'gamma': 'γ', 'delta': 'δ',
                  'epsilon': 'ε', 'zeta': 'ζ', 'theta': 'θ', 'iota': 'ι',
@@ -106,11 +108,12 @@ def multisplit(string, *by, whitespacetoo = False):
     return scour(run)
 
 def translate(string, translater):
-    '''Translate all items in treanslator'''
+    '''Translate all items in translator'''
     for old, new in translater.items(): string=string.replace(old, new)
     return string
 
 def scour(obj, of= ''):
+    '''remove all instances of 'of' from 'obj' '''
     if type(obj) is str:
         if type(of) is str: return obj.replace(of, '')
         for key in of: obj=obj.replace(key, '')
@@ -127,10 +130,7 @@ def scour(obj, of= ''):
             else: obj += 1
         return obj
 
-def unformat(text: str, /, query = 1):
-    '''Remove all capitals from text, strip it of extra spaces, translate
-written-out greek-letters or numbers. Et cetera'''
-    numbers = {
+_numbers={
         'zero': 0,
         'one':1,
         'two':2,
@@ -160,9 +160,7 @@ written-out greek-letters or numbers. Et cetera'''
         'eighty':80,
         'ninety':90
         }
-    hundred = 'hundred'
-    dozen = 'dozen'
-    furtherplaces = {
+_furtherplaces = {
         'thousand': 1000,
         'million': 1000000,
         'billion': 1000000000,
@@ -173,6 +171,13 @@ written-out greek-letters or numbers. Et cetera'''
         'septillion': 1000000000000000000000000,
         'octillion': 1000000000000000000000000000
         }
+def unformat(text: str, /, query = 1):
+    '''Remove all capitals from text, strip it of extra spaces, translate
+written-out greek-letters or numbers. Et cetera'''
+    numbers = _numbers
+    hundred = 'hundred'
+    dozen = 'dozen'
+    furtherplaces=_furtherplaces
     text = text.lower()
     punct = endingpuncuation+phrasepuncuation
     listtext = text.split()
@@ -298,15 +303,7 @@ def write(text):
         floatpart =  text[text.index('.'):]
         return write(intpart) + floatpart
     return text
-
-def ComposeNumber(integer:int):
-    '''
-Converts a number into a string, fails if number is bigger than
-999999999999999999999999999999 (nine hundred ninety nine octillion nine hundred ninety nine septillion nine hundred ninety nine hexillion nine hundred ninety nine quitillion nine hundred ninety nine quatrillion nine hundred ninety nine trillion nine hundred ninety nine billion nine hundred ninety nine million nine hundred ninety nine thousand nine hundred ninety nine)
-
->>> ComposeNumber(100)
-'one hundred\''''
-    Digit = {
+_Digit = {
     '0': '',
     '1': 'one',
     '2': 'two',
@@ -318,7 +315,7 @@ Converts a number into a string, fails if number is bigger than
     '8': 'eight',
     '9': 'nine'
     }
-    tensPlace = {
+_tensPlace = {
     '1': 'ten',
     '2': 'twenty',
     '3': 'thirty',
@@ -329,7 +326,7 @@ Converts a number into a string, fails if number is bigger than
     '8': 'eighty',
     '9': 'ninety'
     }
-    OddOnes = {
+_OddOnes = {
     '11': 'eleven',
     '12': 'twelve',
     '13': 'thirteen',
@@ -340,7 +337,7 @@ Converts a number into a string, fails if number is bigger than
     '18': 'eighteen',
     '19': 'nineteen'
     }
-    LargeGroups = {
+_LargeGroups = {
     '1': 'thousand',
     '2': 'million',
     '3': 'billion',
@@ -351,22 +348,35 @@ Converts a number into a string, fails if number is bigger than
     '8': 'septillion',
     '9': 'octillion',
     }
-    def TensGroup(num):
-        if str(num) in OddOnes: return OddOnes[str(num)]
-        else:
-            if str(num)[0] == '0': return Digit[(str(num)[1])]
-            if str(num)[1] == '0': return tensPlace[(str(num)[0])]
-            return tensPlace[(str(num)[0])] + ' ' + Digit[(str(num)[1])]
-
-    def HundredsGroup(num):
-        num = str(int(num))
-        if int(num) == 0: return ''
-        elif len(str(num)) == 1: return Digit[str(num)]
-        elif len(str(num)) == 2: return TensGroup(num)
-        elif len(str(num)) == 3:
-            if str(num)[1:] == '00': return Digit[(str(num)[0])] + ' hundred'
-            return Digit[(str(num)[0])] + ' hundred ' + TensGroup((str(num)[1:]))
+def _TensGroup(num):
+    if str(num) in OddOnes: return OddOnes[str(num)]
+    else:
+        if str(num)[0] == '0': return Digit[(str(num)[1])]
+        if str(num)[1] == '0': return tensPlace[(str(num)[0])]
+        return tensPlace[(str(num)[0])] + ' ' + Digit[(str(num)[1])]
+def _HundredsGroup(num):
+    num = str(int(num))
+    if int(num) == 0: return ''
+    elif len(str(num)) == 1: return Digit[str(num)]
+    elif len(str(num)) == 2: return TensGroup(num)
+    elif len(str(num)) == 3:
+        if str(num)[1:] == '00': return Digit[(str(num)[0])] + ' hundred'
+        return Digit[(str(num)[0])] + ' hundred ' + TensGroup((str(num)[1:]))
     
+
+def ComposeNumber(integer:int):
+    '''
+Converts a number into a string, fails if number is bigger than
+999999999999999999999999999999 (nine hundred ninety nine octillion nine hundred ninety nine septillion nine hundred ninety nine hexillion nine hundred ninety nine quitillion nine hundred ninety nine quatrillion nine hundred ninety nine trillion nine hundred ninety nine billion nine hundred ninety nine million nine hundred ninety nine thousand nine hundred ninety nine)
+
+>>> ComposeNumber(100)
+'one hundred\''''
+    Digit=_Digit
+    tensPlace=_tensPlace
+    OddOnes=_OddOnes
+    LargeGroups=_LargeGroups
+    TensGroup=_TensGroup
+    HundredsGroup=_HundredsGroup
     strint = str(integer)
     Places = len(strint)
     
@@ -394,10 +404,7 @@ Converts a number into a string, fails if number is bigger than
             strint = strint[3:]
         else: raise ValueError('Number is bigger that 999999999999999999999999999999')
     return ' '.join(Number.split()) #Gets rid of any extra spaces
-
-def Syllables(word:str):
-    """ Count syllables in word/phrase"""
-    alphabet = {
+_alphabet = {
     'a': 'V',
     'b': 'C',
     'c': 'C',
@@ -425,8 +432,7 @@ def Syllables(word:str):
     'y': 'Y',
     'z': 'C'
     }
-
-    special = {
+_special = {
     'hundred': 2,
     'ambiguities': 5,
     'ambiguity':5,
@@ -440,6 +446,11 @@ def Syllables(word:str):
     'hundreds':2,
     'nineties': 2
     }
+def Syllables(word:str):
+    """ Count syllables in word/phrase"""
+    alphabet=_alphabet
+    special=_special
+    
     word = str(word).lower().strip() #makes it more uniform
 
     try: word = ComposeNumber(int(float(word)))
@@ -489,6 +500,8 @@ def Syllables(word:str):
     
     return SyllCount
 
+
+## TODO: colors can be improved severely.
 class colors:
 	'''Colors class:reset all colors with colors.reset; two subclasses:
 fg for foreground and bg for background; use as colors.subclass.colorname. 
@@ -528,49 +541,34 @@ i.e. colors.bold'''
 		cyan='\033[46m'
 		lightgrey='\033[47m'
 
-_hasbeenwarned = False
-_m = __name__
-def WarnOnce():
-    global _hasbeenwarned
-    if not _hasbeenwarned and _m == '__main__':
-        warnings.warn(NotImplementedError('Multline string is in progress: Expect errors and bugs'))
-        _hasbeenwarned = True
-
-#NOT FINISHED, in progress
+##UNFINISHED: Finish by 1.2.2
+##PREREQUISITE1.2.2: Finish multline object
 class multline(object):
     '''multi line string character stuff... in progress'''
     def __init__(self, *strings):
-        WarnOnce()
         self.height = len(strings)
         self.width = max([len(str(x)) for x in strings])
         self.strings = [str(x).center(self.width) for x in strings]
 
     def __repr__(self):
-        WarnOnce()
         return '\n'.join(map(repr, self.strings))
 
     def __str__(self):
-        WarnOnce()
         return '\n'.join(self.strings)
 
     def getwidth(self):
-        WarnOnce()
         return self.width
 
     def getheight(self):
-        WarnOnce()
         return self.height
 
     def getrow(self, line=0):
-        WarnOnce()
         return self.strings[line]
 
     def getcolumn(self, line=0):
-        WarnOnce()
         return '/n'.join([x[line] for x in self.strings])
 
     def extend(self, other, center = None):
-        WarnOnce()
         if self.__class__ != other.__class__:
             raise TypeError('other must be a multline class')
         height1 = self.height
@@ -597,8 +595,8 @@ class multline(object):
                 except: second = ' '*other.width
                 new.append(first+second)
             return multline(*new)
-        print(height1)
-        print(height2)
+        ##print(height1)
+        ##print(height2)
         if center not in range(height1): raise ValueError
         def halves(num):
             def odd(num): return num%2 != 0
@@ -612,7 +610,7 @@ class multline(object):
         newheightfromcenter = max(heightfromcenter, Halves[1])
         offset1 = 0
         offset2 = 0
-        print(Halves)
+        ##print(Halves)
         if center>Halves[0]: offset1=center-Halves[0]
         elif center<Halves[0]: offset2 = Halves[0]-center
         objcenter = max(center, Halves[0])
@@ -621,8 +619,8 @@ class multline(object):
         seconds = other.strings
         new = []
         for num in range(newheight+1):
-            print('num1:', (num-offset1))
-            print('num2:', (num-offset2))
+            ##print('num1:', (num-offset1))
+            ##print('num2:', (num-offset2))
             
             try:
                 if num-offset1<0: raise Exception
@@ -636,12 +634,10 @@ class multline(object):
         return multline(*new)
 
     def __add__(self, other):
-        WarnOnce()
         if type(other) is str: other = self.__class__(other)
         return self.extend(other)
 
     def __radd__(other, self):
-        WarnOnce()
         if type(self) is str: self = other.__class__(self)
         return self.extend(other)
 
