@@ -21,7 +21,8 @@ RELEASE NOTES:
    Basenum class can hold a number in a certain counting system
 
 '''
-
+##UPDATEME: Unreviewed for Usefulpy 1.2.1
+__author__ = 'Austin Garcia'
 __version__ = '1.1.1'
 
 try: from nmath import *
