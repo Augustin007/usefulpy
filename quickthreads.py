@@ -1,16 +1,19 @@
 from _thread import *
-from threading import *
+from threading import Thread
 import time
 import warnings
 
-#if __name__ != '__name__': warnings.warn(Warning('This is not a completed code'))
+##TODO: Document code
+##PREREQUISITE1.2.2: quickthreads 1.1.1
+
+#if __name__ != '__main__': warnings.warn(Warning('This is not a completed code'))
 # It is incomplete but the functions are useable, so ...
 
 def _raise(error):
     raise error
 
 def raise_separately(error):
-    nthread = Thread(target=_raise, args=(error))
+    nthread = Thread(target=_raise, args=(error,))
     nthread.start()
 
 def run_in_thread(func, *args, **kwargs):
