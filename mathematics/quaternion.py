@@ -1,6 +1,6 @@
 '''
 File: quaternion.py
-Version: 1.2.1
+Version: 2.1.2
 Author: Austin Garcia
 
 a quaternion class
@@ -42,10 +42,13 @@ RELEASE NOTES:
    improved __pow__ somewhat, still has problems (gah!)
    improved look of repr and str.
 '''
+##UPDATED TO: Usefulpy 1.2.1
 
-__version__ = '2.1.1'
+__author__ = 'Austin Garcia'
+__version__ = '2.1.2'
 
 from usefulpy import validation as _validation
+from usefulpy.IDLE import _usefulpy_correct_syntax
 try:
     from nmath import *
     from PrimeComposite import *
@@ -65,7 +68,7 @@ class quaternion(object):
     def __new__(cls, a = None, b = None, c = None, d = None):
         '''__new__ for quaternion class, works well (hopefully) for most
 variations of input'''
-        #print(a, b, c, d)
+        ##print(a, b, c, d)
 
         self = super(quaternion, cls).__new__(cls)
         
@@ -114,12 +117,12 @@ variations of input'''
         qsum = 0
 
         for multer, num in zip((1, i, j, k), (a, b, c, d)):
-            #print(qsum)
+            ##print(qsum)
             qsum += multer*num
 
         return qsum
 
-    # ====================== Miscelaneous =======================
+    ### Miscelaneous ###
 
     def vector(self, /):
         '''return self as a vector in a tuple'''
@@ -160,7 +163,7 @@ quaternion'''
         theta3 = atan(self.k/hypot(self.real, self.i, self.j))
         return (r, theta1, theta2, theta3)
 
-    # ================ Conversion to other types ================
+    ### Conversion to other types ###
 
     def __complex__(self, /):
         '''return complex(self) if j and k are empty'''
@@ -184,6 +187,7 @@ quaternion'''
 
     def __str__(self, /):
         '''str(self)'''
+        if self == 0: return '0'
         List = [self.real, self.i, self.j, self.k]
         nList = List.copy()
         List = list(map(str, List))
@@ -198,6 +202,7 @@ quaternion'''
 
     def __repr__(self, /):
         '''IDLE representation'''
+        if self == 0: return '(0)'
         List = [self.real, self.i, self.j, self.k]
         nList = List.copy()
         List = list(map(str, List))
@@ -216,7 +221,7 @@ quaternion'''
     def __getnewargs__(self, /):
         return self.real, self.i, self.j, self.k
 
-    # ================== Arithmetic Operators ===================
+    ### Arithmetic Operators ###
 
     def __abs__(self, /):
         '''return abs(self)'''
@@ -318,15 +323,33 @@ quaternion'''
         if _validation.is_float(other):
             first, power, root = _validation.flatten((int(other), fraction(str(other-int(other))).as_integer_ratio()))
             return (self**first)*rt(root, (self**power))
+        
+        ##TODO: I need to get log/ln for these first...
         raise NotImplementedError('Raising quaternions to non-real powers has not been implemented yet')
 
-    def __rpow__(other, self, /):
+    def __rpow__(self, other, /):
         '''return other**self'''
-        try:
-            other = _validation.trynumber(complex(other))
-            self**other
-        except: pass
-        raise NotImplementedError('Raising things to quaternions has not been implimented yet.')
+        #okay, I know math... so I can figure this out! I think:
+        #My thought process is such:
+        # e**n = 1+x+x^2/2!+x^3/3!...
+        # so o**s = e**(ln(o)*s)
+        num = ln(other)*self
+        # Here the comparison of two versions: 
+        # The left one is my method
+        # The right one is python's built in method for
+        # the identical complex method
+        # ((1.5384778027279444+1.277922552627269i), (1.5384778027279442+1.2779225526272695j))
+        def iteration(x):
+            if x == 0: return 1
+            return (num**x)/factorial(x)
+        return summation(0, inf, iteration)
+        ##raise NotImplementedError('Raising things to quaternions has not been implimented yet.')
+
+    def __mod__(self, other):
+        return self-((self//other)*other)
+
+    def __rmod__(other, self):
+        return self-((self//other)*other)
 
     def __divmod__(self, other, /):
         return (self//other, self%other)
@@ -340,39 +363,51 @@ quaternion'''
     def __pos__(self, /):
         return self
 
-    # ================== Comparison Operators ===================
+    ### Comparison Operators ###
 
     def __eq__(self, other, /):
         '''return self==other'''
-        if type(other) != self.__class__: other = self.__class__(other)
-        if self.real != other.real: return False
-        if self.i != other.i: return False
-        if self.j != other.j: return False
-        return self.k == other.k
+        try:
+            if type(other) != self.__class__: other = self.__class__(other)
+            if self.real != other.real: return False
+            if self.i != other.i: return False
+            if self.j != other.j: return False
+            return self.k == other.k
+        except: return False
 
     def __ne__(self, other, /):
         '''return self != other'''
         return not self == other
 
     def __ge__(self, other, /):
-        return int(self)>=int(other)
+        return float(self)>=float(other)
 
     def __le__(self, other, /):
-        return int(self)<=int(other)
+        return float(self)<=float(other)
 
     def __lt__(self, other, /):
-        return int(self)<int(other)
+        return float(self)<float(other)
 
     def __gt__(selt, other, /):
-        return int(self)>int(other)
+        return float(self)>float(other)
 
-    # ===========================================================
-
-    # __hash__ still needs to be implimented
+    ## TODO: __hash__ still needs to be implimented
 
 i = quaternion(b = 1)
 j = quaternion(c = 1)
 k = quaternion(d = 1)
+ij = i*j
+ik = i*k
+ji = j*i
+jk = j*k
+ki = k*i
+kj = k*j
+ijk = i*j*k
+ikj = i*k*j
+jik = j*i*k
+jki = j*k*i
+kij = k*i*j
+kji = k*j*i
 tesseract = 1+i+j+k
 
 def hyperrect(r, theta1, theta2, theta3):
@@ -383,21 +418,9 @@ def hyperrect(r, theta1, theta2, theta3):
     return quaternion(real, i, j, k)
 
 def fromstring(string):
-    string = string.replace('i', '*i')
-    string = string.replace('+*i', '+i')
-    string = string.replace('/*i', '/i')
-    string = string.replace('**i', '*i')
-    string = string.replace('-*i', '-i')
-    string = string.replace('j', '*j')
-    string = string.replace('+*j', '+j')
-    string = string.replace('/*j', '/j')
-    string = string.replace('**j', '*j')
-    string = string.replace('-*j', '-j')
-    string = string.replace('k', '*k')
-    string = string.replace('+*k', '+k')
-    string = string.replace('/*k', '/k')
-    string = string.replace('**k', '*k')
-    string = string.replace('-*k', '-k')
-    return quaternion(eval(string))
+    string = _usefulpy_correct_syntax(string)
+    try: return quaternion(eval(string))
+    except: pass
+    return ValueError('String does not represent a quaternion')
 
 #eof
