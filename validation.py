@@ -29,7 +29,7 @@ RELEASE NOTES:
   Code is shorter by about fifty lines, and yet its functionality have
   increased... Simplicity is better! Who knew?
 '''
-##Usefulpy 1.2.1
+##UPDATED TO: Usefulpy 1.2.1
 __author__ = 'Austin Garcia'
 __version__ = '1.2.1'
 
