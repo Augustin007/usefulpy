@@ -22,12 +22,18 @@ RELEASE NOTES:
   Version 1.1.2
    Some bug fixes and implementation of __pow__
 '''
-##Usefulpy 1.1.2
+##UPDATED TO: Usefulpy 1.2.1
+##PREREQUISITE1.2.2: basenum 1.2.1
+
+### INFO ###
 __version__ = '1.1.2'
 __author__ = 'Austin Garcia'
 
+### IMPORTS ###
 from usefulpy import validation as _validation
 
+
+### BASENUM ###
 def fromNumBaseFormat(text):
     '''return a basenum from text:
 >>> fromNumBaseFormat('14_5')
@@ -44,8 +50,10 @@ def fromNumBaseFormat(text):
 
 class basenum(object):
     '''Stores numbers of different bases'''
-    def __init__(self, strint, base = 10):
-        '''__init__ for basenum class:
+
+    ### INITIALIZING ###
+    def __new__(cls, strint, base = 10):
+        '''__new__ for basenum class:
 >>> x = basenum('3a2', 16)
 >>> x
 3a2₁₆
@@ -57,6 +65,8 @@ class basenum(object):
 >>> int(y)
 465
 >>> '''
+        self = super(basenum, cls).__new__(cls)
+        
         if 'e' in strint and base == 10:
             nindex = strint.index('e')
             before = strint[:nindex]
@@ -99,7 +109,9 @@ class basenum(object):
         else: self.floatpart = ''
         self.base = base
         self.num = strint
+        return self
 
+    ### Conversions ###
     def __float__(self):
         '''return float(self)'''
         decimal, num, base, floatpart = 0, self.num, self.base, self.floatpart
@@ -151,6 +163,7 @@ class basenum(object):
         if self.Negative: strint = '-'+strint
         return basenum(strint, base)
 
+    ### ARITHMETIC OPERATIONS ###
     def __add__(self, other):
         '''return self+other'''
         decanum = float(self) + float(other)
@@ -204,7 +217,44 @@ class basenum(object):
 
     def __rtruediv__(other, self):
         '''return self/other'''
-        return _validation.tryint(float(self)/float(other))
+        return float(self)/float(other)
+
+    def __abs__(self):
+        '''return the abs(self)'''
+        return abs(float(self))
+
+    def floor(self):
+        if not self.Negative:
+            return int(self)
+        else:
+            if is_integer(self):
+                return int(self)
+            return int(self)-1
+        
+    def ceil(self):
+        if self.Negative:
+            return int(self)
+        else:
+            if is_integer(self):
+                return int(self)
+            return int(self)+1
+
+    def __floordiv__(self, other):
+        self = self/other
+        return floor(self)
+
+    def __rfloordiv__(self, other):
+        self = other/self
+        return floor(self)
+
+    def __gcd__(self, other, /):
+        return findgcd(self, other)
+
+    def __rgcd__(self, other, /):
+        return self.__gcd__(other)
+    
+
+    ### COMPARISON OPERATOR ###
 
     def __lt__(self, other):
         '''return self<other'''
