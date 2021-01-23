@@ -1,5 +1,5 @@
 '''
-usefulmodules
+usefulpy
 Version: 1.1.1
 Author: Austin Garcia
 
@@ -39,16 +39,55 @@ mathematics v1.2.3
 
 '''
 
+##Not ready for 1.2.1
+
+### INFO ###
+__author__ = 'Austin Garcia'
 __version__ = '1.1.2'
 
+### IMPORT ###
 try: import validation, formatting, mathematics, quickthreads
 except: from usefulpy import validation, formatting, mathematics, quickthreads
-
-import warnings
-
 try: from IDLE import IDLE
 except: from usefulpy.IDLE import IDLE
 
 if __name__ == '__main__': IDLE()
+
+### TO DO ###
+# BEFORE ANY UPDATE:
+# Check docstrings, 
+#
+# BEFORE UPDATE 1.2.1:
+# Any tag '##PREREQUISITE1.2.1:' or '##PREREQUISITE1.2:'
+# Update code tagged with '##UPDATEME' for usefulpy 1.2.1
+# 
+# OTHER:
+# Finish any code tagged with '##UNFINISHED' by the
+# prerequisite time
+# 
+# Any tag with TODO, FIXME, or BUG
+#
+#
+# FUTURE PLANS:
+# a 'typecast' object/function that moves a variable to c++
+
+### CURRENTLY WORKING ON ###
+# eq 3.1.1 –Austin Garcia
+
+### UPDATE FORMAT ###
+# x.y.z
+# There is no 0, updates start at 1
+# (so no 1.0.0, but 1.1.1)
+#
+# An update to z means refers to small changes, fixed bugs
+# Improved performance, etc.
+#
+# An update to y refers to larger changes that include adding functions
+# or changing their jobs
+#
+# An update to z refers to the entire code rewritten on a new file.
+
+### BUGS ###
+#
 
 #eof
