@@ -56,8 +56,12 @@ RELEASE NOTES:
  2.2
   2.2.1
    Calculus foundations being laid... adding the 'derivate'
+  2.2.2
 '''
-
+##UPDATEME: Unreviewed for Usefulpy 1.2.1
+##TODO: Update for use with eval.
+##PREREQUISITE1.2.1: 3.1.1
+__author__ = 'Austin Garcia'
 __version__ = '2.1.6'
 
 try: from nmath import *
@@ -80,7 +84,7 @@ translations = {'cos':'\\cos ', 'sin':'\\sin ', 'tan':'\\tan ', 'sec':'\\sec ',
                 'ψ': '\x0epsi ', '**':'^', '\\sq\\rt':'\\sqrt', '\\cb\\rt':'\\cbrt',
                 'floor':'\\floor ', 'c\x0ee il':'\\ceil ', 'd\x0ee rivat\x0ee ':'\\derivate ',
                 '\\s\x0ee c':'\\sec ', '\\arcsec ':'\\arcs\x0ee c '}
-#fixme. not updated to new variables in nmath
+
 constants = {'\x0epi': π, '\x0etau': τ, '\x0ee': e, '\x0ephi': φ, '\x0elphi': φ_,
              '\x0erho': ρ, '\x0ekappa': κ,
              '\x0epsi': ψ}
@@ -98,8 +102,6 @@ operations = '^+-*/'
 implied = 'im*'
 
 fns = {}
-
-
 
 def create(text):
     if type(text) == eq:
@@ -476,6 +478,7 @@ create this from *input* which is what makes it useful'''
                             break
                     elif prev == '-' and _validation.is_float(x):
                         Nlist[count-1, count] = [-x]
+                        break
                     count += 1
                     prev = x
                 else: break
