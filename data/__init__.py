@@ -1,3 +1,7 @@
+
+##UNFINISHED: finish for Usefulpy 1.3
+##PREREQUISITE1.3:
+
 from random import *
 
 def lowbias(low, high):
