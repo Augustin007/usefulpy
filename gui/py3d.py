@@ -62,7 +62,11 @@ RELEASE NOTES:
    this is a placeholder for the actual shading abilities.
 
 '''
+
+###
+
 import time
+__author__ = 'Austin Garcia'
 __version__ = '2.2.2'
 from usefulpy.mathematics.nmath import *
 import usefulpy.validation as _validation
@@ -72,6 +76,8 @@ from collections import namedtuple
 Point3d = namedtuple('Point3d', ('x', 'y', 'z'))
 Point2d = namedtuple('Point2d', ('x', 'y'))
 
+
+### SPACE ###
 class space(object):
     '''Spaces store information about canvases, cameras, and figures'''
     def __init__(self):
@@ -200,8 +206,10 @@ def Distance(a, b):
     '''distance for tuples/Point3d/Point2d objects'''
     return hypot(*[x - y for x, y in zip(a, b)])
 
+### CAMERA ###
 class _camera(object):
     '''Camera for a space'''
+    ### INITIALIZATION ###
     def __init__(self, universe, fov=0.5, x=0, y=0, z=0, thetax=0, thetaz=0, visible=False, shape=None, renderdistance=12):
         assert type(universe) is space
         assert _validation.is_float(x)
@@ -238,8 +246,9 @@ class _camera(object):
         self.movspeed = 0.01
         self._precompute() #computations
 
-    #def addobject(self, obj): #These will use project1.
-    #    self.objects.append(obj)
+    ## TODO: add personal object stuff
+    ##def addobject(self, obj): #These will use project1.
+    ##    self.objects.append(obj)
 
     def _precompute(self):
         '''stuff its going to use tons of times so I might as well calculate
@@ -268,8 +277,7 @@ class _camera(object):
         if self.runningCanvases: self.universe._recieve_update_msg()
         
 
-    #Rotations
-    #rs (rotation section) = self.pre[n]*([d]-self.[d]3)
+    ### PASSING POINTS ###
 
     def _xr(self, x, y):
         '''x rotation of point'''
@@ -381,7 +389,9 @@ class _camera(object):
         x, y, z = point
         pt2ds = self._project1(x, y, z)
         if pt2ds is None: return
-        return rescale(pt2s, at)        
+        return rescale(pt2s, at)
+
+    ### CHANGING ASPECTS ###
 
     def tiltup(self, degrees):
         '''tilt camera up degrees'''
@@ -571,6 +581,7 @@ is facing, keeping the z-location still'''
         self.z = to
         self._precompute()
 
+    ### USE ###
     def __repr__(self):
         '''__repr__ for cam'''
         return f'<(py3d._camera at {self.pos}, facing: ({self.thetax}, {self.thetaz}), field of vision (fov): {self.fov}, render distance: {self.renderdistance}>'
@@ -580,6 +591,7 @@ is facing, keeping the z-location still'''
         if self.shape: return self.shape.__iter__()
         return ().__iter__()
 
+    ### MOVEMENT ###
     def spinrt(self, amount):
         final = amount-int(amount)
         for x in range(int(amount)):
@@ -870,9 +882,8 @@ is facing, keeping the z-location still'''
     def fdxy(self, amount, smooth = True, speed = None):
         if smooth: return self._mvfdxy(amount, speed)
         return self._fdxy(amount)
-        
-        
 
+### FIGURES ###
 class figure3d(object):
     '''3d figure for a space, built of figure2d3ds
 Polygons do not need to be perfectly closed, but it is recommended
@@ -1014,6 +1025,8 @@ def rescale(point, to):
 
     return Point2d(x, y)
 
+
+### FUNCTION ###
 _tstcnv = tkinter.Canvas()
 def make_rectangular_prism(point1, point2, *colors):
     assert len(colors)<= 6
@@ -1046,6 +1059,8 @@ def make_rectangular_prism(point1, point2, *colors):
         )
     return rectangular_prism
 
+
+### MINI-DRIVER ###
 def _main():
     '''this acts as a mini-driver.'''
     from usefulpy.gui import Frame
@@ -1101,9 +1116,3 @@ def _main():
 if __name__ == '__main__':
     import tkinter
     _main()
-
-
-    
-
-
-
