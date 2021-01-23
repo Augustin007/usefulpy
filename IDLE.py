@@ -21,21 +21,21 @@ RELEASE NOTES:
      ——Wednesday the thirteenth of the firstmonth Janurary, 2021——
    Run IDLE() to use Usefulpy's personal IDLE
 '''
+
+
+
 ##UPDATED TO: Usefulpy 1.2.1
 
 __version__ = '1.1.1'
 __author__ = 'Austin Garcia'
 
+from runpy import run_path as run
 from usefulpy.mathematics import *
 from usefulpy.validation import *
 from usefulpy.formatting import *
 from usefulpy.quickthreads import *
-#import threading
-#import time
 
-#eventually will catch other stuff.
-
-_hold = object()
+##_hold = object()
 def _usefulpy_correct_syntax(scource):
     if '"""' in scource or "'''" in scource:
         inchar = ''
