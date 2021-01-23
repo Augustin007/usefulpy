@@ -21,7 +21,8 @@ RELEASE NOTES:
      ——Wednesday the thirteenth of the firstmonth Janurary, 2021——
    Run IDLE() to use Usefulpy's personal IDLE
 '''
-##Usefulpy 1.2.1
+##UPDATED TO: Usefulpy 1.2.1
+
 __version__ = '1.1.1'
 __author__ = 'Austin Garcia'
 
@@ -98,30 +99,42 @@ def _usefulpy_correct_syntax(scource):
             eschar = (char == '\\')
         if runstr: lscource.append(runstr)
         return scource if len(lscource) == 1 else ''.join(map(_usefulpy_correct_syntax, lscource))
+    if ',' in scource:
+        nscource = translate(scource, {'{':'\\{\\', '[':'\\[\\', '(':'\\(\\', '}':'\\}\\', ']':'\\]\\', ')':'\\)\\', ',':'\\,\\'})
+        separated = multisplit(nscource, '\\')
+        nstr = ''
+        for n in separated:
+            if n in ('{', '[', '(', '}', ']', ')', ','):
+                nstr += n
+                continue
+            nstr += _usefulpy_correct_syntax(n)
+        return nstr
     tmp = translate(scource, {'+':'\\+\\', '-':'\\-\\', '/':'\\/\\',
-                              '*':'\\*\\', '(':'\\(\\', ')':'\\)\\'})
+                              '*':'\\*\\', '(':'\\(\\', ')':'\\)\\',
+                              '{':'\\{\\', ')':'\\}\\',
+                              '[':'\\[\\', ')':'\\]\\'})
     ltmp = multisplit(tmp, '\\', whitespacetoo = True)
     qdict = {}
-    for num, var in enumerate(ltmp):
+    for var in ltmp:
         if is_integer(var[0]):
+            #TODO: multireplace translator from formatting
             string = var
-            string = string.replace('i', '*i')
-            string = string.replace('+*i', '+i')
-            string = string.replace('/*i', '/i')
-            string = string.replace('**i', '*i')
-            string = string.replace('-*i', '-i')
-            string = string.replace('j', '*j')
-            string = string.replace('+*j', '+j')
-            string = string.replace('/*j', '/j')
-            string = string.replace('**j', '*j')
-            string = string.replace('-*j', '-j')
-            string = string.replace('k', '*k')
-            string = string.replace('+*k', '+k')
-            string = string.replace('/*k', '/k')
-            string = string.replace('**k', '*k')
-            string = string.replace('-*k', '-k')
+            string = translate(string, {'i':'*i', 'j':'*j', 'k':'*k'})
             qdict[var] = string
-    return translate(scource, qdict)
+    new = translate(scource, qdict)
+    if '/0' in new:
+        tmp = translate(scource, {'+':'\\+\\', '-':'\\-\\',
+                                  '*':'\\*\\', '(':'\\(\\', ')':'\\)\\',
+                                  '{':'\\{\\', ')':'\\}\\',
+                                  '[':'\\[\\', ')':'\\]\\'})
+        ltmp = multisplit(tmp, '\\', whitespacetoo = True)
+        qdict = {}
+        for n in ltmp:
+            if '/0' in n:
+                qdict[n] = 'nan'
+        new = translate(scource, qdict)
+    return new
+        
 
 def _output(object, outnum):
     if object is None: return
@@ -140,6 +153,8 @@ __ refers to output two previous
 ___ refers to output three previous
 naming a variable In or Out may cause Errors
 '''
+    
+    
     In = []
     count_9b134ijhqrg8 = 0
     Out = {}
@@ -159,12 +174,15 @@ naming a variable In or Out may cause Errors
                     tmpvarofinp_039eifojv1u39fnb = tmpholdervarofobj_012984t099w0vfher8
                 In.append(tmpvarofinp_039eifojv1u39fnb)
                 correctedtext10932jf20h = _usefulpy_correct_syntax(tmpvarofinp_039eifojv1u39fnb)
+
                 try:
                     try:
                         old_n_138f23rfw3 = _
                         old__n_138f23rfw3 = __
                     except: pass
+                    
                     output1223efresv423 = eval(correctedtext10932jf20h)
+
                     if output1223efresv423 == None:
                         count_9b134ijhqrg8+=1
                         tmpvarofinp_039eifojv1u39fnb = input(f'\nIn [{count_9b134ijhqrg8}]: ').rstrip()
@@ -178,6 +196,7 @@ naming a variable In or Out may cause Errors
                         ___ = old__n_138f23rfw3
                     except: pass
                 except BaseException as error:
+                    #print(error)
                     try: exec(correctedtext10932jf20h)
                     except BaseException as error:
                         raise_separately(error)
