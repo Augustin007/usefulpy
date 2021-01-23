@@ -263,10 +263,10 @@ class math_tuple(tuple):
     def __rpow__(self, other):
         '''Return other**self'''
         return math_tuple([other**n for n in self])
-    def floor(self):
+    def __floor__(self):
         '''Return floor(self)'''
         return math_tuple([floor(n) for n in self])
-    def ceil(self):
+    def __ceil__(self):
         '''Return ceil(self)'''
         return math_tuple([ceil(n) for n in self])
 
@@ -322,7 +322,7 @@ def floor(x, /):
         else:
             return int(x) if _validation.is_integer(x) else int(x) - 1
     except:pass #lower nesting
-    return floor(x.real) + floor(x.imag)*1j if type(x) is complex else x.floor()
+    return floor(x.real) + floor(x.imag)*1j if type(x) is complex else x.__floor__()
 
 def ceil(x, /):
     '''Return the ceil of x'''
@@ -331,7 +331,7 @@ def ceil(x, /):
             return int(x) if _validation.is_integer(x) else int(x) + 1
         else: return int(x)
     except: pass
-    return ceil(x.real) + ceil(x.imag)*1j if type(x) is complex else x.ceil()
+    return ceil(x.real) + ceil(x.imag)*1j if type(x) is complex else x.__ceil__()
 
 def convert(value, frm, to):
     '''Convert value from 'frm' units to 'to' units.'''
@@ -343,32 +343,30 @@ def convert(value, frm, to):
 #miscillaneous
 def summation(start, finish, function = lambda x: x):
     '''Σ'''
-    if finish == inf: #This is not true infinite summation, but it does give an
-        #approximation, (this does mean that it can be stuck in an infinite
-        #loop... not yet sure how to counter this accurately and efficiently.
-        #but eventually a number gets to big or to small for python to handle
-        #This temporary version is mostly for a few _experimental functions
-        #(see line 584) which uses this to simulate an infinite taylor series
-        #aproxmiating trigonometric expressions, where it stays (from my
-        #observations and experiments) mostly in the 75-100 range before a number
-        #is 'too large to convert to a float'.
-        prev = 10
-        prev1 = 10
-        prev2 = 10
-        change = function(start)
-        sm = 0
-        #print('in')
-        while not all(map(lambda x: abs(x)<1e-25, (change, prev, prev1, prev2))):
-            start += 1
-            try:
-                print(sm, '+', change)
-                sm += change
-                prev2 = prev1
-                prev1 = prev
-                prev = change
-                change = function(start)
-            except: return sm
-        return sm
+    if finish == inf:
+        try:
+            # This is not true infinite summation, but it does give an
+            # approximation, (this does mean that it can be stuck in an infinite
+            # loop... not yet sure how to counter this accurately and efficiently.
+            # but eventually a number gets to big or to small for python to handle
+            prev = 10
+            prev1 = 10
+            prev2 = 10
+            change = function(start)
+            sm = 0
+            ##print('in')
+            while not all(map(lambda x: abs(x)<1e-25, (change, prev, prev1, prev2))):
+                start += 1
+                try:
+                    ##print(sm, '+', change)
+                    sm += change
+                    prev2 = prev1
+                    prev1 = prev
+                    prev = change
+                    change = function(start)
+                except: return sm
+            return sm
+        except: return sm
     rangelist = list(range(start, finish+1))
     rangelist[0] = function(rangelist[0])
     return _reduce((lambda x, y: x+function(y)), rangelist)
@@ -466,7 +464,9 @@ def tesser(x, /):
 def ln(x, /):
     '''Return the natural logarithm of x'''
     try: return _math.log(x)
-    except: return _cmath.log(x)
+    except: pass
+    try: return _cmath.log(x)
+    except: raise Exception
 
 def log(x, base = 10, /):
     '''Return the log base 'base' of x'''
@@ -712,5 +712,20 @@ class _experiment:
         def tan(theta, /):
             def iteration(n):
                 pass
+
+        def ln(x):
+            if x == 1: return 0
+            if x == 2: return 0.6931471805599453
+            if x == 1j: return 1.5707963267948966j
+            if type(x) is complex:
+                
+            def iteration(n):
+                if n == 0: return 0
+                return -((x**n)/n)
+            if abs(x)<2:
+                x = -x+1
+                return summation(0, inf, iteration)
+            else:
+                return 0.6931471805599453+_experiment.t.ln(x/2)
 
 #eof
