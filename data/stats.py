@@ -1,3 +1,5 @@
+##UNFINISHED: finish for Usefulpy 1.3
+##PREREQUISITE1.3:
 
 import math
 import numbers
