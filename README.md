@@ -1,6 +1,6 @@
 [Check out the Usefulpy site](https://augustin007.github.io/usefulpy/)
 
-_Usefulpy site has not been updated in a while, it only includes things from 1.1.2 and before_
+_Usefulpy site is only updated on releases, it only includes things from 1.1.2 and before_
 
 # A note on documentation
 
