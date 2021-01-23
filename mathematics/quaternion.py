@@ -144,15 +144,18 @@ variations of input'''
         '''return gcd of self'''
         return findgcd(self.real, self.i, self.j, self.k)
 
-    def floor(self, /):
+    def __floor__(self, /):
         '''return a quaternion composed only of integers and i, j, and k
 (closer to zero)'''
         return quaternion(floor(self.real), floor(self.i), floor(self.j), floor(self.k))
 
-    def ceil(self, /):
+    def __ceil__(self, /):
         '''return a quaternion composed only of integers and i, j, and k
 (farther to zero)'''
         return quaternion(ceil(self.real), ceil(self.i), ceil(self.j), ceil(self.k))
+
+    def __trunc__(self, /):
+        return quaternion(self.real.__trunc__(), self.i.__trunc__(), self.j.__trunc__(), self.k.__trunc__())
 
     def polar(self, /):
         '''the distance and three angles from 0 that can represent the
