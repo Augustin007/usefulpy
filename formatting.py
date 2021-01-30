@@ -30,7 +30,9 @@ RELEASE NOTES:
   Version 1.2.3
    More bug fixes
 '''
-##UPDATEME: Unreviewed for Usefulpy 1.2.1
+
+##UPDATED TO: Usefulpy 1.2.1
+
 __version__ = '1.2.3'
 __author__ = 'Austin Garcia'
 
@@ -87,7 +89,7 @@ def a_an(nextword):
 
 def punctuate(n, witha = '.'):
     '''adds a punctuation, strips of old punctuation'''
-    if witha not in endingpuncuation: raise ValueError
+    if witha not in endingpuncuation: raise ValueError(f'{witha} not in {endingpuncuation}')
     n.rstrip(endingpuncuation)
     n += witha
     return n
