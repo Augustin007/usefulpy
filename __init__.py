@@ -69,10 +69,10 @@ if __name__ == '__main__': IDLE()
 #
 #
 # FUTURE PLANS:
-# a 'typecast' object/function that moves a variable to c++
+# a 'typecast' object/function that moves a variable/operation to c++
 
 ### CURRENTLY WORKING ON ###
-# eq 3.1.1 –Austin Garcia
+# Usefulpy IDLE 2.1.1
 
 ### UPDATE FORMAT ###
 # x.y.z
