@@ -41,6 +41,9 @@ RELEASE NOTES:
   Version 2.1.2
    improved __pow__ somewhat, still has problems (gah!)
    improved look of repr and str.
+ 2.2
+  Version 2.2.1
+   __pow__, __rpow__, __ln__, and __log__ are working.
 '''
 ##UPDATED TO: Usefulpy 1.2.1
 
@@ -55,7 +58,6 @@ try:
 except:
     from usefulpy.mathematics.nmath import *
     from usefulpy.mathematics.PrimeComposite import *
-
 
 class quaternion(object):
     '''A quaternion class:
@@ -75,14 +77,13 @@ variations of input'''
         if a == None: a = 0
 
         if b == None and c == None and d == None:
-            
             if type(a) is quaternion:
                 self.real = _validation.trynumber(a.real)
                 self.i = _validation.trynumber(a.i)
                 self.j = _validation.trynumber(a.j)
                 self.k = _validation.trynumber(a.k)
                 return self
-            if type(a) is complex:
+            if _validation.is_complex(a):
                 self.real = _validation.trynumber(a.real)
                 self.i = _validation.trynumber(a.imag)
                 self.j = 0
@@ -94,10 +95,16 @@ variations of input'''
                 self.j = 0
                 self.k = 0
                 return self
-            if type(a) is str: return fromstring(a)
-            if isinf(a):
-                pass
-            raise TypeError
+            if type(a) is str:
+                try: return quaternion(fromstring(a))
+                except: pass
+                raise ValueError('quaternion() arg is a malformed string')
+            try:
+                q = a.__quaternion__()
+                if type(q) is quaternion: return q
+                else: raise TypeError(f'__quaternion__ method returned a non-quaternion type: (type {type(q)})')
+            except: pass
+            raise TypeError('A quaternion could not be made from a type {type(a)}')
 
         if b == None: b = 0
         if c == None: c = 0
@@ -144,20 +151,17 @@ variations of input'''
         '''return gcd of self'''
         return findgcd(self.real, self.i, self.j, self.k)
 
-    def __floor__(self, /):
+    def floor(self, /):
         '''return a quaternion composed only of integers and i, j, and k
 (closer to zero)'''
         return quaternion(floor(self.real), floor(self.i), floor(self.j), floor(self.k))
 
-    def __ceil__(self, /):
+    def ceil(self, /):
         '''return a quaternion composed only of integers and i, j, and k
 (farther to zero)'''
         return quaternion(ceil(self.real), ceil(self.i), ceil(self.j), ceil(self.k))
 
-    def __trunc__(self, /):
-        return quaternion(self.real.__trunc__(), self.i.__trunc__(), self.j.__trunc__(), self.k.__trunc__())
-
-    def polar(self, /):
+    def __polar__(self, /):
         '''the distance and three angles from 0 that can represent the
 quaternion'''
         r = hypot(self.real, self.i, self.j, self.k)
@@ -166,13 +170,25 @@ quaternion'''
         theta3 = atan(self.k/hypot(self.real, self.i, self.j))
         return (r, theta1, theta2, theta3)
 
+    def __phase__(self, /):
+        theta1 = atan(self.i/self.real)
+        theta2 = atan(self.j/hypot(self.i, self.real))
+        theta3 = atan(self.k/hypot(self.real, self.i, self.j))
+        return (theta1, theta2, theta3)
+
+    def __ln__(x, /):
+        return ln(abs(x))+(x.v()/abs(x.v())*acos(x.real/abs(x)))
+
+    def __log__(self, other):
+        return ln(self)/ln(other)
+
     ### Conversion to other types ###
 
     def __complex__(self, /):
         '''return complex(self) if j and k are empty'''
         if self.j != 0: return
         if self.k != 0: return
-        return complex(self.real, self.i)
+        return _old_complex(self.real, self.i)
 
     def __int__(self, /):
         '''return int(self) if i, j, and k are empty'''
@@ -219,6 +235,7 @@ quaternion'''
         return '('+'+'.join(List).replace('+-', '-')+')'
 
     def __bool__(self, /):
+        '''return False if self is 0, return True otherwise'''
         return self != 0
 
     def __getnewargs__(self, /):
@@ -326,15 +343,21 @@ quaternion'''
         if _validation.is_float(other):
             first, power, root = _validation.flatten((int(other), fraction(str(other-int(other))).as_integer_ratio()))
             return (self**first)*rt(root, (self**power))
-        
-        ##TODO: I need to get log/ln for these first...
-        raise NotImplementedError('Raising quaternions to non-real powers has not been implemented yet')
 
+        ##raise NotImplementedError('Raising quaternions to non-real powers has not been implemented yet
+
+        ##TODO: test this!
+        num = ln(self) * other
+        def iteration(x):
+            if x == 0: return 1
+            return (num**x)/factorial(x)
+        return summation(0, inf, iteration)
+        
     def __rpow__(self, other, /):
         '''return other**self'''
-        #okay, I know math... so I can figure this out! I think:
-        #My thought process is such:
-        # e**n = 1+x+x^2/2!+x^3/3!...
+        # okay, I know math... so I can figure this out! I think:
+        # My thought process is such:
+        # e**n = x^0/0!+x^1/1!+x^2/2!+x^3/3!...
         # so o**s = e**(ln(o)*s)
         num = ln(other)*self
         # Here the comparison of two versions: 
@@ -344,9 +367,10 @@ quaternion'''
         # ((1.5384778027279444+1.277922552627269i), (1.5384778027279442+1.2779225526272695j))
         def iteration(x):
             if x == 0: return 1
+            if x == 1: return num
             return (num**x)/factorial(x)
         return summation(0, inf, iteration)
-        ##raise NotImplementedError('Raising things to quaternions has not been implimented yet.')
+        ## raise NotImplementedError('Raising things to quaternions has not been implimented yet.')
 
     def __mod__(self, other):
         return self-((self//other)*other)
@@ -391,27 +415,14 @@ quaternion'''
     def __lt__(self, other, /):
         return float(self)<float(other)
 
-    def __gt__(selt, other, /):
+    def __gt__(self, other, /):
         return float(self)>float(other)
+
+    def v(self):
+        return quaternion(0, self.i, self.j, self.k)
 
     ## TODO: __hash__ still needs to be implimented
 
-i = quaternion(b = 1)
-j = quaternion(c = 1)
-k = quaternion(d = 1)
-ij = i*j
-ik = i*k
-ji = j*i
-jk = j*k
-ki = k*i
-kj = k*j
-ijk = i*j*k
-ikj = i*k*j
-jik = j*i*k
-jki = j*k*i
-kij = k*i*j
-kji = k*j*i
-tesseract = 1+i+j+k
 
 def hyperrect(r, theta1, theta2, theta3):
     real = r*cos(theta1)*cos(theta2)*cos(theta3)
@@ -425,5 +436,9 @@ def fromstring(string):
     try: return quaternion(eval(string))
     except: pass
     return ValueError('String does not represent a quaternion')
+
+j = quaternion(c = 1)
+k = quaternion(d = 1)
+tesseract = 1+i+j+k
 
 #eof
