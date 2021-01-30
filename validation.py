@@ -32,7 +32,7 @@ RELEASE NOTES:
 ##UPDATED TO: Usefulpy 1.2.1
 __author__ = 'Austin Garcia'
 __version__ = '1.2.1'
-
+import sys
 import datetime
 from collections import namedtuple, deque
 
@@ -334,10 +334,17 @@ def valideval(s):
         except: return False
     return False
 
+class _empty:
+    def write(*args, **kwargs): pass
+
 def validexec(s):
     '''Return True if it can be executed. Note: will trigger the code.'''
     if type(s) is str:
         try:
+            out = sys.stdout
+            in_ = sys.stdin
+            sys.stdout = _empty()
+            sys.stdout = _empty()
             exec(s)
             return True
         except: return False
@@ -368,4 +375,5 @@ def trynumber(s):
     if is_complex(s): return complex(s)
     return s
 
+    
 #eof
