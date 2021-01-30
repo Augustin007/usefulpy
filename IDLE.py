@@ -35,6 +35,28 @@ from usefulpy.validation import *
 from usefulpy.formatting import *
 from usefulpy.quickthreads import *
 
+def _get_index(str, index):
+    try: return str.index(index)
+    except: return None
+
+def _get_max_index(str, *indeces):
+    if not indeces: return None
+    lstr = []
+    for n in indeces:
+        l = _get_index(str, n)
+        if l == None: continue
+        lstr.append(l)
+    return max(lstr)
+
+def _get_min_index(str, *indeces):
+    if not indeces: return None
+    lstr = []
+    for n in indeces:
+        l = _get_index(str, n)
+        if l == None: continue
+        lstr.append(l)
+    return min(lstr)
+
 ##_hold = object()
 def _usefulpy_correct_syntax(scource):
     if '"""' in scource or "'''" in scource:
@@ -100,6 +122,48 @@ def _usefulpy_correct_syntax(scource):
         if runstr: lscource.append(runstr)
         return scource if len(lscource) == 1 else ''.join(map(_usefulpy_correct_syntax, lscource))
     if ',' in scource:
+        
+        isin = False
+        inout = {'{':'}', '[':']', '(':')'}
+        depth = 0
+        wayout = []
+        runlist = []
+        runstr = ''
+        currentiter = ''
+        for n in scource:
+            if n in ('{', '[', '('):
+                if not isin:
+                    runlist.append(_usefulpy_correct_syntax(runstr))
+                    runlist.append(n)
+                    runstr = ''
+                    isin = True
+                    wayout.append(inout[n])
+                    depth = 1
+                    continue
+                wayout.append(inout[n])
+                depth += 1
+                runstr+=n
+                continue
+            if isin:
+                if n == wayout[-1]:
+                    wayout.pop(-1)
+                    depth -= 1
+                    if not depth:
+                        
+                        runlist.append(_usefulpy_correct_syntax(runstr))
+                        runlist.append(n)
+                        runstr = ''
+                        isin = False
+                        continue
+                runstr+=n
+                continue
+            if n == ',':
+                runlist.append(_usefulpy_correct_syntax(runstr))
+                runlist.append(',')
+                runstr = ''
+                continue
+            runstr+=n
+        if runstr: runlist.append(_usefulpy_correct_syntax(runstr))
         nscource = translate(scource, {'{':'\\{\\', '[':'\\[\\', '(':'\\(\\', '}':'\\}\\', ']':'\\]\\', ')':'\\)\\', ',':'\\,\\'})
         separated = multisplit(nscource, '\\')
         nstr = ''
@@ -122,16 +186,18 @@ def _usefulpy_correct_syntax(scource):
             string = translate(string, {'i':'*i', 'j':'*j', 'k':'*k'})
             qdict[var] = string
     new = translate(scource, qdict)
-    if '/0' in new:
+    if '/' in new:
         tmp = translate(scource, {'+':'\\+\\', '-':'\\-\\',
-                                  '*':'\\*\\', '(':'\\(\\', ')':'\\)\\',
-                                  '{':'\\{\\', ')':'\\}\\',
-                                  '[':'\\[\\', ')':'\\]\\'})
-        ltmp = multisplit(tmp, '\\', whitespacetoo = True)
+                                  '*':'\\*\\'})
+        print(tmp)
+        ltmp = tmp.split('\\')
+        print(ltmp)
         qdict = {}
         for n in ltmp:
-            if '/0' in n:
-                qdict[n] = 'nan'
+            if '/' in n:
+                top, bottom = n.split('/')
+                if eval(bottom) == 0:
+                    qdict[n] = 'nan'
         new = translate(scource, qdict)
     return new
         
@@ -180,7 +246,7 @@ naming a variable In or Out may cause Errors
                         old_n_138f23rfw3 = _
                         old__n_138f23rfw3 = __
                     except: pass
-                    
+                    ##print(correctedtext10932jf20h)
                     output1223efresv423 = eval(correctedtext10932jf20h)
 
                     if output1223efresv423 == None:
