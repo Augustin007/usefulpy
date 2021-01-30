@@ -67,7 +67,6 @@ from math import nextafter, perm, prod, remainder, trunc, ulp
 
 dirlist = __file__.split(_os.sep)
 dirlist[-1] = 'Conversions.json'
-
 _conversions_file_name = _os.sep.join(dirlist)
 
 #Some of the values here are not acurate enough for perfect use
@@ -78,19 +77,128 @@ def _reduce(function, sequence):
     for element in it: value = function(value, element)
     return value
 
+_old_int = int
+_old_float = float
+_old_complex = complex
+_old_str = str
+_old_range = range
 
+def range(*args):
+    return _old_range(*map(_validation.tryint, args))
+
+class _int(_old_int):
+    __add__ = lambda x, y: num(_old_int.__add__(x, y))
+    __sub__ = lambda x, y: num(_old_int.__sub__(x, y))
+    __mul__ = lambda x, y: num(_old_int.__mul__(x, y))
+    def __truediv__(x, y):
+        try: return num(_old_int.__truediv__(x, y))
+        except ZeroDivisionError: return float('nan')
+    def __rtruediv__(x, y):
+        try: return num(_old_int.__rtruediv__(x, y))
+        except ZeroDivisionError: return float('nan')
+    __radd__ = lambda x, y: num(_old_int.__radd__(x, y))
+    __rsub__ = lambda x, y: num(_old_int.__rsub__(x, y))
+    __rmul__ = lambda x, y: num(_old_int.__rmul__(x, y))
+    __pow__ = lambda x, y: num(_old_int.__pow__(x, y))
+    __rpow__ = lambda x, y: num(_old_int.__rpow__(x, y))
+    __call__ = __mul__
+
+def int(x, base=10):
+    x=_validation.tryint(_validation.tryeval(x))
+    return _int(x)
+
+class _float(_old_float):
+    __add__ = lambda x, y: num(_old_float.__add__(x, y))
+    __sub__ = lambda x, y: num(_old_float.__sub__(x, y))
+    __mul__ = lambda x, y: num(_old_float.__mul__(x, y))
+    def __truediv__(x, y):
+        try: return num(_old_float.__truediv__(x, y))
+        except ZeroDivisionError: return float('nan')
+    def __rtruediv__(x, y):
+        try: return num(_old_float.__rtruediv__(x, y))
+        except ZeroDivisionError: return float('nan')
+    __radd__ = lambda x, y: num(_old_float.__radd__(x, y))
+    __rsub__ = lambda x, y: num(_old_float.__rsub__(x, y))
+    __rmul__ = lambda x, y: num(_old_float.__rmul__(x, y))
+    __pow__ = lambda x, y: num(_old_float.__pow__(x, y))
+    __rpow__ = lambda x, y: num(_old_float.__rpow__(x, y))
+    __call__ = __mul__
+
+def float(x=0, /):
+    x=_validation.tryfloat(_validation.tryeval(x))
+    return _float(x)
+
+class _complex(_old_complex):
+    __add__ = lambda x, y: num(_old_complex.__add__(x, y))
+    __sub__ = lambda x, y: num(_old_complex.__sub__(x, y))
+    __mul__ = lambda x, y: num(_old_complex.__mul__(x, y))
+    def __truediv__(x, y):
+        try: return num(_old_complex.__truediv__(x, y))
+        except ZeroDivisionError:
+            if all((x.imag, x.real)): return complex('nan+nanj')
+            elif x.imag: return complex('nanj')
+            else: return float('nan')
+    def __rtruediv__(x, y):
+        if type(y) == _old_int: return int(y)/x
+        return num(_old_complex.__rtruediv__(x, y))
+    __radd__ = lambda x, y: num(_old_complex.__radd__(x, y))
+    __rsub__ = lambda x, y: num(_old_complex.__rsub__(x, y))
+    __rmul__ = lambda x, y: num(_old_complex.__rmul__(x, y))
+    __pow__ = lambda x, y: num(_old_complex.__pow__(x, y))
+    __rpow__ = lambda x, y: num(_old_complex.__rpow__(x, y))
+
+    def _rep(x):
+        if all((x.imag, x.real)): return f'({num(x.real)}+{num(x.imag)}i)'
+        if x.imag: return f'({num(x.imag)}i)'
+        else: return f'({num(x.real)})'
+    __repr__ = __str__ = _rep
+    del _rep
+    __call__ = __mul__
+
+def complex(real=0, imag=0):
+    
+    if type(real) is str: real=_validation.tryeval(real.replace('j', '\\').replace('i', 'j').replace('jnf', 'inf'))
+    if type(imag) is str: imag=_validation.tryeval(imag.replace('j', '\\').replace('i', 'j').replace('jnf', 'inf'))
+    
+    try: x =_old_complex(real, imag)
+    except: x = _validation.trycomplex(real)
+    return _complex(x)
+
+i = complex(imag = 1)
+
+def trynumber(s):
+    s = _validation.trynumber(s)
+    if type(s) is str:
+        try: return quaternion(s)
+        except: return s
+    return s
+
+def num(x):
+    if type(x) is str:
+        t=x.replace('j', '\\').replace('i', 'j').replace('//', 'i')
+        t=trynumber(t)
+        if type(t) is not str: x = t
+    else:
+        x = trynumber(x)
+    if type(x) is _old_float:
+        return float(x)
+    if type(x) is _old_int:
+        return int(x)
+    if type(x) is _old_complex:
+        return complex(x)
+    return x
 
 inf = float('inf')
 neg_inf = -inf
-infj = complex('infj')
-neg_infj = -infj
-nanj = complex('nanj')
+infi = complex('infi')
+neg_infi = -infi
+nani = complex('nani')
 nan = float('nan')
 
 
-# Our irrationals
+### Non-Algebraic Numbers ###
 
-# more digits than it will store... so the most accurate possible
+# way more digits than it will store... so the most accurate possible
 # I originially had it be calculated with formulae, (averaging the leibniz
 # and basil approach with odd numbers for pi) but I decided that this
 # was more efficient and more accurate (I kept on adjusting the numbers to get
@@ -103,7 +211,7 @@ e = 2.71828182845904523536028747135266249775724709369995957496696762772407663035
 # τ, ratio of diameter to circumference in circle
 τ = tau = 2*pi
 
-#Algebraic numbers
+### Algebraic numbers ###
 
 # φ
 #
@@ -185,9 +293,7 @@ _sum = (1+_a+_b)
 #Number of sets of symmetries in the largest finite group of sets of symmetries
 monster = 808017424794512875886459904961710757005754368000000000
 
-Avogadro = 6.02214076e+23
-
-#checks
+### checks ###
 def odd(num, /):
     '''Return True if num is odd'''
     return num%2 != 0
@@ -230,45 +336,49 @@ def isfinite(x, /):
     '''Return True if x is finite'''
     return not (isnan(x) or isinf(x))
 
-#Broadening abilities
-class math_tuple(tuple):
+### Broadening abilities ###
+_old_tuple = tuple
+class tuple(_old_tuple):
     '''A tuple modified for math work'''
     def __add__(self, other):
         '''Return self+other'''
-        return math_tuple([n+other for n in self])
+        return tuple([n+other for n in self])
     def __radd__(self, other):
         '''Return other+self'''
-        return math_tuple([other+n for n in self])
+        return tuple([other+n for n in self])
     def __sub__(self, other):
         '''Return self-other'''
-        return math_tuple([n-other for n in self])
+        return tuple([n-other for n in self])
     def __rsub__(self, other):
         '''Return other-self'''
-        return math_tuple([other-n for n in self])
+        return tuple([other-n for n in self])
     def __mul__(self, other):
         '''Return self*other'''
-        return math_tuple([n*other for n in self])
+        return tuple([n*other for n in self])
     def __rmul__(self, other):
         '''Return other*self'''
-        return math_tuple([other*n for n in self])
+        return tuple([other*n for n in self])
     def __truediv__(self, other):
         '''Return self/other'''
-        return math_tuple([n/other for n in self])
+        return tuple([n/other for n in self])
     def __rtruediv__(self, other):
         '''Return other/self'''
-        return math_tuple([other/n for n in self])
+        return tuple([other/n for n in self])
     def __pow__(self, other):
         '''Return self**other'''
-        return math_tuple([n**other for n in self])
+        return tuple([n**other for n in self])
     def __rpow__(self, other):
         '''Return other**self'''
-        return math_tuple([other**n for n in self])
+        return tuple([other**n for n in self])
     def __floor__(self):
         '''Return floor(self)'''
-        return math_tuple([floor(n) for n in self])
+        return tuple([floor(n) for n in self])
     def __ceil__(self):
         '''Return ceil(self)'''
-        return math_tuple([ceil(n) for n in self])
+        return tuple([ceil(n) for n in self])
+    def flatten(self):
+        '''flatten into 1 dimension'''
+        return _validation.flatten(self)
 
 _setting = 'approx'
 _mathfuncs = {}
@@ -308,12 +418,12 @@ def add_mathfunc(name, approx, exact, *argnames):
 
     
     tmp = mathfunc(name, approx, exact)
-    exec(f'global {name}\n{name} = tmp')
+    globals()[name]=tmp
     return tmp
 
 def pm(a, b):
     '''Return a ± b'''
-    return math_tuple((a+b, a-b))
+    return tuple((a+b, a-b))
 
 def floor(x, /):
     '''Return the floor of x'''
@@ -340,7 +450,7 @@ def convert(value, frm, to):
     valuefrm, valueto = eval(conversions[frm]['value']), eval(conversions[to]['value'])
     return _validation.trynumber((value/valuefrm)*valueto)
 
-#miscillaneous
+### miscillaneous ###
 def summation(start, finish, function = lambda x: x):
     '''Σ'''
     if finish == inf:
@@ -376,7 +486,7 @@ def sigmoid(x, /):
     epow = exp(-x)
     return 1/(1+epow)
 
-#powers and exponents
+### powers and exponents ###
 def rt(nth, of):
     '''Find the nth root of (n must be an integer)'''
     assert _validation.is_integer(nth)
@@ -463,15 +573,26 @@ def tesser(x, /):
 
 def ln(x, /):
     '''Return the natural logarithm of x'''
-    try: return _math.log(x)
-    except: pass
-    try: return _cmath.log(x)
-    except: raise Exception
+    x = trynumber(x)
+    if _validation.is_float(x):
+        return _math.log(x)
+    elif _validation.is_complex(x):
+        return _cmath.log(x)
+    else:
+        try: return x.__ln__()
+        except: pass
+        try: return x.__log__(e)
+        except: pass
+    raise TypeError
 
 def log(x, base = 10, /):
     '''Return the log base 'base' of x'''
     try: return _math.log(x, base)
-    except: return _cmath.log(x, base)
+    except: pass
+    try: return _cmath.log(x, base)
+    except: pass
+    try: x.__log__(base)
+    except: pass
 
 def log2(x, /):
     '''Return the log base 2 of x'''
@@ -482,15 +603,16 @@ def log1p(x, /):
     '''Return the natural logarithm of x+1'''
     try: return _math.log1p(x)
     except: return ln(x+1)
-#complex
+
+### complex ###
 
 def phase(z, /):
     '''Return angle of number'''
-    try: return z.__polar__()[1:]
+    try: return z.__phase__()
     except:pass
-    if _validation.is_float(z): z = float(z)
+    if _validation.is_float(z):z=float(z)
     z = complex(z)
-    return atan(z.imag/z.real)
+    return (_math.atan2(z.imag, z.real),)
 
 def polar(z, /):
     '''Return a number in polar form'''
@@ -504,7 +626,7 @@ def rect(r, phi, /):
     '''Create complex back from polar form'''
     return r*cis(phi)
 
-#trig
+### trig ###
 _circles = {
     'rad': tau,
     'deg': 360,
@@ -530,7 +652,7 @@ def grad():
     '''Change setting to grad'''
     _changeto('grad')
 
-def acos(θ, /):
+def acos(θ, /, setting = None):
     '''Return the arc cosine of θ'''
     try: ans = _math.acos(θ)
     except: ans = _cmath.acos(θ)
@@ -714,18 +836,26 @@ class _experiment:
                 pass
 
         def ln(x):
+            x = _validation.trynumber(x)
             if x == 1: return 0
             if x == 2: return 0.6931471805599453
-            if x == 1j: return 1.5707963267948966j
-            if type(x) is complex:
-                
+            ##print('a')
+            if not _validation.is_numeric(x): raise TypeError(f'Value {x} is not a numeric value (a numeric type is any which supports all arithmetic operations with int, float, and complex')
+            if type(x) not in (int, float) or x < 0:
+                ##print('b')
+                ##print(abs(x))
+                args = (_experiment.t.ln(abs(x)), *phase(x))
+                ##print(args)
+                try: return complex(*args)
+                except: return x.__class__(*args)
+            if abs(x) >=2: return 0.6931471805599453+_experiment.t.ln(x/2)
+            
+            ##print('a')
             def iteration(n):
                 if n == 0: return 0
                 return -((x**n)/n)
-            if abs(x)<2:
-                x = -x+1
-                return summation(0, inf, iteration)
-            else:
-                return 0.6931471805599453+_experiment.t.ln(x/2)
+            x = -x+1
+            return summation(0, inf, iteration)
+                
 
 #eof
