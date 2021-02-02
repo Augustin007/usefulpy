@@ -42,14 +42,23 @@ RELEASE NOTES:
      ——Wednesday, the thirteenth day of the firstmonth Janurary, 2021——
    Rewrote on another document, cleaning up, improving, and adding functions
    throughout
+  Version 3.2.2
+   Small bugfixes
+ 3.2
+  Version 3.2.1
+  ...
 '''
 
 ##UPDATED TO: Usefulpy 1.2.1
 ##TODO: Update for use with quaternions
 
+
+### HEADERS ###
 __version__='3.1.1'
 __author__ = 'Austin Garcia'
 
+
+### IMPORTS ###
 from usefulpy import validation as _validation
 
 from decimal import Decimal as number
@@ -61,138 +70,31 @@ import math as _math
 import json as _json
 import os as _os
 
-from math import comb, copysign, dist, erf, erfc, expm1, fabs, factorial
-from math import fmod, frexp, fsum, gamma, hypot, ldexp, lgamma, modf
+from math import comb, copysign, dist, erf, erfc, fabs, factorial
+from math import fmod, fsum, gamma, hypot, lgamma, modf
 from math import nextafter, perm, prod, remainder, trunc, ulp
 
-dirlist = __file__.split(_os.sep)
-dirlist[-1] = 'Conversions.json'
-_conversions_file_name = _os.sep.join(dirlist)
-
-#Some of the values here are not acurate enough for perfect use
+### CONVERSIONS ###
+_dirlist = __file__.split(_os.sep)
+_dirlist[-1] = 'Conversions.json'
+_conversions_file_name = _os.sep.join(_dirlist)
 conversions = _json.loads(open(_conversions_file_name).read())
 
+##TODO: Update values for better use
+#Some of the values here are not acurate enough for perfect use
+
+
+### Support
 def _reduce(function, sequence):
     it = iter(sequence); value = next(it)
     for element in it: value = function(value, element)
     return value
 
-_old_int = int
-_old_float = float
-_old_complex = complex
-_old_str = str
-_old_range = range
-
-def range(*args):
-    return _old_range(*map(_validation.tryint, args))
-
-class _int(_old_int):
-    __add__ = lambda x, y: num(_old_int.__add__(x, y))
-    __sub__ = lambda x, y: num(_old_int.__sub__(x, y))
-    __mul__ = lambda x, y: num(_old_int.__mul__(x, y))
-    def __truediv__(x, y):
-        try: return num(_old_int.__truediv__(x, y))
-        except ZeroDivisionError: return float('nan')
-    def __rtruediv__(x, y):
-        try: return num(_old_int.__rtruediv__(x, y))
-        except ZeroDivisionError: return float('nan')
-    __radd__ = lambda x, y: num(_old_int.__radd__(x, y))
-    __rsub__ = lambda x, y: num(_old_int.__rsub__(x, y))
-    __rmul__ = lambda x, y: num(_old_int.__rmul__(x, y))
-    __pow__ = lambda x, y: num(_old_int.__pow__(x, y))
-    __rpow__ = lambda x, y: num(_old_int.__rpow__(x, y))
-    __call__ = __mul__
-
-def int(x, base=10):
-    x=_validation.tryint(_validation.tryeval(x))
-    return _int(x)
-
-class _float(_old_float):
-    __add__ = lambda x, y: num(_old_float.__add__(x, y))
-    __sub__ = lambda x, y: num(_old_float.__sub__(x, y))
-    __mul__ = lambda x, y: num(_old_float.__mul__(x, y))
-    def __truediv__(x, y):
-        try: return num(_old_float.__truediv__(x, y))
-        except ZeroDivisionError: return float('nan')
-    def __rtruediv__(x, y):
-        try: return num(_old_float.__rtruediv__(x, y))
-        except ZeroDivisionError: return float('nan')
-    __radd__ = lambda x, y: num(_old_float.__radd__(x, y))
-    __rsub__ = lambda x, y: num(_old_float.__rsub__(x, y))
-    __rmul__ = lambda x, y: num(_old_float.__rmul__(x, y))
-    __pow__ = lambda x, y: num(_old_float.__pow__(x, y))
-    __rpow__ = lambda x, y: num(_old_float.__rpow__(x, y))
-    __call__ = __mul__
-
-def float(x=0, /):
-    x=_validation.tryfloat(_validation.tryeval(x))
-    return _float(x)
-
-class _complex(_old_complex):
-    __add__ = lambda x, y: num(_old_complex.__add__(x, y))
-    __sub__ = lambda x, y: num(_old_complex.__sub__(x, y))
-    __mul__ = lambda x, y: num(_old_complex.__mul__(x, y))
-    def __truediv__(x, y):
-        try: return num(_old_complex.__truediv__(x, y))
-        except ZeroDivisionError:
-            if all((x.imag, x.real)): return complex('nan+nanj')
-            elif x.imag: return complex('nanj')
-            else: return float('nan')
-    def __rtruediv__(x, y):
-        if type(y) == _old_int: return int(y)/x
-        return num(_old_complex.__rtruediv__(x, y))
-    __radd__ = lambda x, y: num(_old_complex.__radd__(x, y))
-    __rsub__ = lambda x, y: num(_old_complex.__rsub__(x, y))
-    __rmul__ = lambda x, y: num(_old_complex.__rmul__(x, y))
-    __pow__ = lambda x, y: num(_old_complex.__pow__(x, y))
-    __rpow__ = lambda x, y: num(_old_complex.__rpow__(x, y))
-
-    def _rep(x):
-        if all((x.imag, x.real)): return f'({num(x.real)}+{num(x.imag)}i)'
-        if x.imag: return f'({num(x.imag)}i)'
-        else: return f'({num(x.real)})'
-    __repr__ = __str__ = _rep
-    del _rep
-    __call__ = __mul__
-
-def complex(real=0, imag=0):
-    
-    if type(real) is str: real=_validation.tryeval(real.replace('j', '\\').replace('i', 'j').replace('jnf', 'inf'))
-    if type(imag) is str: imag=_validation.tryeval(imag.replace('j', '\\').replace('i', 'j').replace('jnf', 'inf'))
-    
-    try: x =_old_complex(real, imag)
-    except: x = _validation.trycomplex(real)
-    return _complex(x)
-
-i = complex(imag = 1)
-
-def trynumber(s):
-    s = _validation.trynumber(s)
-    if type(s) is str:
-        try: return quaternion(s)
-        except: return s
-    return s
-
-def num(x):
-    if type(x) is str:
-        t=x.replace('j', '\\').replace('i', 'j').replace('//', 'i')
-        t=trynumber(t)
-        if type(t) is not str: x = t
-    else:
-        x = trynumber(x)
-    if type(x) is _old_float:
-        return float(x)
-    if type(x) is _old_int:
-        return int(x)
-    if type(x) is _old_complex:
-        return complex(x)
-    return x
-
 inf = float('inf')
 neg_inf = -inf
-infi = complex('infi')
-neg_infi = -infi
-nani = complex('nani')
+infj = complex('infj')
+neg_infj = -infj
+nanj = complex('nanj')
 nan = float('nan')
 
 
@@ -229,18 +131,18 @@ e = 2.71828182845904523536028747135266249775724709369995957496696762772407663035
 # and f^-1(x) = ((1/a)**(1/r))*(x**(1/r))
 # if the equations will be equal, the power of x has to be equal, so
 # (x**(r-1)) = (x**(1/r))
-# (r-1) = (1/r) ## No need to go any further, this is a definition of φ
-# r = φ, or the radical conjugate of φ, which we will note as φ_
+# (r-1) = (1/r) # No need to go any further, this is a definition of φ
+# r = φ, (or the radical conjugate of φ, which we will note as φ_)
 # Thus:
 # (1/a)**(1/φ_) = φ_*a and (1/a)**(1/φ) = ra
 # or
 # (1/a)**(1/r) = ra
 # where r assumes the properties of φ and φ_
 # (1/a)**(1/r) = ra
-# (1/a)**(r-1) = ra   ##prop of φ
+# (1/a)**(r-1) = ra   #property of φ
 # a**(1-r) = ra
 # a**r = r
-# a = ^r√r ## rth root of r, true for φ and φ_
+# a = ^r√r # rth root of r, true for φ and φ_
 #
 # this means f'(x) = f^-1(x) when f(x) = (^φ√φ)*(x**φ) or (^φ_√φ_)*(x**φ_)
 # let's check this (because I've gotten carried away)
@@ -289,8 +191,10 @@ _b = ((29-3*_radical)/2)**(1/3)
 _sum = (1+_a+_b)
 ψ = psi = _sum/3
 
+del _radical
+
 # Its a bit of a tongue twister, but: the number nicknamed monster is the
-#Number of sets of symmetries in the largest finite group of sets of symmetries
+# Number of sets of symmetries in the largest finite group of sets of symmetries
 monster = 808017424794512875886459904961710757005754368000000000
 
 ### checks ###
@@ -509,7 +413,7 @@ def rt(nth, of):
 
     return approx*final
 
-    
+
 def irt(nth, num, /):
     '''Return floor nth root of num'''
     assert _validation.is_integer(nth)
@@ -527,15 +431,36 @@ def irt(nth, num, /):
             a = (a*(n-1) + q)//n
         return a
 
+def ldexp(x, i, /):
+    '''The inverse of frexp().'''
+    try: return _math.ldexp(x, i)
+    except: pass
+    return x*(2**i)
+
+def frexp(x, /):
+    '''Return the mantissa and exponent of x, as pair (m, e).
+
+m is a float and e is an int, such that x = m * 2.**e.
+If x is 0, m and e are both 0.  Else 0.5 <= abs(m) < 1.0.'''
+    try: return _math.frexp(x) # Always try to use optimized method
+    except: pass
+    n = floor(log2(x)) + 1
+    n1 = x/(2**n)
+    return (n1, n)
+
 def exp(x, /):
     '''Return e to the power of x'''
     try: return _math.exp(x)
     except: pass
     try: return _cmath.exp(x)
-    except: return e**x
+    except: pass
+    try: return x.__exp__()
+    except: return e**x # this final section may cause a recursive loop if 
+    # the method __pow__ or __rpow__ calls exp, but if it doesn't then this
+    # handles it.
 
 def expm1(x, /):
-    '''Return e**x-1'''
+    '''Return exp(x)-1'''
     try: return _math.expm1(x)
     except: return exp(x)-1
 
@@ -573,7 +498,7 @@ def tesser(x, /):
 
 def ln(x, /):
     '''Return the natural logarithm of x'''
-    x = trynumber(x)
+    x = _validation.trynumber(x)
     if _validation.is_float(x):
         return _math.log(x)
     elif _validation.is_complex(x):
