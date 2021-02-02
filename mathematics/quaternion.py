@@ -161,14 +161,39 @@ variations of input'''
 (farther to zero)'''
         return quaternion(ceil(self.real), ceil(self.i), ceil(self.j), ceil(self.k))
 
-    def __polar__(self, /):
+    def __cos__(q, /):
+        '''return cos of self in radians'''
+        r, p, n = q.__polar__()
+        return cos(q.real)*cosh(r*sin(p))-n*sin(q.real)*sinh(r*sin(p))
+
+    def __sin__(q, /):
+        '''return cos of self in radians'''
+        r, p, n = q.__polar__()
+        return sin(q.real)*cosh(r*sin(p))+n*cos(q.real)*sinh(r*sin(p))
+
+    def __tan__(q, /):
+        return q.__sin__()*(q.__cos__()**-1)
+
+    def __cot__(q, /):
+        try: return q.__cos__()*(q.__sin__()**-1)
+        except ZeroDivisionError: return nan
+
+    def __csc__(q, /):
+        try: return q.__sin__()**-1
+        except ZeroDivisionError: return nan
+
+    def __sec__(q, /):
+        try: return q.__cos__()**-1
+        except ZeroDivisionError: return nan
+    
+
+    def __polar__(q, /):
         '''the distance and three angles from 0 that can represent the
 quaternion'''
-        r = hypot(self.real, self.i, self.j, self.k)
-        theta1 = atan(self.i/self.real)
-        theta2 = atan(self.j/hypot(self.i, self.real))
-        theta3 = atan(self.k/hypot(self.real, self.i, self.j))
-        return (r, theta1, theta2, theta3)
+        r = hypot(q.real, q.i, q.j, q.k)
+        phi = acos(q.real/abs(q))
+        ñ = q.v()/abs(q.v())
+        return (r, phi, ñ)
 
     def __phase__(self, /):
         theta1 = atan(self.i/self.real)
@@ -329,30 +354,27 @@ quaternion'''
 
     def __rgcd__(self, other, /):
         return self.__gcd__(other)
-
+    
     def __pow__(self, other, /):
         '''return self**other'''
-        try:
-            self = _validation.trynumber(complex(self))
-            self**other
-        except: pass
+        if other == 0: return 1
+        if _validation.is_complex(self):
+            self = _validation.trynumber(self)
+            return self**other
         if _validation.is_integer(other) and other>=0:
             current = 1
             for l in range(int(other)): current *= self
             return quaternion(current)
-        if _validation.is_float(other):
-            first, power, root = _validation.flatten((int(other), fraction(str(other-int(other))).as_integer_ratio()))
-            return (self**first)*rt(root, (self**power))
-
-        ##raise NotImplementedError('Raising quaternions to non-real powers has not been implemented yet
-
-        ##TODO: test this!
+        if _validation.is_integer(other):
+            return 1/(self**-other)
         num = ln(self) * other
-        def iteration(x):
-            if x == 0: return 1
-            return (num**x)/factorial(x)
-        return summation(0, inf, iteration)
-        
+        return exp(num)
+
+    def __exp__(q):
+        a = q.real
+        v = q.v()
+        return (e**a)*(cos(abs(v))+ ((v/abs(v)*sin(abs(v)))))
+    
     def __rpow__(self, other, /):
         '''return other**self'''
         # okay, I know math... so I can figure this out! I think:
@@ -365,12 +387,13 @@ quaternion'''
         # The right one is python's built in method for
         # the identical complex method
         # ((1.5384778027279444+1.277922552627269i), (1.5384778027279442+1.2779225526272695j))
-        def iteration(x):
-            if x == 0: return 1
-            if x == 1: return num
-            return (num**x)/factorial(x)
-        return summation(0, inf, iteration)
-        ## raise NotImplementedError('Raising things to quaternions has not been implimented yet.')
+        return exp(num)
+        ##TODO: add t.exp()
+        ## def iteration(x): 
+        ##     if x == 0: return 1
+        ##     if x == 1: return num
+        ##     return (num**x)/factorial(x)
+        ## return summation(0, inf, iteration)
 
     def __mod__(self, other):
         return self-((self//other)*other)
