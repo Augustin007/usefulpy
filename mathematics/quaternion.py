@@ -175,17 +175,24 @@ variations of input'''
         return q.__sin__()*(q.__cos__()**-1)
 
     def __cot__(q, /):
-        try: return q.__cos__()*(q.__sin__()**-1)
-        except ZeroDivisionError: return nan
+        return q.__cos__()*(q.__sin__()**-1)
 
     def __csc__(q, /):
-        try: return q.__sin__()**-1
-        except ZeroDivisionError: return nan
+        return q.__sin__()**-1
 
     def __sec__(q, /):
-        try: return q.__cos__()**-1
-        except ZeroDivisionError: return nan
-    
+        return q.__cos__()**-1
+
+    def __atan__(q, /):
+        r, p, n = q.__polar__()
+        return -(n/2)*ln((n-q)/(n+q))
+
+    def __acos__(q, /):
+        r, p, n = q.__polar__()
+        return -n*ln(sqrt(1-(q**2))+q)
+
+    def __asin__(q, /):
+        r, p, n = q.__polar__()
 
     def __polar__(q, /):
         '''the distance and three angles from 0 that can represent the
