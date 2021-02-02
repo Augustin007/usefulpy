@@ -657,9 +657,9 @@ def acos(x, /, setting = None):
 recources to x.__acos__ if cos cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         ans = _math.acos(x)
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         ans = _cmath.acos(x)
     else:
         try: ans = x.__acos__()
@@ -673,9 +673,9 @@ def acosh(x, /, setting = None):
 recources to x.__acos__ if cosh cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         ans = _math.acosh(x)
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         ans = _cmath.acosh(x)
     else:
         try: ans = x.__acosh__()
@@ -689,9 +689,9 @@ def asin(x, /, setting = None):
 recources to x.__asin__ if sin cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         ans = _math.asin(x)
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         ans = _cmath.asin(x)
     else:
         try: ans = x.__asin__()
@@ -705,9 +705,9 @@ def asinh(x, /, setting = None):
 recources to x.__asin__ if sinh cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         ans = _math.asinh(x)
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         ans = _cmath.asinh(x)
     else:
         try: ans = x.__asinh__()
@@ -721,9 +721,9 @@ def atan(x, /, setting = None):
 recources to x.__atan__ if tan cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         ans = _math.atan(x)
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         ans = _cmath.atan(x)
     else:
         try: ans = x.__atan__()
@@ -737,9 +737,9 @@ def atanh(x, /, setting = None):
 recources to x.__atan__ if tanh cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         ans = _math.atanh(x)
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         ans = _cmath.atanh(x)
     else:
         try: ans = x.__atanh__()
@@ -754,10 +754,10 @@ recources to x.__asec__ if sec cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
     zde = False
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         try: ans = (1/_math.acos(x))
         except ZeroDivisionError: zde = True
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         try: ans = (1/_cmath.acos(x))
         except ZeroDivisionError: zde = True
     else:
@@ -777,10 +777,10 @@ recources to x.__asech__ if sech cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
     zde = False
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         try: ans = (1/_math.acosh(x))
         except ZeroDivisionError: zde = True
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         try: ans = (1/_cmath.acosh(x))
         except ZeroDivisionError: zde = True
     else:
@@ -800,10 +800,10 @@ recources to x.__acsc__ if csc cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
     zde = False
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         try: ans = (1/_math.asin(x))
         except ZeroDivisionError: zde = True
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         try: ans = (1/_cmath.asin(x))
         except ZeroDivisionError: zde = True
     else:
@@ -823,10 +823,10 @@ recources to x.__acsch__ if csch cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
     zde = False
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         try: ans = (1/_math.asinh(x))
         except ZeroDivisionError: zde = True
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         try: ans = (1/_cmath.asinh(x))
         except ZeroDivisionError: zde = True
     else:
@@ -846,10 +846,10 @@ recources to x.__acot__ if cot cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
     zde = False
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         try: ans = (1/_math.atan(x))
         except ZeroDivisionError: zde = True
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         try: ans = (1/_cmath.atan(x))
         except ZeroDivisionError: zde = True
     else:
@@ -869,10 +869,10 @@ recources to x.__acoth__ if coth cannot be found'''
     if setting is None: setting = _angle
     x = _validation.trynumber(x)
     zde = False
-    if _validation.isfloat(x):
+    if _validation.is_float(x):
         try: ans = (1/_math.atanh(x))
         except ZeroDivisionError: zde = True
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(x):
         try: ans = (1/_cmath.atanh(x))
         except ZeroDivisionError: zde = True
     else:
@@ -891,9 +891,9 @@ def cos(θ, /, setting = None):
 recources to θ.__cos__ if cos cannot be found'''
     if setting is None: setting = _angle
     θ = _validation.trynumber(convert(θ, setting, 'rad'))
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         return _math.cos(θ)
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(θ):
         return _cmath.cos(θ)
     else:
         try: return θ.__cos__()
@@ -905,9 +905,9 @@ def cosh(θ, /, setting = None):
 recources to θ.__cosh__ if cosh cannot be found'''
     if setting is None: setting = _angle
     θ = _validation.trynumber(convert(θ, setting, 'rad'))
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         return _math.cosh(θ)
-    elif _validation.iscomplex(θ):
+    elif _validation.is_complex(θ):
         return _cmath.cosh(θ)
     else:
         try: return θ.__cosh__()
@@ -919,9 +919,9 @@ def sin(θ, /, setting = None):
 recources to θ.__sin__ if sin cannot be found'''
     if setting is None: setting = _angle
     θ = _validation.trynumber(convert(θ, setting, 'rad'))
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         return _math.sin(θ)
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(θ):
         return _cmath.sin(θ)
     else:
         try: return θ.__sin__()
@@ -933,9 +933,9 @@ def sinh(θ, /, setting = None):
 recources to θ.__sinh__ if sinh cannot be found'''
     if setting is None: setting = _angle
     θ = _validation.trynumber(convert(θ, setting, 'rad'))
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         return _math.sinh(θ)
-    elif _validation.iscomplex(θ):
+    elif _validation.is_complex(θ):
         return _cmath.sinh(θ)
     else:
         try: return θ.__sinh__()
@@ -947,9 +947,9 @@ def tan(θ, /, setting = None):
 recources to θ.__tan__ if tan cannot be found'''
     if setting is None: setting = _angle
     θ = _validation.trynumber(convert(θ, setting, 'rad'))
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         return _math.tan(θ)
-    elif _validation.iscomplex(x):
+    elif _validation.is_complex(θ):
         return _cmath.tan(θ)
     else:
         try: return θ.__tan__()
@@ -961,9 +961,9 @@ def tanh(θ, /, setting = None):
 recources to θ.__tanh__ if tanh cannot be found'''
     if setting is None: setting = _angle
     θ = _validation.trynumber(convert(θ, setting, 'rad'))
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         return _math.tanh(θ)
-    elif _validation.iscomplex(θ):
+    elif _validation.is_complex(θ):
         return _cmath.tanh(θ)
     else:
         try: return θ.__tanh__()
@@ -976,11 +976,11 @@ recources to θ.__sec__ if sec cannot be found'''
     if setting is None: setting = _angle
     θ = (_validation.trynumber(convert(θ, setting, 'rad')))
     
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         try: return _math.cos(1/θ)
         except ZeroDivisionError: pass
         raise ValueError ('math domain error')
-    elif _validation.iscomplex(θ):
+    elif _validation.is_complex(θ):
         try: return _cmath.cos(1/θ)
         except ZeroDivisionError: pass
         
@@ -999,11 +999,11 @@ recources to θ.__sech__ if sech cannot be found'''
     if setting is None: setting = _angle
     θ = (_validation.trynumber(convert(θ, setting, 'rad')))
     
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         try: return _math.cosh(1/θ)
         except ZeroDivisionError: pass
         raise ValueError ('math domain error')
-    elif _validation.iscomplex(θ):
+    elif _validation.is_complex(θ):
         try: return _cmath.cosh(1/θ)
         except ZeroDivisionError: pass
         
@@ -1022,11 +1022,11 @@ recources to θ.__csc__ if csc cannot be found'''
     if setting is None: setting = _angle
     θ = (_validation.trynumber(convert(θ, setting, 'rad')))
     
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         try: return _math.sin(1/θ)
         except ZeroDivisionError: pass
         raise ValueError ('math domain error')
-    elif _validation.iscomplex(θ):
+    elif _validation.is_complex(θ):
         try: return _cmath.sin(1/θ)
         except ZeroDivisionError: pass
         
@@ -1045,11 +1045,11 @@ recources to θ.__csch__ if csch cannot be found'''
     if setting is None: setting = _angle
     θ = (_validation.trynumber(convert(θ, setting, 'rad')))
     
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         try: return _math.sinh(1/θ)
         except ZeroDivisionError: pass
         raise ValueError ('math domain error')
-    elif _validation.iscomplex(θ):
+    elif _validation.is_complex(θ):
         try: return _cmath.sinh(1/θ)
         except ZeroDivisionError: pass
         
@@ -1068,11 +1068,11 @@ recources to θ.__cot__ if cot cannot be found'''
     if setting is None: setting = _angle
     θ = (_validation.trynumber(convert(θ, setting, 'rad')))
     
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         try: return _math.tan(1/θ)
         except ZeroDivisionError: pass
         raise ValueError ('math domain error')
-    elif _validation.iscomplex(θ):
+    elif _validation.is_complex(θ):
         try: return _cmath.tan(1/θ)
         except ZeroDivisionError: pass
         
@@ -1091,11 +1091,11 @@ recources to θ.__coth__ if coth cannot be found'''
     if setting is None: setting = _angle
     θ = (_validation.trynumber(convert(θ, setting, 'rad')))
     
-    if _validation.isfloat(θ):
+    if _validation.is_float(θ):
         try: return _math.tanh(1/θ)
         except ZeroDivisionError: pass
         raise ValueError ('math domain error')
-    elif _validation.iscomplex(θ):
+    elif _validation.is_complex(θ):
         try: return _cmath.tanh(1/θ)
         except ZeroDivisionError: pass
         
@@ -1142,6 +1142,7 @@ class t:
     def ln(x):
         '''taylor series for ln. Only works properly for real numbers'''
         x = _validation.trynumber(x)
+        if x == 0: raise ValueError('math domain error')
         if x == 1: return 0
         if x == 2: return 0.6931471805599453
         if not _validation.is_numeric(x): raise TypeError(f'Value {x} is not a numeric value (a numeric type is any which supports all arithmetic operations with int, float, and complex')
@@ -1150,6 +1151,6 @@ class t:
             if n == 0: return 0
             return -((x**n)/n)
         x = -x+1
-        return summation(0, inf, iteration)      
+        return summation(0, inf, iteration)
 
 #eof
