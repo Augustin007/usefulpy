@@ -460,6 +460,7 @@ def fromstring(string):
     except: pass
     return ValueError('String does not represent a quaternion')
 
+i = quaternion(b = 1)
 j = quaternion(c = 1)
 k = quaternion(d = 1)
 tesseract = 1+i+j+k
