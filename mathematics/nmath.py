@@ -970,7 +970,7 @@ recources to θ.__tanh__ if tanh cannot be found'''
         except: pass
     raise TypeError('tanh cannot be found of a type %s' % (type(x)))
 
-def sec(θ, /):
+def sec(θ, /, setting= None):
     '''Return the secant of θ,
 recources to θ.__sec__ if sec cannot be found'''
     if setting is None: setting = _angle
@@ -993,7 +993,7 @@ recources to θ.__sec__ if sec cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('sec cannot be found of a type %s' % (type(x)))
 
-def sech(θ, /):
+def sech(θ, /, setting= None):
     '''Return the hyperbolic secant of θ
 recources to θ.__sech__ if sech cannot be found'''
     if setting is None: setting = _angle
@@ -1016,7 +1016,7 @@ recources to θ.__sech__ if sech cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('sech cannot be found of a type %s' % (type(x)))
 
-def csc(θ, /):
+def csc(θ, /, setting= None):
     '''Return the cosecant of θ,
 recources to θ.__csc__ if csc cannot be found'''
     if setting is None: setting = _angle
@@ -1039,7 +1039,7 @@ recources to θ.__csc__ if csc cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('csc cannot be found of a type %s' % (type(x)))
 
-def csch(θ, /):
+def csch(θ, /, setting= None):
     '''Return the hyperbolic cosecant of θ
 recources to θ.__csch__ if csch cannot be found'''
     if setting is None: setting = _angle
@@ -1062,7 +1062,7 @@ recources to θ.__csch__ if csch cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('csch cannot be found of a type %s' % (type(x)))
 
-def cot(θ, /):
+def cot(θ, /, setting= None):
     '''Return the cotangent of θ,
 recources to θ.__cot__ if cot cannot be found'''
     if setting is None: setting = _angle
@@ -1085,7 +1085,7 @@ recources to θ.__cot__ if cot cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('cot cannot be found of a type %s' % (type(x)))
 
-def coth(θ, /):
+def coth(θ, /, setting= None):
     '''Return the hyperbolic cotangent of θ
 recources to θ.__coth__ if coth cannot be found'''
     if setting is None: setting = _angle

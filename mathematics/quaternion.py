@@ -189,10 +189,20 @@ variations of input'''
 
     def __acos__(q, /):
         r, p, n = q.__polar__()
-        return -n*ln(sqrt(1-(q**2))+q)
+        return pi/2-asin(q)
 
     def __asin__(q, /):
         r, p, n = q.__polar__()
+        return n*ln(sqrt(1-(q**2))-n*q)
+
+    def __acsc__(q, /):
+        return asin(1/q)
+
+    def __asec__(q, /):
+        return acos(1/q)
+
+    def __acot__(q, /):
+        return atan(1/q)
 
     def __polar__(q, /):
         '''the distance and three angles from 0 that can represent the
