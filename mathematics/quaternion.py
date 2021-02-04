@@ -85,8 +85,8 @@ variations of input'''
                 return self
             if _validation.is_complex(a):
                 self.real = _validation.trynumber(a.real)
-                self.i = _validation.trynumber(a.imag)
-                self.j = 0
+                self.i = 0
+                self.j = _validation.trynumber(a.imag)
                 self.k = 0
                 return self
             if _validation.is_float(a):
@@ -204,6 +204,44 @@ variations of input'''
     def __acot__(q, /):
         return atan(1/q)
 
+    def __cosh__(q, /):
+        r, p, n = q.__polar__()
+        return cosh(q.real)*cos(r*sin(p))+n*sinh(q.real)*sin(r*sin(p))
+
+    def __sinh__(q, /):
+        r, p, n = q.__polar__()
+        return sinh(q.real)*cos(r*sin(p))+n*cosh(q.real)*sin(r*sin(p))
+
+    def __tanh__(q, /):
+        return q.__sinh__()*(q.__cosh__()**-1)
+
+    def __sech__(q, /):
+        return q.__cosh__()**-1
+
+    def __csch__(q, /):
+        return q.__sinh__()**-1
+
+    def __coth__(q, /):
+        return q.__cosh__()*(q.__sinh__()**-1)
+
+    def __acosh__(q, /):
+        return ln(q+sqrt((q**2)-1))
+
+    def __asinh__(q, /):
+        return ln(q+sqrt((q**2)+1))
+
+    def __atanh__(q, /):
+        return (1/2)*ln((1+q)*((1-q)**-1))
+
+    def __asech__(q, /):
+        return acosh(1/q)
+
+    def __acsch__(q, /):
+        return asinh(1/q)
+
+    def __acoth__(q, /):
+        return atanh(1/q)
+
     def __polar__(q, /):
         '''the distance and three angles from 0 that can represent the
 quaternion'''
@@ -228,9 +266,9 @@ quaternion'''
 
     def __complex__(self, /):
         '''return complex(self) if j and k are empty'''
-        if self.j != 0: return
+        if self.i != 0: return
         if self.k != 0: return
-        return _old_complex(self.real, self.i)
+        return complex(self.real, self.i)
 
     def __int__(self, /):
         '''return int(self) if i, j, and k are empty'''
@@ -377,15 +415,15 @@ quaternion'''
         if other == 0: return 1
         if _validation.is_complex(self):
             self = _validation.trynumber(self)
-            return self**other
+            return quaternion(self**other)
         if _validation.is_integer(other) and other>=0:
             current = 1
             for l in range(int(other)): current *= self
             return quaternion(current)
         if _validation.is_integer(other):
             return 1/(self**-other)
-        num = ln(self) * other
-        return exp(num)
+        r, p, n = self.__polar__()
+        return (r**other)*(cos(other*p)+n*sin(other*p))
 
     def __exp__(q):
         a = q.real
@@ -405,12 +443,6 @@ quaternion'''
         # the identical complex method
         # ((1.5384778027279444+1.277922552627269i), (1.5384778027279442+1.2779225526272695j))
         return exp(num)
-        ##TODO: add t.exp()
-        ## def iteration(x): 
-        ##     if x == 0: return 1
-        ##     if x == 1: return num
-        ##     return (num**x)/factorial(x)
-        ## return summation(0, inf, iteration)
 
     def __mod__(self, other):
         return self-((self//other)*other)
