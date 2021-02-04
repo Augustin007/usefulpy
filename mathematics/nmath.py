@@ -1116,7 +1116,7 @@ def cis(θ, n=1j):
         raise ValueError ('math domain error')
     return cos(θ)+(n*sin(θ))
 
-class t:
+class t: #taylor series
     def cos(theta, /):
         '''taylor series for cos.'''
         def iteration(n):
@@ -1136,11 +1136,19 @@ class t:
         return summation(0, inf, iteration)
 
     def tan(theta, /):
-        def iteration(n):
-            pass
+        ##TODO: Add Taylor Series for tan
+        return t.sin(theta)/t.cos(theta) 
+
+    def exp(num):
+        def iteration(x): 
+            if x == 0: return 1
+            if x == 1: return num
+            return (num**x)/factorial(x)
+        return summation(0, inf, iteration)
 
     def ln(x):
-        '''taylor series for ln. Only works properly for real numbers'''
+        '''taylor series for ln. Only works for real numbers. A complex number
+will return an incorrect value.'''
         x = _validation.trynumber(x)
         if x == 0: raise ValueError('math domain error')
         if x == 1: return 0
