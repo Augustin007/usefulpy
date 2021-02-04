@@ -1,32 +1,32 @@
 # __init__.py
-  ## PREREQUISITE1.2:
-    _'_
+## PREREQUISITE1.2:
+    '
 
 # encoding.py
 
 # formatting.py
-  ## UPDATED TO:
-    _Usefulpy 1.2.1_
-  ##  TODO:
-    _colors can be improved severely._
-  ## UNFINISHED:
-    _Finish by 1.2.2_
-  ## PREREQUISITE1.2.2:
-    _Finish multline object_
+## UPDATED TO:
+    Usefulpy 1.2.1
+##  TODO:
+    colors can be improved severely.
+## UNFINISHED:
+    Finish by 1.2.2
+## PREREQUISITE1.2.2:
+    Finish multline object
 
 # IDLE.py
-  ## UPDATED TO:
-    _Usefulpy 1.2.1_
+## UPDATED TO:
+    Usefulpy 1.2.1
 
 # neuralnet.py
 
 # quickthreads.py
-  ## TODO:
-    _Document code_
-  ## PREREQUISITE1.2.2:
-    _quickthreads 1.1.1_
+## TODO:
+    Document code
+## PREREQUISITE1.2.2:
+    quickthreads 1.1.1
 
 # validation.py
-  ## UPDATED TO:
-    _Usefulpy 1.2.1_
+## UPDATED TO:
+    Usefulpy 1.2.1
 
