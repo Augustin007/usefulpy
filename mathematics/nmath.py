@@ -315,7 +315,7 @@ class mathfunc(object):
         self.func = func
         self.__name__ = self.func.__name__
         self.__doc__ = self.func.__doc__
-        ##self.__call__.__doc__ = self.func.__doc__
+        self.__call__.__func__.__doc__ = self.func.__doc__
         return self
 
     def __repr__(self):
@@ -721,7 +721,7 @@ class trig_func(mathfunc):
         self.func = func
         self.__name__ = self.func.__name__
         self.__doc__ = self.func.__doc__
-        ##self.__call__.__doc__ = self.func.__doc__
+        self.__call__.__func__.__doc__ = self.func.__doc__
         return self
 
     def __call__(self, θ, /, setting = None):
@@ -738,7 +738,7 @@ class inverse_trig_func(mathfunc):
         self.func = func
         self.__name__ = self.func.__name__
         self.__doc__ = self.func.__doc__
-        ##self.__call__.__doc__ = self.func.__doc__
+        self.__call__.__func__.__doc__ = self.func.__doc__
         return self
 
     def __call__(self, x, /, setting = None):
