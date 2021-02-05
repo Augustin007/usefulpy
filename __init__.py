@@ -46,8 +46,8 @@ __author__ = 'Austin Garcia'
 __version__ = '1.1.2'
 
 ### IMPORT ###
-try: import validation, formatting, mathematics, quickthreads
-except: from usefulpy import validation, formatting, mathematics, quickthreads
+try: import validation, formatting, mathematics, quickthreads, decorators
+except: from usefulpy import validation, formatting, mathematics, quickthreads, decorators
 try: from IDLE import IDLE
 except: from usefulpy.IDLE import IDLE
 
