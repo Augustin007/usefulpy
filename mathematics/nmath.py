@@ -60,6 +60,7 @@ __author__ = 'Austin Garcia'
 
 ### IMPORTS ###
 from usefulpy import validation as _validation
+from usefulpy import decorators as _decorators
 
 from decimal import Decimal as number
 from fractions import Fraction as fraction
@@ -556,24 +557,21 @@ def ln(x, /):
         except: pass
     raise TypeError('Natural logarithm cannot be found of a type %s.' % type(x))
 
-def log(*args):
+@_decorators.shift_args({2:(0, 1), 1:((10,), 0)})
+def log(base, x):
     ''' log(x, [base = 10])
     Return the log base 'base' of x
     recources to x.__log__(base) if log cannot be found'''
-    LenError = TypeError ('log requires 1 to 2 arguments')
-    if len(args) == 1:
-        base, x = 10, args[0]
-    elif len(args) == 2:
-        base, x = args
-    else:
-        raise LenError
+    print(f'log base {base} of {x}')
+    base = _validation.trynumber(base)
     x = _validation.trynumber(x)
+    if x == base: return 1
     if x == 0:
         raise ValueError('math domain error')
     if _validation.is_float(x):
-        return _math.log(base, x)
+        return _math.log(x, base)
     elif _validation.is_complex(x):
-        return _cmath.log(base, x)
+        return _cmath.log(x, base)
     else:
         try: return x.__log__(base)
         except: pass
@@ -591,7 +589,6 @@ def log2(x, /):
         try: return log(x, 2)
         except: pass
     raise TypeError('Logarithm base 2 cannot be found of a type %s.' % type(x))
-    
 
 def log1p(x, /):
     '''Return the natural logarithm of x+1'''
