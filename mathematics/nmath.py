@@ -309,51 +309,106 @@ class tuple(_old_tuple):
         '''flatten into 1 dimension'''
         return _validation.flatten(self)
 
-_setting = 'approx'
-_mathfuncs = {}
-def add_mathfunc(name, approx, exact, *argnames):
-    '''Create a math function'''
-    tmp = ['self']
-    tmp.extend(argnames)
-    
-    args = '('+ ', '.join(argnames)+ ')'
+class mathfunc(object):
+    def __new__(cls, func): ##, *extras):
+        self = super(mathfunc, cls).__new__(cls)
+        self.func = func
+        self.__name__ = self.func.__name__
+        self.__doc__ = self.func.__doc__
+        ##self.__call__.__doc__ = self.func.__doc__
+        return self
 
-    call_args = '('+ ', '.join(tmp)+ ')'
-    del tmp
-    
-    class mathfunc():
-        def __new__(cls, name, approx, exact):
-            self = super(mathfunc, cls).__new__(cls)
-            self.approx = approx
-            
-            self.exact = exact
+    def __repr__(self):
+        return f'<nmath.mathfunc {self.__name__} at {hex(id(self))}>'
 
-            split = name.split('_')
-            self.name = split[0]
-            self.extras = split[1:]
+    def __call__(self, x):
+        return self.func(x)
 
-            self.hexid = hex(id(self))
-            _mathfuncs[name] = self
-            return self
+    def __add__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: f(θ) + g(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ) + g)
+        raise TypeError('Inappropriate argument type.')
 
-        exec(f'''def __call__{call_args}:
-            if _setting == 'exact':
-                return self.exact{args}
-            if _setting == 'approx':
-                return self.approx{args}''')
+    def __radd__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: g(θ) + f.func(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: g + f.func(θ))
+        raise TypeError('Inappropriate argument type.')
 
-        def __repr__(self):
-            return f'<nmath.mathfunc {self.name} at {self.hexid}>'
+    def __sub__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: f.func(θ) - g(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ) - g)
+        raise TypeError('Inappropriate argument type.')
 
-    
-    tmp = mathfunc(name, approx, exact)
-    globals()[name]=tmp
-    return tmp
+    def __rsub__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: g(θ) - f.func(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: g - f.func(θ))
+        raise TypeError('Inappropriate argument type.')
+
+    def __mul__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: f.func(θ)*g(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ)*g)
+        raise TypeError('Inappropriate argument type.')
+
+    def __rmul__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: g(θ)*f.func(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: g*f.func(θ))
+        raise TypeError('Inappropriate argument type.')
+
+    def __truediv__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: f.func(θ)/g(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ)/g)
+        raise TypeError('Inappropriate argument type.')
+
+    def __rtruediv__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: g(θ)/f.func(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: g/f.func(θ))
+        raise TypeError('Inappropriate argument type.')
+
+    def __pow__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: f.func(θ)**g(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ)**g)
+        raise TypeError('Inappropriate argument type.')
+
+    def __rpow__(f, g):
+        try:
+            g.__call__
+            return mathfunc(lambda θ: g(θ)**f.func(θ))
+        except: pass
+        if _validation.is_numeric(g): return mathfunc(lambda θ: g**f.func(θ))
+        raise TypeError('Inappropriate argument type.')
 
 def pm(a, b):
     '''Return a ± b'''
     return tuple((a+b, a-b))
 
+@mathfunc
 def floor(x, /):
     '''Return the floor of x'''
     try:
@@ -363,6 +418,7 @@ def floor(x, /):
     except:pass #lower nesting
     return floor(x.real) + floor(x.imag)*1j if type(x) is complex else x.__floor__()
 
+@mathfunc
 def ceil(x, /):
     '''Return the ceil of x'''
     try:
@@ -410,6 +466,7 @@ def summation(start, finish, function = lambda x: x):
     rangelist[0] = function(rangelist[0])
     return _reduce((lambda x, y: x+function(y)), rangelist)
 
+@mathfunc
 def sigmoid(x, /):
     '''Sigmoid function'''
     epow = exp(-x)
@@ -450,7 +507,6 @@ def rt(nth, of):
 
     return approx*final
 
-
 def irt(nth, num, /):
     '''Return floor nth root of num'''
     assert _validation.is_integer(nth)
@@ -485,6 +541,7 @@ If x is 0, m and e are both 0.  Else 0.5 <= abs(m) < 1.0.'''
     n1 = x/(2**n)
     return (n1, n)
 
+@mathfunc
 def exp(x, /):
     '''Return e to the power of x'''
     try: return _math.exp(x)
@@ -496,11 +553,13 @@ def exp(x, /):
     # the method __pow__ or __rpow__ calls exp, but if it doesn't then this
     # handles it.
 
+@mathfunc
 def expm1(x, /):
     '''Return exp(x)-1'''
     try: return _math.expm1(x)
     except: return exp(x)-1
 
+@mathfunc
 def sqrt(x, /):
     '''Return the square root of x'''
     try: return _math.sqrt(x)
@@ -516,6 +575,7 @@ def isqrt(x, /):
     try: return _math.isqrt(x)
     except: return floor(sqrt(x))
 
+@mathfunc
 def cbrt(x, /):
     '''Return the cube root of x'''
     try: return x**(1/3)
@@ -528,18 +588,22 @@ def icbrt(x, /):
     except: pass
     return irt(3, x)
 
+@mathfunc
 def square(x, /):
     '''Return x**2'''
     return x*x
 
+@mathfunc
 def cube(x, /):
     '''Return x**3'''
     return x*x*x
 
+@mathfunc
 def tesser(x, /):
     '''Return x**4'''
     return x*x*x*x
 
+@mathfunc
 def ln(x, /):
     '''Return the natural logarithm of x
     recources to x.__ln__() or x.__log__(e) if log cannot be found'''
@@ -559,10 +623,9 @@ def ln(x, /):
 
 @_decorators.shift_args({2:(0, 1), 1:((10,), 0)})
 def log(base, x):
-    ''' log(x, [base = 10])
+    ''' log([base = 10], x)
     Return the log base 'base' of x
     recources to x.__log__(base) if log cannot be found'''
-    print(f'log base {base} of {x}')
     base = _validation.trynumber(base)
     x = _validation.trynumber(x)
     if x == base: return 1
@@ -578,6 +641,7 @@ def log(base, x):
         
     raise TypeError('Logarithm cannot be found of a type %s.' % type(x))
 
+@mathfunc
 def log2(x, /):
     '''Return the log base 2 of x'''
     x = _validation.trynumber(x)
@@ -590,6 +654,7 @@ def log2(x, /):
         except: pass
     raise TypeError('Logarithm base 2 cannot be found of a type %s.' % type(x))
 
+@mathfunc
 def log1p(x, /):
     '''Return the natural logarithm of x+1'''
     try: return _math.log1p(x)
@@ -649,245 +714,243 @@ def grad():
     '''Change setting to grad'''
     _changeto('grad')
 
-def acos(x, /, setting = None):
+##BUG: adding two trig funcs returns a mathfunc, which stops non-setting calling.
+class trig_func(mathfunc):
+    def __new__(cls, func):
+        self = super(trig_func, cls).__new__(cls, func)
+        self.func = func
+        self.__name__ = self.func.__name__
+        self.__doc__ = self.func.__doc__
+        ##self.__call__.__doc__ = self.func.__doc__
+        return self
+
+    def __call__(self, θ, /, setting = None):
+        if setting is None: setting = _angle
+        θ = _validation.trynumber(convert(θ, setting, 'rad'))
+        return self.func(θ)
+
+    def __repr__(self):
+        return  f'<nmath.trig_func {self.__name__} at {hex(id(self))}>'
+    
+class inverse_trig_func(mathfunc):
+    def __new__(cls, func):
+        self = super(inverse_trig_func, cls).__new__(cls, func)
+        self.func = func
+        self.__name__ = self.func.__name__
+        self.__doc__ = self.func.__doc__
+        ##self.__call__.__doc__ = self.func.__doc__
+        return self
+
+    def __call__(self, x, /, setting = None):
+        if setting is None: setting = _angle
+        θ = self.func(_validation.trynumber(x))
+        return _validation.trynumber(convert(θ, 'rad', setting))
+
+    def __repr__(self):
+        return  f'<nmath.inverse_trig_func {self.__name__} at {hex(id(self))}>'
+
+@inverse_trig_func
+def acos(x):
     '''Return the arc cosine of x,
 recources to x.__acos__ if cos cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     if _validation.is_float(x):
-        ans = _math.acos(x)
+        return _math.acos(x)
     elif _validation.is_complex(x):
-        ans = _cmath.acos(x)
+        return _cmath.acos(x)
     else:
-        try: ans = x.__acos__()
+        try: return x.__acos__()
         except: pass
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('acos cannot be found of a type %s' % (type(x)))
 
-def acosh(x, /, setting = None):
+@inverse_trig_func
+def acosh(x):
     '''Return the inverse hyperbolic cosine of x
 recources to x.__acos__ if cosh cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     if _validation.is_float(x):
-        ans = _math.acosh(x)
+        return _math.acosh(x)
     elif _validation.is_complex(x):
-        ans = _cmath.acosh(x)
+        return _cmath.acosh(x)
     else:
-        try: ans = x.__acosh__()
+        try: return x.__acosh__()
         except: pass
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('acos cannot be found of a type %s' % (type(x)))
 
-def asin(x, /, setting = None):
+@inverse_trig_func
+def asin(x):
     '''Return the arc sine of x,
 recources to x.__asin__ if sin cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     if _validation.is_float(x):
-        ans = _math.asin(x)
+        return _math.asin(x)
     elif _validation.is_complex(x):
-        ans = _cmath.asin(x)
+        return _cmath.asin(x)
     else:
-        try: ans = x.__asin__()
+        try: return x.__asin__()
         except: pass
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('asin cannot be found of a type %s' % (type(x)))
 
-def asinh(x, /, setting = None):
+@inverse_trig_func
+def asinh(x):
     '''Return the inverse hyperbolic sine of x
 recources to x.__asin__ if sinh cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     if _validation.is_float(x):
-        ans = _math.asinh(x)
+        return _math.asinh(x)
     elif _validation.is_complex(x):
-        ans = _cmath.asinh(x)
+        return _cmath.asinh(x)
     else:
-        try: ans = x.__asinh__()
+        try: return x.__asinh__()
         except: pass
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('asin cannot be found of a type %s' % (type(x)))
 
-def atan(x, /, setting = None):
+@inverse_trig_func
+def atan(x):
     '''Return the arc tangent of x,
 recources to x.__atan__ if tan cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     if _validation.is_float(x):
-        ans = _math.atan(x)
+        return _math.atan(x)
     elif _validation.is_complex(x):
-        ans = _cmath.atan(x)
+        return _cmath.atan(x)
     else:
-        try: ans = x.__atan__()
+        try: return x.__atan__()
         except: pass
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('atan cannot be found of a type %s' % (type(x)))
 
-def atanh(x, /, setting = None):
+@inverse_trig_func
+def atanh(x):
     '''Return the inverse hyperbolic tangent of x
 recources to x.__atan__ if tanh cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     if _validation.is_float(x):
-        ans = _math.atanh(x)
+        return _math.atanh(x)
     elif _validation.is_complex(x):
-        ans = _cmath.atanh(x)
+        return _cmath.atanh(x)
     else:
-        try: ans = x.__atanh__()
+        try: return x.__atanh__()
         except: pass
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('atan cannot be found of a type %s' % (type(x)))
 
-def asec(x, /, setting = None):
+@inverse_trig_func
+def asec(x):
     '''Return the arc secant of x
 recources to x.__asec__ if sec cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     zde = False
     if _validation.is_float(x):
-        try: ans = (1/_math.acos(x))
+        try: return (1/_math.acos(x))
         except ZeroDivisionError: zde = True
     elif _validation.is_complex(x):
-        try: ans = (1/_cmath.acos(x))
+        try: return (1/_cmath.acos(x))
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: ans = x.__asec__()
+            try: return x.__asec__()
             except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('asec cannot be found of a type %s' % (type(x)))
 
-def asech(x, /):
+@inverse_trig_func
+def asech(x):
     '''Return the inverse hyperbolic secant of x
 recources to x.__asech__ if sech cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     zde = False
     if _validation.is_float(x):
-        try: ans = (1/_math.acosh(x))
+        try: return (1/_math.acosh(x))
         except ZeroDivisionError: zde = True
     elif _validation.is_complex(x):
-        try: ans = (1/_cmath.acosh(x))
+        try: return (1/_cmath.acosh(x))
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: ans = x.__asech__()
+            try: return x.__asech__()
             except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('asech cannot be found of a type %s' % (type(x)))
 
-def acsc(x, /, setting = None):
+@inverse_trig_func
+def acsc(x):
     '''Return the arc cosecant of x
 recources to x.__acsc__ if csc cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     zde = False
     if _validation.is_float(x):
-        try: ans = (1/_math.asin(x))
+        try: return (1/_math.asin(x))
         except ZeroDivisionError: zde = True
     elif _validation.is_complex(x):
-        try: ans = (1/_cmath.asin(x))
+        try: return (1/_cmath.asin(x))
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: ans = x.__acsc__()
+            try: return x.__acsc__()
             except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('acsc cannot be found of a type %s' % (type(x)))
 
+@inverse_trig_func
 def acsch(x, /):
     '''Return the inverse hyperbolic cosecant of x
 recources to x.__acsch__ if csch cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     zde = False
     if _validation.is_float(x):
-        try: ans = (1/_math.asinh(x))
+        try: return (1/_math.asinh(x))
         except ZeroDivisionError: zde = True
     elif _validation.is_complex(x):
-        try: ans = (1/_cmath.asinh(x))
+        try: return (1/_cmath.asinh(x))
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: ans = x.__acsch__()
+            try: return x.__acsch__()
             except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('acsch cannot be found of a type %s' % (type(x)))
 
+@inverse_trig_func
 def acot(x, /, setting = None):
     '''Return the arc cotangent of x
 recources to x.__acot__ if cot cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     zde = False
     if _validation.is_float(x):
-        try: ans = (1/_math.atan(x))
+        try: return (1/_math.atan(x))
         except ZeroDivisionError: zde = True
     elif _validation.is_complex(x):
-        try: ans = (1/_cmath.atan(x))
+        try: return (1/_cmath.atan(x))
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: ans = x.__acot__()
+            try: return x.__acot__()
             except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('acot cannot be found of a type %s' % (type(x)))
 
+@inverse_trig_func
 def acoth(x, /):
     '''Return the inverse hyperbolic cotangent of x
 recources to x.__acoth__ if coth cannot be found'''
-    if setting is None: setting = _angle
-    x = _validation.trynumber(x)
     zde = False
     if _validation.is_float(x):
-        try: ans = (1/_math.atanh(x))
+        try: return (1/_math.atanh(x))
         except ZeroDivisionError: zde = True
     elif _validation.is_complex(x):
-        try: ans = (1/_cmath.atanh(x))
+        try: return (1/_cmath.atanh(x))
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: ans = x.__acoth__()
+            try: return x.__acoth__()
             except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
-    try: return convert(ans, 'rad', setting)
-    except NameError: pass
     raise TypeError('acoth cannot be found of a type %s' % (type(x)))
 
-def cos(θ, /, setting = None):
+@trig_func
+def cos(θ):
     '''Return the cosine of θ,
 recources to θ.__cos__ if cos cannot be found'''
-    if setting is None: setting = _angle
-    θ = _validation.trynumber(convert(θ, setting, 'rad'))
     if _validation.is_float(θ):
         return _math.cos(θ)
     elif _validation.is_complex(θ):
@@ -897,11 +960,10 @@ recources to θ.__cos__ if cos cannot be found'''
         except: pass
     raise TypeError('cos cannot be found of a type %s' % (type(x)))
 
-def cosh(θ, /, setting = None):
+@trig_func
+def cosh(θ):
     '''Return the hyperbolic cosine of θ,
 recources to θ.__cosh__ if cosh cannot be found'''
-    if setting is None: setting = _angle
-    θ = _validation.trynumber(convert(θ, setting, 'rad'))
     if _validation.is_float(θ):
         return _math.cosh(θ)
     elif _validation.is_complex(θ):
@@ -911,11 +973,10 @@ recources to θ.__cosh__ if cosh cannot be found'''
         except: pass
     raise TypeError('cosh cannot be found of a type %s' % (type(x)))
 
-def sin(θ, /, setting = None):
+@trig_func
+def sin(θ):
     '''Return the sine of θ,
 recources to θ.__sin__ if sin cannot be found'''
-    if setting is None: setting = _angle
-    θ = _validation.trynumber(convert(θ, setting, 'rad'))
     if _validation.is_float(θ):
         return _math.sin(θ)
     elif _validation.is_complex(θ):
@@ -925,11 +986,10 @@ recources to θ.__sin__ if sin cannot be found'''
         except: pass
     raise TypeError('sin cannot be found of a type %s' % (type(x)))
 
-def sinh(θ, /, setting = None):
+@trig_func
+def sinh(θ):
     '''Return the hyperbolic sine of θ,
 recources to θ.__sinh__ if sinh cannot be found'''
-    if setting is None: setting = _angle
-    θ = _validation.trynumber(convert(θ, setting, 'rad'))
     if _validation.is_float(θ):
         return _math.sinh(θ)
     elif _validation.is_complex(θ):
@@ -939,11 +999,10 @@ recources to θ.__sinh__ if sinh cannot be found'''
         except: pass
     raise TypeError('sinh cannot be found of a type %s' % (type(x)))
 
-def tan(θ, /, setting = None):
+@trig_func
+def tan(θ):
     '''Return the tangent of θ,
 recources to θ.__tan__ if tan cannot be found'''
-    if setting is None: setting = _angle
-    θ = _validation.trynumber(convert(θ, setting, 'rad'))
     if _validation.is_float(θ):
         return _math.tan(θ)
     elif _validation.is_complex(θ):
@@ -953,11 +1012,10 @@ recources to θ.__tan__ if tan cannot be found'''
         except: pass
     raise TypeError('tan cannot be found of a type %s' % (type(x)))
 
-def tanh(θ, /, setting = None):
+@trig_func
+def tanh(θ):
     '''Return the hyperbolic tangent of θ,
 recources to θ.__tanh__ if tanh cannot be found'''
-    if setting is None: setting = _angle
-    θ = _validation.trynumber(convert(θ, setting, 'rad'))
     if _validation.is_float(θ):
         return _math.tanh(θ)
     elif _validation.is_complex(θ):
@@ -967,12 +1025,10 @@ recources to θ.__tanh__ if tanh cannot be found'''
         except: pass
     raise TypeError('tanh cannot be found of a type %s' % (type(x)))
 
-def sec(θ, /, setting= None):
+@trig_func
+def sec(θ):
     '''Return the secant of θ,
 recources to θ.__sec__ if sec cannot be found'''
-    if setting is None: setting = _angle
-    θ = (_validation.trynumber(convert(θ, setting, 'rad')))
-    
     if _validation.is_float(θ):
         try: return _math.cos(1/θ)
         except ZeroDivisionError: pass
@@ -990,12 +1046,10 @@ recources to θ.__sec__ if sec cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('sec cannot be found of a type %s' % (type(x)))
 
-def sech(θ, /, setting= None):
+@trig_func
+def sech(θ):
     '''Return the hyperbolic secant of θ
 recources to θ.__sech__ if sech cannot be found'''
-    if setting is None: setting = _angle
-    θ = (_validation.trynumber(convert(θ, setting, 'rad')))
-    
     if _validation.is_float(θ):
         try: return _math.cosh(1/θ)
         except ZeroDivisionError: pass
@@ -1013,7 +1067,8 @@ recources to θ.__sech__ if sech cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('sech cannot be found of a type %s' % (type(x)))
 
-def csc(θ, /, setting= None):
+@trig_func
+def csc(θ):
     '''Return the cosecant of θ,
 recources to θ.__csc__ if csc cannot be found'''
     if setting is None: setting = _angle
@@ -1036,12 +1091,10 @@ recources to θ.__csc__ if csc cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('csc cannot be found of a type %s' % (type(x)))
 
-def csch(θ, /, setting= None):
+@trig_func
+def csch(θ):
     '''Return the hyperbolic cosecant of θ
 recources to θ.__csch__ if csch cannot be found'''
-    if setting is None: setting = _angle
-    θ = (_validation.trynumber(convert(θ, setting, 'rad')))
-    
     if _validation.is_float(θ):
         try: return _math.sinh(1/θ)
         except ZeroDivisionError: pass
@@ -1059,12 +1112,10 @@ recources to θ.__csch__ if csch cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('csch cannot be found of a type %s' % (type(x)))
 
-def cot(θ, /, setting= None):
+@trig_func
+def cot(θ):
     '''Return the cotangent of θ,
 recources to θ.__cot__ if cot cannot be found'''
-    if setting is None: setting = _angle
-    θ = (_validation.trynumber(convert(θ, setting, 'rad')))
-    
     if _validation.is_float(θ):
         try: return _math.tan(1/θ)
         except ZeroDivisionError: pass
@@ -1082,11 +1133,10 @@ recources to θ.__cot__ if cot cannot be found'''
         if zde: raise ValueError ('math domain error')
     raise TypeError('cot cannot be found of a type %s' % (type(x)))
 
-def coth(θ, /, setting= None):
+@trig_func
+def coth(θ):
     '''Return the hyperbolic cotangent of θ
 recources to θ.__coth__ if coth cannot be found'''
-    if setting is None: setting = _angle
-    θ = (_validation.trynumber(convert(θ, setting, 'rad')))
     
     if _validation.is_float(θ):
         try: return _math.tanh(1/θ)
