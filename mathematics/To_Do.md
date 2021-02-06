@@ -34,9 +34,10 @@ format ##TAG: (tag text). A tag can be ended with ## or :
 ## UPDATED TO:
     Usefulpy 1.2.1
 ## TODO:
-    Update for use with quaternions
-    Update values for better use
+    Add more values to conversions
     Add Taylor Series for tan
+## BUG:
+    adding two trig funcs returns a mathfunc, which stops non-setting calling.
 
 # PrimeComposite.py
 ## UPDATEME:
