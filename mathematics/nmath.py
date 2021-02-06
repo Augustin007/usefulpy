@@ -50,7 +50,6 @@ RELEASE NOTES:
 '''
 
 ##UPDATED TO: Usefulpy 1.2.1
-##TODO: Update for use with quaternions
 
 
 ### HEADERS ###
@@ -81,11 +80,10 @@ _dirlist[-1] = 'Conversions.json'
 _conversions_file_name = _os.sep.join(_dirlist)
 conversions = _json.loads(open(_conversions_file_name).read())
 
-##TODO: Update values for better use
-#Some of the values here are not acurate enough for perfect use
+##TODO: Add more values to conversions
 
 
-### Support
+### Support ###
 def _reduce(function, sequence):
     it = iter(sequence); value = next(it)
     for element in it: value = function(value, element)
@@ -179,7 +177,7 @@ _radical = 5**(1/2)
 _radical = 13**(1/2)
 κ = kappa = (3+_radical)/2
 
- #ρ**3 = ρ+1
+#ρ**3 = ρ+1
 _radical = 69**(1/2)
 _a = (9+_radical)/18
 _b = (9-_radical)/18
@@ -640,6 +638,11 @@ def log(base, x):
         except: pass
         
     raise TypeError('Logarithm cannot be found of a type %s.' % type(x))
+
+@_decorators.default_with_decorator(mathfunc)
+def log_base(a, b):
+    '''Log base \\FIRSTARG of x'''
+    return log(a, b)
 
 @mathfunc
 def log2(x, /):
