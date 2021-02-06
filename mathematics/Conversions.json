@@ -96,11 +96,11 @@
   },
  "foot":
   {"type": "length",
-   "value": "3.280839895"
+   "value": "3.2808398949899997"
   },
  "inches":
   {"type": "length",
-   "value": "39.37007874"
+   "value": "39.37007873988"
   },
  "yard":
   {"type": "length",
@@ -108,11 +108,11 @@
   },
  "mile":
   {"type": "length",
-   "value": "1/1609"
+   "value": "0.0006213711922329545"
   },
  "nautical_mile":
   {"type": "length",
-   "value": "1/1852"
+   "value": "0.0005399670663248847"
   },
  " ":
   {"type": " ",
