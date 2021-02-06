@@ -3,27 +3,27 @@ import time
 import random
 
 def debug(func):
-    """Print the function signature and return value"""
+    '''Print the function signature and return value'''
     @functools.wraps(func)
     def wrapper_debug(*args, **kwargs):
         args_repr = [repr(a) for a in args]
-        kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]
+        kwargs_repr = [f'{k}={v!r}' for k, v in kwargs.items()]
         signature = ", ".join(args_repr + kwargs_repr)
-        print(f"Calling {func.__name__}({signature})")
+        print(f'Calling {func.__name__}({signature})')
         value = func(*args, **kwargs)
-        print(f"{func.__name__!r} returned {value!r}")
+        print(f'{func.__name__!r} returned {value!r}')
         return value
     return wrapper_debug
 
 def timer(func):
-    """Print the runtime of the decorated function"""
+    '''Print the runtime of the decorated function'''
     @functools.wraps(func)
     def wrapper_timer(*args, **kwargs):
         start_time = time.perf_counter()
         value = func(*args, **kwargs)
         end_time = time.perf_counter()
         run_time = end_time - start_time
-        print(f"Finished {func.__name__!r} in {run_time:.4f} secs")
+        print(f'Finished {func.__name__!r} in {run_time:.4f} secs')
         return value
     return wrapper_timer
 
@@ -119,3 +119,45 @@ def pipeline(b):
             return f'Pipeline[{str(self)}]'
     def pipe_dec(a): return _pipeline(a, b)
     return pipe_dec
+
+def default_setter(func):
+    def wrapper_func(arg):
+        @functools.wraps(func)
+        def nfunc(*args, **kwargs):
+            nfunc.__doc__ = func.__doc__.replace('\\FIRSTARG', str(arg))
+            return func(arg, *args, **kwargs)
+        return nfunc
+    wrapper_func.__doc__ = f'Makes a {func.__name__} function with arg\nas a default first argument'
+    wrapper_func.__name__ = func.__name__
+    return wrapper_func
+
+def default_with_decorator(decorator=None):
+    trivial = lambda x: x
+    if decorator is None: decorator = trivial
+    def default_setter(func):
+        @io_opt #io_opt minimizes duplicate functions in this case
+        def wrapper_func(arg):
+            @decorator
+            @functools.wraps(func)
+            def nfunc(*args, **kwargs):
+                return func(arg, *args, **kwargs)
+            nfunc.__doc__ = func.__doc__.replace('\\FIRSTARG', str(arg))
+            try: nfunc.__call__.__func__.__doc__ = func.__doc__.replace('\\FIRSTARG', str(arg))
+            except: pass
+            return nfunc
+        wrapper_func.__doc__ = f'Makes a {func.__name__} function with arg\nas a default first argument'
+        wrapper_func.__name__ = func.__name__
+        return wrapper_func
+    return default_setter
+
+def io_opt(func):
+    '''Minimizes duplicate functions in a function'''
+    func_store = {}
+    @functools.wraps(func)
+    def nfunc(*args, **kwargs):
+        input = str((args, kwargs))
+        if input in func_store: return func_store[input]
+        output = func(*args, **kwargs)
+        func_store[input] = output
+        return output
+    return nfunc
