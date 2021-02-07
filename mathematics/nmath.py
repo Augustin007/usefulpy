@@ -316,12 +316,14 @@ class mathfunc(object):
         self.__call__.__func__.__doc__ = self.func.__doc__
         return self
 
+    
     def __repr__(self):
         return f'<nmath.mathfunc {self.__name__} at {hex(id(self))}>'
 
     def __call__(self, x):
         return self.func(x)
 
+    @_decorators.io_opt
     def __add__(f, g):
         try:
             g.__call__
@@ -330,6 +332,7 @@ class mathfunc(object):
         if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ) + g)
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.io_opt
     def __radd__(f, g):
         try:
             g.__call__
@@ -338,6 +341,7 @@ class mathfunc(object):
         if _validation.is_numeric(g): return mathfunc(lambda θ: g + f.func(θ))
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.io_opt
     def __sub__(f, g):
         try:
             g.__call__
@@ -346,6 +350,7 @@ class mathfunc(object):
         if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ) - g)
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.io_opt
     def __rsub__(f, g):
         try:
             g.__call__
@@ -354,6 +359,7 @@ class mathfunc(object):
         if _validation.is_numeric(g): return mathfunc(lambda θ: g - f.func(θ))
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.io_opt
     def __mul__(f, g):
         try:
             g.__call__
@@ -362,6 +368,7 @@ class mathfunc(object):
         if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ)*g)
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.io_opt
     def __rmul__(f, g):
         try:
             g.__call__
@@ -370,6 +377,7 @@ class mathfunc(object):
         if _validation.is_numeric(g): return mathfunc(lambda θ: g*f.func(θ))
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.io_opt
     def __truediv__(f, g):
         try:
             g.__call__
@@ -378,6 +386,7 @@ class mathfunc(object):
         if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ)/g)
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.io_opt
     def __rtruediv__(f, g):
         try:
             g.__call__
@@ -386,6 +395,7 @@ class mathfunc(object):
         if _validation.is_numeric(g): return mathfunc(lambda θ: g/f.func(θ))
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.io_opt
     def __pow__(f, g):
         try:
             g.__call__
@@ -394,6 +404,7 @@ class mathfunc(object):
         if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ)**g)
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.io_opt
     def __rpow__(f, g):
         try:
             g.__call__
@@ -1162,9 +1173,14 @@ def cis(θ, n=1j):
     '''Return cos(θ) + nsin(θ)'''
     if abs(n) != 1:
         raise ValueError ('math domain error')
-    if n.real != 1:
+    if n.real != 0:
         raise ValueError ('math domain error')
     return cos(θ)+(n*sin(θ))
+
+@_decorators.default_with_decorator(trig_func)
+def cns(n, θ):
+    '''Return cos(θ)+\\FIRSTARG sin(θ)'''
+    return cis(θ, n)
 
 class t: #taylor series
     def cos(theta, /):
