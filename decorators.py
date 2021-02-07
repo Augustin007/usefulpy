@@ -27,6 +27,7 @@ def timer(func):
         return value
     return wrapper_timer
 
+@io_opt
 def repeat(num_times):
     def decorator_repeat(func):
         @functools.wraps(func)
@@ -37,6 +38,7 @@ def repeat(num_times):
         return wrapper_repeat
     return decorator_repeat
 
+@io_opt
 def timed_repeat(num_times, timing):
     def decorator_repeat(func):
         @functools.wraps(func)
@@ -50,6 +52,7 @@ def timed_repeat(num_times, timing):
 
 
 # Sample Dictionary: {2:(0, 1), 1:((10,), 0)}
+@io_opt
 def shift_args(dict_):
     ''' Decorator for a function
 
@@ -95,6 +98,7 @@ log base 1 of 2
         return wrapper_shift_args
     return deccorator_shift_args
 
+@io_opt
 def pipeline(b):
     class _pipeline(object):
         def __init__(self, a, b):
@@ -120,6 +124,7 @@ def pipeline(b):
     def pipe_dec(a): return _pipeline(a, b)
     return pipe_dec
 
+@io_opt
 def default_setter(func):
     def wrapper_func(arg):
         @functools.wraps(func)
@@ -131,27 +136,42 @@ def default_setter(func):
     wrapper_func.__name__ = func.__name__
     return wrapper_func
 
-def default_with_decorator(decorator=None):
-    trivial = lambda x: x
-    if decorator is None: decorator = trivial
+@io_opt # minimize exact returns
+def default_with_decorator(*decorators, check = None):
     def default_setter(func):
         @io_opt #io_opt minimizes duplicate functions in this case
         def wrapper_func(arg):
-            @decorator
+            if check:
+                if not check(arg):
+                    raise ValueError(f'{arg} is an inapropriate value for {func.__name__}')
             @functools.wraps(func)
             def nfunc(*args, **kwargs):
                 return func(arg, *args, **kwargs)
             nfunc.__doc__ = func.__doc__.replace('\\FIRSTARG', str(arg))
             try: nfunc.__call__.__func__.__doc__ = func.__doc__.replace('\\FIRSTARG', str(arg))
             except: pass
+            for decorator in decorators:
+                nfunc = decorator(nfunc)
             return nfunc
         wrapper_func.__doc__ = f'Makes a {func.__name__} function with arg\nas a default first argument'
         wrapper_func.__name__ = func.__name__
+        
         return wrapper_func
     return default_setter
 
+def arg_simplifier(simplify)
+    def wrapper_creator(func):
+        def wrapper_simplifier(*args, **kwargs):
+            args = [simplify(a) for a  in args]
+            for a, b in kwargs.items():
+                new_kwarg = simplify(b)
+                if new_kwarg != b: kwargs[a] = b
+            return func(*new_args, **new_kwargs)
+        return wrapper_simplifier
+    return wrapper_creator
+
 def io_opt(func):
-    '''Minimizes duplicate functions in a function'''
+    '''Minimizes duplicate functions returned from a function'''
     func_store = {}
     @functools.wraps(func)
     def nfunc(*args, **kwargs):
