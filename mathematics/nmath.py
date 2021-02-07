@@ -1,6 +1,6 @@
 '''
 File: nmath.py
-Version: 3.1.1
+Version: 3.2.1
 Author: Austin Garcia
 
 This file is essentially the importation of the math module, but a few small
@@ -46,7 +46,7 @@ RELEASE NOTES:
    Small bugfixes
  3.2
   Version 3.2.1
-  ...
+   Mathfunc improvements/ trigfunc stuff, decorators
 '''
 
 ##UPDATED TO: Usefulpy 1.2.1
