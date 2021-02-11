@@ -44,12 +44,11 @@ mathematics v1.2.3
 ### INFO ###
 __author__ = 'Austin Garcia'
 __version__ = '1.1.2'
+__package__ = 'usefulpy'
 
 ### IMPORT ###
-try: import validation, formatting, mathematics, quickthreads, decorators
-except: from usefulpy import validation, formatting, mathematics, quickthreads, decorators
-try: from IDLE import IDLE
-except: from usefulpy.IDLE import IDLE
+from . import validation, formatting, mathematics, quickthreads, decorators
+from .IDLE import IDLE
 
 if __name__ == '__main__': IDLE()
 
