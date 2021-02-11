@@ -27,6 +27,18 @@ def timer(func):
         return value
     return wrapper_timer
 
+def io_opt(func):
+    '''Minimizes duplicate functions returned from a function'''
+    @functools.wraps(func)
+    def nfunc(*args, **kwargs):
+        input = str((args, kwargs))
+        if input in nfunc.func_store: return nfunc.func_store[input]
+        output = func(*args, **kwargs)
+        nfunc.func_store[input] = output
+        return output
+    nfunc.func_store = {}
+    return nfunc
+
 @io_opt
 def repeat(num_times):
     def decorator_repeat(func):
@@ -98,30 +110,36 @@ log base 1 of 2
         return wrapper_shift_args
     return deccorator_shift_args
 
+def _getstr(fn, *args):
+    if len(args) != 0:
+        args = list(args)
+        args[0:1] = [fn, args[0]]
+        return tuple([_getstr(a) for a in args])
+    if type(fn) is str: return fn
+    if hasattr(fn, '__name__'): return fn.__name__
+    if hasattr(fn, '__str__'): return str(fn)
+    return repr(fn)
+
 @io_opt
 def pipeline(b):
     class _pipeline(object):
         def __init__(self, a, b):
             self.a = a
             self.b = b
+
         @functools.wraps(b)
         def __call__(self, *args, **kwargs):
             return self.a(self.b(*args, **kwargs))
+
         def __str__(self):
-            try: a = self.a.__name__
-            except:
-                try: a = str(self.a)
-                except:
-                    a = repr(self.a)
-            try: b = self.b.__name__
-            except:
-                try: b = str(self.b)
-                except:
-                    b = repr(self.b)
+            a, b = _getstr(self.a, self.b)
             return a+'———'+b
+        
         def __repr__(self):
-            return f'Pipeline[{str(self)}]'
+            return f'<Pipeline[{str(self)}] at {hex(id(self))}>'
+    
     def pipe_dec(a): return _pipeline(a, b)
+
     return pipe_dec
 
 @io_opt
@@ -159,25 +177,16 @@ def default_with_decorator(*decorators, check = None):
         return wrapper_func
     return default_setter
 
-def arg_simplifier(simplify)
+def arg_modifier(modify):
     def wrapper_creator(func):
-        def wrapper_simplifier(*args, **kwargs):
-            args = [simplify(a) for a  in args]
+        @functools.wraps(func)
+        def wrapper_modifier(*args, **kwargs):
+            args = [modify(a) for a  in args]
             for a, b in kwargs.items():
-                new_kwarg = simplify(b)
+                new_kwarg = modify(b)
                 if new_kwarg != b: kwargs[a] = b
-            return func(*new_args, **new_kwargs)
-        return wrapper_simplifier
+            return func(*args, **kwargs)
+        return wrapper_modifier
     return wrapper_creator
 
-def io_opt(func):
-    '''Minimizes duplicate functions returned from a function'''
-    func_store = {}
-    @functools.wraps(func)
-    def nfunc(*args, **kwargs):
-        input = str((args, kwargs))
-        if input in func_store: return func_store[input]
-        output = func(*args, **kwargs)
-        func_store[input] = output
-        return output
-    return nfunc
+
