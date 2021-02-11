@@ -299,6 +299,15 @@ def is_iterable(n):
         return True
     except: return False
 
+def merge_dicts(a, b, exclude = True, fill_val = None):
+    ndict = {}
+    for key in a:
+        if key in b: ndict[key] = (a[key],b[key])
+    if exclude: return ndict
+    for key in b:
+        ndict[key] = (a.get(key, fill_val),b.get(key, fill_val))
+    return ndict
+
 def flatten(iterable):
     '''Flatten an iterable into a single dimension'''
     assert is_iterable(iterable)
