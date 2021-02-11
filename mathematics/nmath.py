@@ -55,24 +55,24 @@ RELEASE NOTES:
 ### HEADERS ###
 __version__='3.1.1'
 __author__ = 'Austin Garcia'
-
+__package__='usefulpy.mathematics'
 
 ### IMPORTS ###
-from usefulpy import validation as _validation
-from usefulpy import decorators as _decorators
+from .constants import *
+from .. import validation as _validation
+from .. import decorators as _decorators
 
 from decimal import Decimal as number
 from fractions import Fraction as fraction
 
-import operator as _op
+import operator as _op # Is not being used currently?
 import cmath as _cmath
 import math as _math
 import json as _json
 import os as _os
 
-from math import comb, copysign, erf, erfc, fabs, factorial
-from math import fmod, fsum, gamma, lgamma, modf
-from math import nextafter, perm, prod, remainder, trunc, ulp
+from math import comb, copysign, erf, erfc, fabs, factorial, fmod, fsum, gamma
+from math import lgamma, modf, nextafter, perm, prod, remainder, trunc, ulp
 
 ### CONVERSIONS ###
 _dirlist = __file__.split(_os.sep)
@@ -307,115 +307,483 @@ class tuple(_old_tuple):
         '''flatten into 1 dimension'''
         return _validation.flatten(self)
 
+##TODO: (mathfunc) Auto-generate names for this when based on other functions
+##TODO: (mathfunc) Auto-generate derivatives, etc for functions based on other functions
+##TODO: (mathfunc) add a .ispolynomial() check?
+##TODO: (mathfunc) optimize for stuff like (cos**2)**2 should return a single func cos**4, not (cos**2)**2
+##TODO: (mathfunc) polynomial class? polynomial
+##TODO: (mathfunc) add a .roots() finder... maybe a number of roots
 class mathfunc(object):
-    def __new__(cls, func): ##, *extras):
+    def __new__(cls, func, **extras):
         self = super(mathfunc, cls).__new__(cls)
+        self.__dict__ = extras
         self.func = func
         self.__name__ = self.func.__name__
         self.__doc__ = self.func.__doc__
-        self.__call__.__func__.__doc__ = self.func.__doc__
+        self.composition = self.__name__+'(x)'
         return self
-
     
     def __repr__(self):
         return f'<nmath.mathfunc {self.__name__} at {hex(id(self))}>'
 
     def __call__(self, x):
+        try:
+            x.__call__
+            y = x
+            h = mathfunc(lambda x: self(y(x)))
+            h.composition = self.composition.replace('(x)', '('+x.composition+')')
+            h.__name__ = self.__name__[0]+'0'+x.__name__[0]
+            hmd = _validation.merge_dicts(self.__dict__, x.__dict__)
+            for key, value_pair in hmd.items():
+                fv, gv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':continue
+                    h.__dict__[key] = (mul, (nest, (fv, x), gv))
+                    continue
+            h.composition = '('+f.composition+'+'+g.composition+')'
+            return h
+        except: pass
         return self.func(x)
 
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __add__(f, g):
+        if f'add{g}' in f.__dict__: return f.solve_key(f'add{g}')
+        if g == 0: return f
         try:
             g.__call__
-            return mathfunc(lambda θ: f(θ) + g(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ) + g)
+        else:
+            h = mathfunc(lambda x: f(x) + g(x))
+            h.__name__ = f.__name__[0]+'p'+g.__name__[0]
+            hmd = _validation.merge_dicts(f.__dict__, g.__dict__)
+            for key, value_pair in hmd.items():
+                fv, gv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = _math.gcd(fv, gv)
+                        continue
+                    h.__dict__[key] = (add, (fv, gv))
+                    continue
+            h.composition = '('+f.composition+'+'+g.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: f.func(x) + g)
+            h.__name__ = f.__name__[0]+'p'+str(g)[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = value
+                        continue
+                    h.__dict__[key] = value
+                    continue
+            h.composition = '('+f.composition+'+'+str(g)
+            return h
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __radd__(f, g):
+        if f'radd{g}' in f.__dict__: return f.solve_key(f'radd{g}')
+        if g == 0: return f
         try:
             g.__call__
-            return mathfunc(lambda θ: g(θ) + f.func(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: g + f.func(θ))
+        else:
+            h = mathfunc(lambda x: g(x)+f(x))
+            h.__name__ = g.__name__[0]+'p'+f.__name__[0]
+            hmd = _validation.merge_dicts(g.__dict__, f.__dict__)
+            for key, value_pair in hmd.items():
+                gv, fv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = _math.gcd(gv, fv)
+                        continue
+                    h.__dict__[key] = (add, (gv, fv))
+                    continue
+            h.composition = '('+g.composition+'+'+f.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: g + f(x))
+            h.__name__ = str(g)+'p'+f.__name__[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = value
+                        continue
+                    h.__dict__[key] = value
+                    continue
+            h.composition = '('+str(g)+'+'+f.composition+')'
+            return h
         raise TypeError('Inappropriate argument type.')
-
+    
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __sub__(f, g):
+        if g == 0: return f
+        if f'sub{g}' in f.__dict__: return f.solve_key(f'sub{g}')
         try:
             g.__call__
-            return mathfunc(lambda θ: f.func(θ) - g(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ) - g)
+        else:
+            h = mathfunc(lambda x: f(x) - g(x))
+            h.__name__ = f.__name__[0]+'m'+g.__name__[0]
+            hmd = _validation.merge_dicts(f.__dict__, g.__dict__)
+            for key, value_pair in hmd.items():
+                fv, gv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = _math.gcd(fv, gv)
+                        continue
+                    h.__dict__[key] = (sub, (fv, gv))
+                    continue
+            h.composition = '('+f.composition+'-'+g.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: f(x) - g)
+            h.__name__ = f.__name__[0]+'m'+str(g)[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = value
+                        continue
+                    h.__dict__[key] = value
+                    continue
+            h.composition = '('+f.composition+'-'+str(g)+')'
+            return h
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __rsub__(f, g):
+        if g == 0: return -f
+        if f'rsub{g}' in f.__dict__: return f.solve_key(f'rsub{g}')
         try:
             g.__call__
-            return mathfunc(lambda θ: g(θ) - f.func(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: g - f.func(θ))
+        else:
+            h = mathfunc(lambda x: g(x) - f(x))
+            h.__name__ = g.__name__[0]+'m'+f.__name__[0]
+            hmd = _validation.merge_dicts(g.__dict__, f.__dict__)
+            for key, value_pair in hmd.items():
+                gv, fv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = _math.gcd(gv, fv)
+                        continue
+                    h.__dict__[key] = (sub, (gv, fv))
+                    continue
+            h.composition = '('+g.composition+'-'+f.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: g-f(x))
+            h.__name__ = str(g)+'m'+f.__name__[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = value
+                        continue
+                    h.__dict__[key] = value
+                    continue
+            h.composition = '('+str(g)+'-'+f.composition+')'
+            return h
         raise TypeError('Inappropriate argument type.')
 
+    
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __mul__(f, g):
+        if g == 1: return f
+        if f'mul{g}' in f.__dict__: return f.solve_key(f'mul{g}')
         try:
             g.__call__
-            return mathfunc(lambda θ: f.func(θ)*g(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ)*g)
+        else:
+            h = mathfunc(lambda x: f(x) * g(x))
+            h.__name__ = f.__name__[0]+'t'+g.__name__[0]
+            hmd = _validation.merge_dicts(f.__dict__, g.__dict__)
+            for key, value_pair in hmd.items():
+                fv, gv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = _math.gcd(fv, gv)
+                        continue
+                    h.__dict__[key] = (add, ((mul, (fv, g)) ,(mul, (gv, f))))
+                    continue
+            h.composition = '('+f.composition+'*'+g.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: f(x) * g)
+            h.__name__ = f.__name__[0]+'t'+str(g)[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = value
+                        continue
+                    h.__dict__[key] = (mul, (value, g))
+                    continue
+            h.composition = '('+f.composition+'*'+str(g)+')'
+            return h
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __rmul__(f, g):
+        if g == 1: return f
+        if f'rmul{g}' in f.__dict__: return f.solve_key(f'rmul{g}')
         try:
             g.__call__
-            return mathfunc(lambda θ: g(θ)*f.func(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: g*f.func(θ))
+        else:
+            h = mathfunc(lambda x: g(x) * f(x))
+            h.__name__ = g.__name__[0]+'t'+f.__name__[0]
+            hmd = _validation.merge_dicts(g.__dict__, f.__dict__)
+            for key, value_pair in hmd.items():
+                gv, fv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = _math.gcd(gv, fv)
+                        continue
+                    h.__dict__[key] = (add, ((mul, (fv, g)) ,(mul, (gv, f))))
+                    continue
+            h.composition = '('+g.composition+'*'+f.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: g * f(x))
+            h.__name__ = str(g)+'t'+f.__name__[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = value
+                        continue
+                    h.__dict__[key] = (rmul, (value, g))
+                    continue
+            h.composition = '('+str(g)+'*'+f.composition+')'
+            return h
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __truediv__(f, g):
+        if g == 1: return f
+        if f'div{g}' in f.__dict__: return f.solve_key(f'div{g}')
         try:
             g.__call__
-            return mathfunc(lambda θ: f.func(θ)/g(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ)/g)
+        else:
+            h = mathfunc(lambda x: f(x) / g(x))
+            h.__name__ = f.__name__[0]+'o'+g.__name__[0]
+            hmd = _validation.merge_dicts(f.__dict__, g.__dict__)
+            for key, value_pair in hmd.items():
+                fv, gv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle': continue
+                    h.__dict__[key] = (div, (sub, (mul(g, fv), mul(f, gv))), (mul, (g, g)))
+                    continue
+            h.composition = '('+f.composition+'/'+g.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: f(x) / g)
+            h.__name__ = f.__name__[0]+'o'+str(g)[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = value
+                        continue
+                    h.__dict__[key] = (div, (value, g))
+                    continue
+            h.composition = '('+f.composition+'/'+str(g)+')'
+            return h
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __rtruediv__(f, g):
+        if f'rdiv{g}' in f.__dict__: return f.solve_key(f'rdiv{g}')
         try:
             g.__call__
-            return mathfunc(lambda θ: g(θ)/f.func(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: g/f.func(θ))
+        else:
+            h = mathfunc(lambda x: f(x) / g(x))
+            h.__name__ = g.__name__[0]+'o'+f.__name__[0]
+            hmd = _validation.merge_dicts(g.__dict__, f.__dict__)
+            for key, value_pair in hmd.items():
+                gv, fv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle': continue
+                    h.__dict__[key] = (div, (rsub, (mul(g, fv), mul(f, gv))), (mul, (f, f)))
+                    continue
+            h.composition = '('+g.composition+'/'+f.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: f(x) / g)
+            h.__name__ = str(g)+'o'+f.__name__[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = value
+                        continue
+                    h.__dict__[key] = (div, (value, -(f**2)))
+                    continue
+            h.composition = '('+str(g)+'/'+f.composition+')'
+            return h
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __pow__(f, g):
+        if g == 1: return f
+        if f'pow{g}' in f.__dict__: return f.solve_key(f'pow{g}')
         try:
             g.__call__
-            return mathfunc(lambda θ: f.func(θ)**g(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: f.func(θ)**g)
+        else:
+            h = mathfunc(lambda x: f(x) ** g(x))
+            h.__name__ = f.__name__[0]+'r'+g.__name__[0]
+            hmd = _validation.merge_dicts(f.__dict__, g.__dict__)
+            for key, value_pair in hmd.items():
+                fv, gv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = _math.gcd(fv, gv)
+                        continue
+                    h.__dict__[key] = (mul, (h, (add, ((mul, (ln(f), gv)),(mul, ((div, (fv, f)), g))))))
+                    continue
+            h.composition = '('+f.composition+'**'+g.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: f(x) ** g)
+            h.__name__ = f.__name__[0]+'r'+str(g)[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle':
+                        h.__dict__[key] = value
+                        continue
+                    h.__dict__[key] = (mul, ((mul, (g, pow(f, g-1)), (value))))
+                    continue
+            h.composition = '('+f.composition+'**'+str(g)+')'
+            return h
         raise TypeError('Inappropriate argument type.')
 
+    @_decorators.arg_modifier(_validation.trynumber)
     @_decorators.io_opt
     def __rpow__(f, g):
+        if f'rpow{g}' in f.__dict__: return f.solve_key(f'rpow{g}')
         try:
             g.__call__
-            return mathfunc(lambda θ: g(θ)**f.func(θ))
         except: pass
-        if _validation.is_numeric(g): return mathfunc(lambda θ: g**f.func(θ))
+        else:
+            h = mathfunc(lambda x: f(x) ** g(x))
+            h.__name__ = g.__name__[0]+'r'+f.__name__[0]
+            hmd = _validation.merge_dicts(g.__dict__, f.__dict__)
+            for key, value_pair in hmd.items():
+                gv, fv = value_pair
+                if key.startswith('prime'):
+                    if key == 'prime_cycle': continue
+                    h.__dict__[key] = (mul, (add, ((mul, (ln(g), fv)),(mul, (div, (gv, g)), f))))
+                    continue
+            h.composition = '('+g.composition+'**'+f.composition+')'
+            return h
+        if _validation.is_numeric(g):
+            h = mathfunc(lambda x: f(x) + g)
+            h.__name__ = str(g)+'o'+f.__name__[0]
+            for key, value in f.__dict__.items():
+                if key.startswith('prime'):
+                    if key == 'prime_cycle': continue
+                    h.__dict__[key] = (mul, (mul, (h, ln(g)), value))
+                    continue
+            h.composition = '('+str(g)+'**'+f.composition+')'
+            return h
         raise TypeError('Inappropriate argument type.')
+
+    @_decorators.arg_modifier(_validation.trynumber)
+    @_decorators.io_opt
+    def __neg__(f):
+        if 'negative' in f.__dict__: return f.__dict__['negative']
+        h = mathfunc(lambda x: -(f(x)), negative=f)
+        for key, value in f.__dict__.items():
+            if key.startswith('prime'):
+                if key == 'prime_cycle':
+                    h.__dict__[key] = value
+                    continue
+                h.__dict__[key] = (sub, (0, value))
+                continue
+        h.__name__=f'neg_{f.__name__}'
+        h.composition = '-'+f.composition
+        return h
+
+    def __pos__(f):
+        return f
+
+    @_decorators.arg_modifier(_validation.trynumber)
+    @_decorators.io_opt
+    def __abs__(f):
+        return mathfunc(lambda x: abs(f(x)))
+
+    @staticmethod
+    @_decorators.io_opt
+    @_decorators.debug
+    def resolve_tuple_key(x):
+        if type(x) is _old_tuple:
+            y, z = x
+            a, b = z
+            if type(a) is _old_tuple:
+                a = mathfunc.resolve_tuple_key(a)
+                z = (a, b)
+            if type(b) is _old_tuple:
+                b = mathfunc.resolve_tuple_key(b)
+                z = (a, b)
+            return y(*z)
+        return x
+
+    @_decorators.debug
+    def solve_key(self, key):
+        self.__dict__[key] = self.resolve_tuple_key(self.__dict__[key])
+        return self.__dict__[key]
+
+    @_decorators.arg_modifier(_validation.trynumber)
+    @_decorators.io_opt
+    def derivative(f, kth=1):
+        '''find the kth derivative of f'''
+        if 'prime_cycle' in f.__dict__: kth = kth%f.prime_cycle
+        if f'prime{kth}' in f.__dict__: return f.solve_key(f'prime{kth}')
+        assert _validation.is_integer(kth)
+        assert kth >= 0
+        
+        if kth == 0: return f
+        if kth == 1:
+            return mathfunc(lambda x: ((f(x+dx)-f(x))/dx))
+        return f.derivative(kth-1).derivative()
+
+dx = 1e-14
+
+add = lambda x, y: x+y
+radd = lambda x, y: y+x
+sub = lambda x, y: x-y
+rsub = lambda x, y: y-x
+mul = lambda x, y: x*y
+rmul = lambda x, y: y*x
+div = lambda x, y: x/y
+rdiv = lambda x, y: y/x
+rpow = lambda x, y: y**x
+nest = lambda x, y: x(y)
+
+@_decorators.io_opt
+def mathfunc_with_extras(**extras):
+    @_decorators.io_opt
+    def mathfunc_dec(func): return mathfunc(func, **extras)
+    return mathfunc_dec
 
 def pm(a, b):
     '''Return a ± b'''
     return tuple((a+b, a-b))
+
+@mathfunc
+def identity(x):
+    return x
+identity.composition = 'x'
+
+identity.prime1 = 1
 
 @mathfunc
 def floor(x, /):
@@ -562,11 +930,17 @@ def exp(x, /):
     # the method __pow__ or __rpow__ calls exp, but if it doesn't then this
     # handles it.
 
+exp.prime_cycle = 1
+
 @mathfunc
 def expm1(x, /):
     '''Return exp(x)-1'''
     try: return _math.expm1(x)
     except: return exp(x)-1
+
+exp.sub1 = expm1
+expm1.derivative = exp
+expm1.add1 = exp
 
 @mathfunc
 def sqrt(x, /):
@@ -629,6 +1003,8 @@ def ln(x, /):
         try: return x.__log__(e)
         except: pass
     raise TypeError('Natural logarithm cannot be found of a type %s.' % type(x))
+
+ln.prime1 = 1/identity
 
 @_decorators.shift_args({2:(0, 1), 1:((10,), 0)})
 def log(base, x):
@@ -728,40 +1104,51 @@ def grad():
     '''Change setting to grad'''
     _changeto('grad')
 
-##BUG: adding two trig funcs returns a mathfunc, which stops non-setting calling.
+##BUG: adding two trig funcs returns a mathfunc, which stops non-default setting calling.
 class trig_func(mathfunc):
-    def __new__(cls, func):
-        self = super(trig_func, cls).__new__(cls, func)
-        self.func = func
-        self.__name__ = self.func.__name__
-        self.__doc__ = self.func.__doc__
-        self.__call__.__func__.__doc__ = self.func.__doc__
-        return self
 
     def __call__(self, θ, /, setting = None):
+        try:
+            θ.__call__
+            y = θ
+            return mathfunc(lambda θ: self(y(θ)))
+        except: pass
         if setting is None: setting = _angle
         θ = _validation.trynumber(convert(θ, setting, 'rad'))
         return self.func(θ)
 
     def __repr__(self):
         return  f'<nmath.trig_func {self.__name__} at {hex(id(self))}>'
-    
+
+@_decorators.io_opt
+def trig_func_with_extras(**extras):
+    @_decorators.io_opt
+    def trig_func_dec(func): return trig_func(func, **extras)
+    return trig_func_dec
+
 class inverse_trig_func(mathfunc):
-    def __new__(cls, func):
-        self = super(inverse_trig_func, cls).__new__(cls, func)
-        self.func = func
-        self.__name__ = self.func.__name__
-        self.__doc__ = self.func.__doc__
-        self.__call__.__func__.__doc__ = self.func.__doc__
-        return self
 
     def __call__(self, x, /, setting = None):
+        try:
+            x.__call__
+            y = x
+            return mathfunc(lambda x: self(y(x)))
+        except: pass
         if setting is None: setting = _angle
         θ = self.func(_validation.trynumber(x))
         return _validation.trynumber(convert(θ, 'rad', setting))
 
     def __repr__(self):
         return  f'<nmath.inverse_trig_func {self.__name__} at {hex(id(self))}>'
+
+@_decorators.io_opt
+def inverse_trig_func_with_extras(**extras):
+    @_decorators.io_opt
+    def inverse_trig_func_dec(func): return inverse_trig_func(func, **extras)
+    return inverse_trig_func_dec
+
+def get_angle():
+    return _angle
 
 @inverse_trig_func
 def acos(x):
@@ -1181,6 +1568,33 @@ def cis(θ, n=1j):
 def cns(n, θ):
     '''Return cos(θ)+\\FIRSTARG sin(θ)'''
     return cis(θ, n)
+
+cos.prime1=-sin
+cos.prime2=-cos
+cos.prime3=sin
+cos.prime_cycle = 4
+
+sin.prime1=cos
+sin.prime2=-sin
+sin.prime3=-cos
+sin.prime_cycle = 4
+
+(-sin).prime1=-cos
+(-sin).prime2=sin
+(-sin).prime3=cos
+(-sin).prime_cycle = 4
+
+(-cos).prime1=sin
+(-cos).prime2=cos
+(-cos).prime3=-sin
+(-cos).prime_cycle = 4
+
+tan.prime1 = sec**2
+sec.prime1 = sec*tan
+cot.prime1 = -(csc**2)
+csc.prime1 = -csc*cot
+
+
 
 class t: #taylor series
     def cos(theta, /):
