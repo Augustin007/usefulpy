@@ -43,7 +43,7 @@ RELEASE NOTES:
    improved look of repr and str.
  2.2
   Version 2.2.1
-   __pow__, __rpow__, __ln__, and __log__ are working.
+   __pow__, __rpow__, __ln__, __log__, (et cetera) are working. 
 '''
 ##UPDATED TO: Usefulpy 1.2.1
 
@@ -139,9 +139,48 @@ variations of input'''
         '''return True if quaternion is a versor (unit quaternion)'''
         return isclose(1, abs(self), rel_tol = 0, abs_tol = 1e-14)
 
+    def normal(self):
+        return self/abs(self)
+
+    def vtuple(q):
+        return q.i, q.j, q.k
+
+    def astuple(q):
+        return q.real, q.i, q.j, q/k
+
+    def dot(v1, v2):
+        '''dot product of v1 and v2'''
+        a1, b1, c1, d1 = v1.astuple()
+        a2, b2, c2, d2 = v2.astuple()
+        return a1*a2+b1*b2+c1*c2+d1*d2
+
+    
+
+    def cross(v1, v2):
+        '''cross product of v1 and v2'''
+        if v1.real:
+            raise ValueError('v1 must have no real part')
+        if v2.real:
+            raise ValueError('v2 must have no real part')
+        b1, c1, d1 = v1.vtuple()
+        b2, c2, d2 = v2.vtuple()
+        return quaternion(0,(c1*d2-d1*c2),(d1*b2-b1*d2),(b1*c2-c1*b2))
+
     def is_unit(self, /):
         '''return True if distance from 0 is a single unit'''
         return isclose(1, abs(self), rel_tol = 0, abs_tol = 1e-14)
+
+    def rotate(p, r, v, a):
+        '''rotate point p r radians around vector v'''
+        p = p-a
+        v = v.normal().v()
+        q = cis(r/2, v)
+        p1 = q*p*(q**-1)
+        return p1.v()+a.v()
+
+    def __invert__(self, /):
+        '''return the mathematical conjugate of self'''
+        return quaternion(self.real, -self.i, -self.j, -self.k)
 
     def conjugate(self, /):
         '''return the mathematical conjugate of self'''
