@@ -1,3 +1,112 @@
+inf = float('inf')
+neg_inf = -inf
+infj = complex('infj')
+neg_infj = -infj
+nanj = complex('nanj')
+nan = float('nan')
+
+
+### Non-Algebraic Numbers ###
+
+# way more digits than it will store... so the most accurate possible
+# I originially had it be calculated with formulae, (averaging the leibniz
+# and basil approach with odd numbers for pi) but I decided that this
+# was more efficient and more accurate (I kept on adjusting the numbers to get
+# a bit more accuracy, but I still wasn't quite happy with it.
+
+#e, number where f(x)=e^x, its derivative, f'(x) also equals e^x
+e = 2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274#...
+# π, ratio of diameter to circumference in circle
+π = pi =  3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421#...
+# τ, ratio of diameter to circumference in circle
+τ = tau = 2*pi
+
+### Algebraic numbers ###
+
+# φ
+#
+# 1/(1+1/(1+1/(1+1/(1+1/(1+1/(1+1/(1+1/(1+1/(...)))))))))
+# φ-1 = 1/φ, φ**2-φ = 1, φ**2-φ-1 = 0, etc.
+# also (a+a*Φ)/a*Φ = a/a*Φ, golden ratio
+#
+# pops up everywhere
+# for example, a math problem I did recently:
+#
+# f'(x) = f^-1(x)
+# If you try to find a solution in the form
+# f(x) = a(x**r)
+# then f'(x) = (x**(r-1))
+# and f^-1(x) = ((1/a)**(1/r))*(x**(1/r))
+# if the equations will be equal, the power of x has to be equal, so
+# (x**(r-1)) = (x**(1/r))
+# (r-1) = (1/r) # No need to go any further, this is a definition of φ
+# r = φ, (or the radical conjugate of φ, which we will note as φ_)
+# Thus:
+# (1/a)**(1/φ_) = φ_*a and (1/a)**(1/φ) = ra
+# or
+# (1/a)**(1/r) = ra
+# where r assumes the properties of φ and φ_
+# (1/a)**(1/r) = ra
+# (1/a)**(r-1) = ra   #property of φ
+# a**(1-r) = ra
+# a**r = r
+# a = ^r√r # rth root of r, true for φ and φ_
+#
+# this means f'(x) = f^-1(x) when f(x) = (^φ√φ)*(x**φ) or (^φ_√φ_)*(x**φ_)
+# let's check this (because I've gotten carried away)
+# f'(x) = φ(φ^√(1/φ))*(x**(φ-1))
+# f'(x) = φ(φ^√φ**-1)*(x**(1/φ))
+# f'(x) = φ(φ^√φ**-1)*(^φ√x)
+# f'(x) = ^φ√(φ**φ)(φ^√φ**-1)*(^φ√x)
+# f'(x) = ^φ√((φ**φ)φ**-1)*(^φ√x)
+# f'(x) = ^φ√((φ**(φ-1))*^φ√x
+# f'(x) = ^φ√((φ**(1/φ))*^φ√x
+#
+# f'(x) = ^(φ**2)√φ * ^φ√x
+#
+# f^-1(x) = (1/^φ√(1/φ))**(1/φ) * φ**1/φ
+# f^-1(x) = (1/^φ√(1/φ))**(1/φ) * ^φ√x
+# f^-1(x) = (1/(1/φ**(1/φ)))**(1/φ) * ^φ√x
+# f^-1(x) = (φ**(1/φ))**(1/φ) * ^φ√x
+# f^-1(x) = φ**(1/φ**2) * ^φ√x
+#
+# f^-1(x) = ^(φ**2)√φ * ^φ√x
+#
+# f'(x) = ^(φ**2)√φ * ^φ√x, f^-1(x) = ^(φ**2)√φ * ^φ√x
+# f'(x) = f^-1(x)
+# Quod Erat Demonstratum!
+
+_radical = 5**(1/2)
+φ = phi = (1+_radical)/2
+#radical conjugate of φ, same properties
+φ_ = phi_ = (1-_radical)/2 
+
+
+#Bronze ratio, 3+1/(3+1/(3+1/(3+1/(3+1/(...)))))
+_radical = 13**(1/2)
+κ = kappa = (3+_radical)/2
+
+#ρ**3 = ρ+1
+_radical = 69**(1/2)
+_a = (9+_radical)/18
+_b = (9-_radical)/18
+ρ = rho = _a**(1/3)+_b**(1/3)
+
+#ψ, supergolden ratio x**3 = x**2+1
+_radical =93**(1/2)
+_a = ((29+3*_radical)/2)**(1/3)
+_b = ((29-3*_radical)/2)**(1/3)
+_sum = (1+_a+_b)
+ψ = supergoldenpsi = _sum/3
+
+del _radical
+del _sum
+
+# Its a bit of a tongue twister, but: the number nicknamed monster is the
+# Number of sets of symmetries in the largest finite group of sets of symmetries
+monster = 808017424794512875886459904961710757005754368000000000
+
+
 Avogadro = 6.02214076e+23
 Boltzmann = 1.380649e-23
 Btu = 1055.05585262
