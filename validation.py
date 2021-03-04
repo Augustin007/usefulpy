@@ -35,7 +35,6 @@ __version__ = '1.2.1'
 __package__ = 'usefulpy'
 import sys
 import datetime
-from collections import namedtuple, deque
 
 _chastise = '''
 Your input was invalid.
