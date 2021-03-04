@@ -1,3 +1,30 @@
+'''
+File: decorators.py
+Version: 1.1.1
+Author: Austin Garcia
+
+This program is meant to contain decorators for a better python experience
+
+LICENSE:
+This is a section of usefulpy. See usefulpy's lisence.md file.
+
+PLATFORMS:
+This is a section of usefulpy. See usefulpy.__init__'s "PLATFORMS" section.
+
+INSTALLATION:
+Put this file where Python can see it.
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Decorators.py contains a few decorators
+'''
+
+__version__ = '1.1.1'
+__author__ = 'Austin Garcia'
+__package__ = 'usefulpy'
+
 import functools
 import time
 import random

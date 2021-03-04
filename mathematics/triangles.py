@@ -31,12 +31,12 @@ RELEASE NOTES:
 ### INFO ###
 __version__ = '1.1.2'
 __author__ = 'Austin Garcia'
-__package__ = 'usefulpy'
+__package__ = 'usefulpy.mathematics'
 
 
 ### IMPORTS ###
 import math as _math
-from . import validation as _validation
+from .. import validation as _validation
 
 ### CHECKS ###
 def isTriangle(a, b, c):

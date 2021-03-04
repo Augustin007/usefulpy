@@ -28,12 +28,12 @@ RELEASE NOTES:
 
 __version__ = '1.1.1'
 __author__ = 'Austin Garcia'
-
+__package__ = 'usefulpy'
 from runpy import run_path as run
-from usefulpy.mathematics import *
-from usefulpy.validation import *
-from usefulpy.formatting import *
-from usefulpy.quickthreads import *
+from .mathematics import *
+from .validation import *
+from .formatting import *
+from .quickthreads import *
 
 def _get_index(str, index):
     try: return str.index(index)

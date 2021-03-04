@@ -49,15 +49,12 @@ RELEASE NOTES:
 
 __author__ = 'Austin Garcia'
 __version__ = '2.1.2'
+__package__ = 'usefulpy.mathematics'
 
-from usefulpy import validation as _validation
-from usefulpy.IDLE import _usefulpy_correct_syntax
-try:
-    from nmath import *
-    from PrimeComposite import *
-except:
-    from usefulpy.mathematics.nmath import *
-    from usefulpy.mathematics.PrimeComposite import *
+from .. import validation as _validation
+from ..IDLE import _usefulpy_correct_syntax
+from .nmath import *
+from .PrimeComposite import *
 
 class quaternion(object):
     '''A quaternion class:

@@ -64,11 +64,11 @@ __author__ = 'Austin Garcia'
 __package__ = 'usefulpy.mathematics'
 
 ### IMPORTS ###
+from .basenum import *
+from .eq import *
 from .nmath import *
 from .PrimeComposite import *
-from .basenum import *
-from .triangles import *
-from .eq import *
 from .quaternion import *
+from .triangles import *
 
 #eof

@@ -32,6 +32,7 @@ RELEASE NOTES:
 ##UPDATED TO: Usefulpy 1.2.1
 __author__ = 'Austin Garcia'
 __version__ = '1.2.1'
+__package__ = 'usefulpy'
 import sys
 import datetime
 from collections import namedtuple, deque
@@ -129,7 +130,7 @@ into a float.'''
 
 def is_floatlist(s):
     '''Check if a list is composed solely of numbers'''
-    try: Numbers = list(map(float, NumbersStr.split())); return True
+    try: list(map(float, s.split())); return True
     except: return False
 
 def floatlistinput(Prompt = '', beginning = '', ending = None, \
@@ -192,7 +193,7 @@ def bool(x):
 
 def boolinput(Prompt):
     '''Continue to repeat an input prompt until the input is 'True' or 'False'.'''
-    return bool(validation.validinput(is_bool, Prompt))
+    return bool(validinput(isbool, Prompt))
 
 def fromdatainput(data, prompt = ''):
     '''Continue to repeat an input prompt until the input is a value from the

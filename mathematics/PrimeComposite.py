@@ -24,11 +24,11 @@ RELEASE NOTES:
 ##UPDATEME: Unreviewed for Usefulpy 1.2.1
 __author__ = 'Austin Garcia'
 __version__ = '1.1.1'
+__package__ = 'usefulpy.mathematics'
 
-try: from nmath import *
-except: from usefulpy.mathematics.nmath import *
+from .nmath import *
 
-from usefulpy import validation as _validation
+from .. import validation as _validation
 
 from math import gcd
 
