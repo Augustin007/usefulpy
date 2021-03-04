@@ -1526,7 +1526,7 @@ will return an incorrect value.'''
         if x == 1: return 0
         if x == 2: return 0.6931471805599453
         if not _validation.is_numeric(x): raise TypeError(f'Value {x} is not a numeric value (a numeric type is any which supports all arithmetic operations with int, float, and complex')
-        if abs(x) >=2: return 0.6931471805599453+_experiment.t.ln(x/2)
+        if abs(x) >=2: return 0.6931471805599453+t.ln(x/2)
         def iteration(n):
             if n == 0: return 0
             return -((x**n)/n)

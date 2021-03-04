@@ -182,7 +182,6 @@ create this from *input* which is what makes it useful'''
         runstr = ''
         depth = 0
         var = self.var
-        inner = False
         fn = False
         na = 'na' #To avoid errors regarding '-' placed first
         prevtype = na #To avoid 'implied multiplication' leading to errors
@@ -192,16 +191,14 @@ create this from *input* which is what makes it useful'''
         f = 'fn'#support for prevtype
         c = 'special'#support for prevtype
         p = '()'
-        nprev = None
         for char in text:
-            l = runstr
             if depth == 0:
                 if char == ')':
                     raise SyntaxError('Parenthesis nesting error occured')
                 elif char == '(':
                     depth += 1
                     if runstr != '':
-                        if runtr == '-':
+                        if runstr == '-':
                             nlist.append(-1)
                             prevtype = num
                         else:
@@ -303,7 +300,6 @@ create this from *input* which is what makes it useful'''
                     nlist.append(ceq)
                     prevtype = p
                     runstr = ''
-            nprev = l
         self.var = var
         if nlist[0] == '+': nlist = nlist[1:]
         nlist = formatting.scour(nlist)
