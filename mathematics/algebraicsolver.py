@@ -37,7 +37,7 @@ RELEASE NOTES:
 '''
 
 ##UNFINISHED: finish for Usefulpy 1.3
-##PREREQUISITE1.3:
+##PREREQUISITE1.3: 1.1.1
 
 __author__ = 'Austin Garcia'
 __version__ = 'pr 6 (1.1.1)'
