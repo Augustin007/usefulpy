@@ -57,7 +57,7 @@ if __name__ == '__main__': IDLE()
 # Check docstrings, 
 #
 # BEFORE UPDATE 1.2.1:
-# Any tag '##PREREQUISITE1.2.1:' or '##PREREQUISITE1.2:'
+# Any tag 'PREREQUISITE1.2.1:' or '##PREREQUISITE1.2:'
 # Update code tagged with '##UPDATEME' for usefulpy 1.2.1
 # 
 # OTHER:
