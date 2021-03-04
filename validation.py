@@ -177,7 +177,7 @@ like I said... big mess'''
     firstPrompt[0] = beginning + firstPrompt[0]
     #gets the various inputs at once with _getinp
     inp = _getinp(numinputs, *firstPrompt, inputtype = ninput)
-    while not validquery(*inp): print(Chastisement); inp = getinp(numinputs, *Prompt, inputtype = ninput)
+    while not validquery(*inp): print(Chastisement); inp = _getinp(numinputs, *Prompt, inputtype = ninput)
     if ending != None: print(ending)
     return returnclass(*inp)
 
@@ -384,5 +384,4 @@ def trynumber(s):
     if is_complex(s): return complex(s)
     return s
 
-    
 #eof
