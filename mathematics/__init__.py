@@ -61,14 +61,14 @@ quaternion v1.2.2
 ### INFO ###
 __version__ = '1.2.5'
 __author__ = 'Austin Garcia'
-__package__ = 'usefulpy'
+__package__ = 'usefulpy.mathematics'
 
 ### IMPORTS ###
-from .mathematics.nmath import *
-from .mathematics.PrimeComposite import *
-from .mathematics.triangles import *
-from .mathematics.basenum import *
-from .mathematics.eq import *
-from .mathematics.quaternion import *
+from .nmath import *
+from .PrimeComposite import *
+from .basenum import *
+from .triangles import *
+from .eq import *
+from .quaternion import *
 
 #eof
