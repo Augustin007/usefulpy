@@ -7,8 +7,6 @@ format ##TAG: (tag text). A tag can be ended with ## or :
 
 ## __init__.py
 
-### PREREQUISITE1.2
-
 ## decorators.py
 
 ## encoding.py
