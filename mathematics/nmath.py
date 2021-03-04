@@ -96,9 +96,9 @@ def even(num, /):
 
 def isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0):
     '''Return True if a is close to b'''
-    try: return _math.isclose(x) # Always try optimized c methods first
+    try: return _math.isclose(a, b) # Always try optimized c methods first
     except: pass
-    try: return _cmath.isclose(x)
+    try: return _cmath.isclose(a, b)
     except: pass
     if isnan(a) or isnan(b): return False
     if isinf(a) or isinf(b): return a == b
@@ -286,7 +286,6 @@ neg = lambda x, y: -x
 
 def pascal(depth):
     values = (1,)
-    values_shift = (0, 1, 0)
     for layer in range(depth-1):
         value_list = [1]
         for num, value in enumerate(values):
@@ -294,6 +293,9 @@ def pascal(depth):
             except IndexError: value_list.append(value)
         values = tuple(value_list)
     return tuple(values)
+
+def binomial_coeficient(k, n):
+    return factorial(n)/(factorial(n-k)*factorial(k))
 
 def _derivative_mul_tuple(f, g, kth):
     binomial_numbers = pascal(kth+1)
@@ -440,7 +442,6 @@ class mathfunc:
         if f == g: return f**2
         if callable(g):
             h = mathfunc(lambda x: f.func(x) * g.func(x))
-            hmd = _validation.merge_dicts(f.__dict__, g.__dict__)
             for key, value_pair in mathfunc.merge_items(f, g):
                 fv, gv = value_pair
                 if key == 'prime1':
@@ -779,17 +780,7 @@ def irt(nth, num, /):
     assert _validation.is_integer(nth)
     try: nth = int(nth)
     except: nth = int(float(nth))
-    try:
-        num = int(num)
-    except:
-        return floor(rt(nth, of))
-    else:
-        a = 1 << -(-int.bit_length(xc)//n)
-        while True:
-            q, r = divmod(xc, a**(n-1))
-            if a <= q: break
-            a = (a*(n-1) + q)//n
-        return a
+    return floor(rt(nth, num))
 
 def ldexp(x, i, /):
     '''The inverse of frexp().'''
@@ -1254,7 +1245,7 @@ recources to θ.__cos__ if cos cannot be found'''
     else:
         try: return θ.__cos__()
         except: pass
-    raise TypeError('cos cannot be found of a type %s' % (type(x)))
+    raise TypeError('cos cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def cosh(θ):
@@ -1267,7 +1258,7 @@ recources to θ.__cosh__ if cosh cannot be found'''
     else:
         try: return θ.__cosh__()
         except: pass
-    raise TypeError('cosh cannot be found of a type %s' % (type(x)))
+    raise TypeError('cosh cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def sin(θ):
@@ -1280,7 +1271,7 @@ recources to θ.__sin__ if sin cannot be found'''
     else:
         try: return θ.__sin__()
         except: pass
-    raise TypeError('sin cannot be found of a type %s' % (type(x)))
+    raise TypeError('sin cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def sinh(θ):
@@ -1293,7 +1284,7 @@ recources to θ.__sinh__ if sinh cannot be found'''
     else:
         try: return θ.__sinh__()
         except: pass
-    raise TypeError('sinh cannot be found of a type %s' % (type(x)))
+    raise TypeError('sinh cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def tan(θ):
@@ -1306,7 +1297,7 @@ recources to θ.__tan__ if tan cannot be found'''
     else:
         try: return θ.__tan__()
         except: pass
-    raise TypeError('tan cannot be found of a type %s' % (type(x)))
+    raise TypeError('tan cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def tanh(θ):
@@ -1319,7 +1310,7 @@ recources to θ.__tanh__ if tanh cannot be found'''
     else:
         try: return θ.__tanh__()
         except: pass
-    raise TypeError('tanh cannot be found of a type %s' % (type(x)))
+    raise TypeError('tanh cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def sec(θ):
@@ -1340,7 +1331,7 @@ recources to θ.__sec__ if sec cannot be found'''
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
-    raise TypeError('sec cannot be found of a type %s' % (type(x)))
+    raise TypeError('sec cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def sech(θ):
@@ -1361,7 +1352,7 @@ recources to θ.__sech__ if sech cannot be found'''
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
-    raise TypeError('sech cannot be found of a type %s' % (type(x)))
+    raise TypeError('sech cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def csc(θ):
@@ -1377,7 +1368,6 @@ recources to θ.__csc__ if csc cannot be found'''
     elif _validation.is_complex(θ):
         try: return _cmath.sin(1/θ)
         except ZeroDivisionError: pass
-        
     else:
         zde = False
         try:
@@ -1385,7 +1375,7 @@ recources to θ.__csc__ if csc cannot be found'''
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
-    raise TypeError('csc cannot be found of a type %s' % (type(x)))
+    raise TypeError('csc cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def csch(θ):
@@ -1406,7 +1396,7 @@ recources to θ.__csch__ if csch cannot be found'''
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
-    raise TypeError('csch cannot be found of a type %s' % (type(x)))
+    raise TypeError('csch cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def cot(θ):
@@ -1427,7 +1417,7 @@ recources to θ.__cot__ if cot cannot be found'''
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
-    raise TypeError('cot cannot be found of a type %s' % (type(x)))
+    raise TypeError('cot cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def coth(θ):
@@ -1449,11 +1439,11 @@ recources to θ.__coth__ if coth cannot be found'''
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
-    raise TypeError('coth cannot be found of a type %s' % (type(x)))
+    raise TypeError('coth cannot be found of a type %s' % (type(θ)))
 
 def cis(θ, n=1j):
     '''Return cos(θ) + nsin(θ)'''
-    if abs(n) != 1:
+    if not isclose(abs(n), 1):
         raise ValueError ('math domain error')
     if n.real != 0:
         raise ValueError ('math domain error')
