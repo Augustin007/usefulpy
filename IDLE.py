@@ -129,7 +129,6 @@ def _usefulpy_correct_syntax(scource):
         wayout = []
         runlist = []
         runstr = ''
-        currentiter = ''
         for n in scource:
             if n in ('{', '[', '('):
                 if not isin:

@@ -32,6 +32,7 @@ __package__ = 'usefulpy.mathematics'
 
 ### IMPORTS ###
 from .. import validation as _validation
+from .PrimeComposite import *
 
 
 ### BASENUM ###
@@ -146,7 +147,7 @@ class basenum(object):
         number = abs(float(self))
         if number == 0: return basenum('0', base)
         if base == 10: return basenum(str(_validation.trynumber(self)))
-        strint, n, p = "", 0, 0
+        strint, n = "", 0
         if number >= 1:
             while (base**n)<= number: n+=1
             n-=1
@@ -228,7 +229,7 @@ class basenum(object):
         if not self.Negative:
             return int(self)
         else:
-            if is_integer(self):
+            if _validation.is_integer(self):
                 return int(self)
             return int(self)-1
         
@@ -236,7 +237,7 @@ class basenum(object):
         if self.Negative:
             return int(self)
         else:
-            if is_integer(self):
+            if _validation.is_integer(self):
                 return int(self)
             return int(self)+1
 

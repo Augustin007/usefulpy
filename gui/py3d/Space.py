@@ -33,7 +33,7 @@ class space:
 
     def setview(self, to):
         '''set a default view for the space'''
-        if isinstance(cam, tuple(self.cam_bases)):
+        if isinstance(to, tuple(self.cam_bases)):
             if to.universe != self: raise ValueError(f'{to} not in this universe')
             self.view = to
             return
@@ -62,10 +62,10 @@ class space:
     def view_from(self, cam, at):
         '''view from cam at a canvas 'at' '''
         if isinstance(cam, tuple(self.cam_bases)):
-            if to.universe != self: raise ValueError(f'{to} not in this universe')
+            if cam.universe != self: raise ValueError(f'{cam} not in this universe')
             cam.add_canvas(at)
             return
-        raise TypeError(f'{to} should be a valid camera type')
+        raise TypeError(f'{cam} should be a valid camera type')
 
     def remove_fig(self, fig):
         index = self.space.index(fig)

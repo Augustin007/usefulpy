@@ -220,11 +220,9 @@ variations of input'''
         return q.__cos__()**-1
 
     def __atan__(q, /):
-        r, p, n = q.__polar__()
         return -(n/2)*ln((n-q)/(n+q))
 
     def __acos__(q, /):
-        r, p, n = q.__polar__()
         return pi/2-asin(q)
 
     def __asin__(q, /):

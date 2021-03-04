@@ -34,7 +34,7 @@ def points_6(plane):
     q2 = -q1
     q3 = versor_from_points(plane)
     q4 = -q3
-    q5 = normalize(cross_product(q1, q3))
+    q5 = q1.cross(q3).normal()
     q6 = -q5
     return q1, q2, q3, q4, q5, q6
 
@@ -59,7 +59,7 @@ def equation(plane):
     return NotImplemented
 
 def point_at(plane, x, y):
-    a, b, c = plane
+    c = plane[2]
     d, f = shift_plane(*plane)
     if f.i != 0:
         shifty_base = (d-(d.i/f.i)*f)
@@ -80,9 +80,9 @@ def is_on_plane(plane, point):
     return isclose(point, new_point)
 
 def _same_side(p1, p2, a, b):
-    cp1 = cross_product(b-a, p1-a)
-    cp2 = cross_product(b-a, p2-a)
-    if dot_product(cp1, cp2) >= 0:
+    cp1 = (b-a).corss(p1-a)
+    cp2 = (b-a).corss(p2-a)
+    if cp1.dot(cp2) >= 0:
         return True
     else:
         return False

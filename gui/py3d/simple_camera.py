@@ -206,7 +206,7 @@ class simple_camera(cam_base):
         if zrot > 0: return (xrot/zrot, -yrot/zrot)
 
     def _project1(self, point):
-        x, y, z = p.vtuple()
+        x, y, z = point.vtuple()
         xrot = self._xr1(x, y)
         yrot = self._yr1(x, y, z)
         zrot = self._zr1(x, y, z)
@@ -263,6 +263,3 @@ if __name__ == '__main__':
     canv = Frame(width = 800, height =800).addCanvas(width = 800, height =800)
     cam = simple_camera(Space, quaternion(), i)
     cam.add_canvas(canv)
-#    cube1 = make_rectangular_prism((2, 2, -0.5), (3, 3, 0.5), 'CadetBlue')
-#    cube2 = make_rectangular_prism((-1, -1, -1), (0, 0, 0), 'brown')
-#    cube3 = make_rectangular_prism((3, 2, 0), (4, 3, 1), 'DarkGoldenrod')

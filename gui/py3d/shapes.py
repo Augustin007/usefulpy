@@ -56,7 +56,7 @@ class pane:
             
             if type(point) is quaternion:
                 if point.real != 0:
-                    raise PointError
+                    raise ValueError(f'Point {point} cannot properly be interpreted as a three-dimensional point')
                 npoints.append(point)
                 continue
             try:

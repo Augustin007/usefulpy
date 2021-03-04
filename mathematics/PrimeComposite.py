@@ -29,7 +29,7 @@ __package__ = 'usefulpy.mathematics'
 from .nmath import *
 
 from .. import validation as _validation
-
+from functools import reduce as _reduce
 from math import gcd
 
 _primes = [2]
@@ -93,9 +93,9 @@ def lcm(a, b):
 
 def gcd2(a, b):
     '''return gcd(a, b)'''
-    if Expression in (type(a), type(b)):
-        if type(a) is Expression: return a.gcd(b)
-        return b.gcd(a)
+#    if Expression in (type(a), type(b)):
+#        if type(a) is Expression: return a.gcd(b)
+#        return b.gcd(a)
     def acceptable(num):
         if _validation.is_float(num): return abs(_validation.tryint(float(num)))
         return num.__gcd__()

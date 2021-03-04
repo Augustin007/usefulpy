@@ -294,7 +294,6 @@ def write(text):
     if type(num) is int:
         numstr = str(num)
         nicenum = ''
-        namount = ((len(numstr)+1)%3)+1
         for count, letter in enumerate(numstr):
             nicenum += letter
             if (len(numstr)-(count+1))%3 == 0 and (len(numstr)-(count+1)) != 0:
@@ -351,19 +350,19 @@ _LargeGroups = {
     '9': 'octillion',
     }
 def _TensGroup(num):
-    if str(num) in OddOnes: return OddOnes[str(num)]
+    if str(num) in _OddOnes: return _OddOnes[str(num)]
     else:
-        if str(num)[0] == '0': return Digit[(str(num)[1])]
-        if str(num)[1] == '0': return tensPlace[(str(num)[0])]
-        return tensPlace[(str(num)[0])] + ' ' + Digit[(str(num)[1])]
+        if str(num)[0] == '0': return _Digit[(str(num)[1])]
+        if str(num)[1] == '0': return _tensPlace[(str(num)[0])]
+        return _tensPlace[(str(num)[0])] + ' ' + _Digit[(str(num)[1])]
 def _HundredsGroup(num):
     num = str(int(num))
     if int(num) == 0: return ''
-    elif len(str(num)) == 1: return Digit[str(num)]
-    elif len(str(num)) == 2: return TensGroup(num)
+    elif len(str(num)) == 1: return _Digit[str(num)]
+    elif len(str(num)) == 2: return _TensGroup(num)
     elif len(str(num)) == 3:
-        if str(num)[1:] == '00': return Digit[(str(num)[0])] + ' hundred'
-        return Digit[(str(num)[0])] + ' hundred ' + TensGroup((str(num)[1:]))
+        if str(num)[1:] == '00': return _Digit[(str(num)[0])] + ' hundred'
+        return _Digit[(str(num)[0])] + ' hundred ' + _TensGroup((str(num)[1:]))
     
 
 def ComposeNumber(integer:int):
@@ -373,11 +372,7 @@ Converts a number into a string, fails if number is bigger than
 
 >>> ComposeNumber(100)
 'one hundred\''''
-    Digit=_Digit
-    tensPlace=_tensPlace
-    OddOnes=_OddOnes
     LargeGroups=_LargeGroups
-    TensGroup=_TensGroup
     HundredsGroup=_HundredsGroup
     strint = str(integer)
     Places = len(strint)
@@ -653,6 +648,5 @@ class multline(object):
 
     def __rmul__(other, self):
         return other*self
-
 
 #eof

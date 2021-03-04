@@ -149,7 +149,6 @@ class triangle(object):
                     self.compute()
                     return
                 raise wr_args
-                return
             if gamma:
                 kwval['c'] = c = LawofCos(a, b, gamma = gamma)
                 kwval['alpha'] = alpha = LawofSin(gamma, c, b=a)
