@@ -9,8 +9,6 @@ format ##TAG: (tag text). A tag can be ended with ## or :
 
 ### PREREQUISITE1.2
 
-    '
-
 ## decorators.py
 
 ## encoding.py
