@@ -193,7 +193,7 @@ class replacer(Thread):
 
 class NewWindow(object):
     def __init__(self):
-        self.root = root = turtle._root = Tk()
+        self.root = turtle._root = Tk()
         self.fields = {}
         pane = PanedWindow(orient=VERTICAL, sashwidth=1,
                            sashrelief=SOLID, bg='#ddd')
