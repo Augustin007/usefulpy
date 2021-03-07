@@ -128,8 +128,13 @@ class pane:
         self._updated = True
         
 
-    def __iter__(self):
-        return self.points.__iter__()
+def shift_iter(iter, num):
+    amount =range(len(iter)-num+1)
+    iters = []
+    for n in amount:
+        iters.append(iter[n, n+num])
+    return zip(*iters)
+
 
 class polyhedron:
     def __init__(self, universe, *faces):
