@@ -19,8 +19,9 @@ file
 RELEASE NOTES:
 Pre releases:
  pr 1
- ——Wednesday the thirteenth of the firstmonth Janurary, 2021——
-  Run IDLE() to use Usefulpy's personal IDLE
+  pr 1a
+  ——Wednesday the thirteenth of the firstmonth Janurary, 2021——
+   Run IDLE() to use Usefulpy's personal IDLE
 1
  1.1
   Version 1.1.1:
