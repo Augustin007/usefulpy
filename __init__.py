@@ -27,7 +27,6 @@ RELEASE NOTES:
      ——  ——
    Addition of more programs that contain more functions. Addition of usefulpy
    IDLE.
-   
 
 SECTIONS:
 validation v1.1.2
@@ -36,6 +35,9 @@ formatting v1.2.2
  This program contains several useful functions for formatting output.
 mathematics v1.2.3
  Several mathematical functions plopped together.
+gui
+decorators
+IDLE
 
 '''
 
@@ -48,16 +50,16 @@ __package__ = 'usefulpy'
 
 ### IMPORT ###
 from . import validation, formatting, mathematics, quickthreads, decorators
-from .IDLE import IDLE
+from .IDE import ide, run_path, startup
 
-if __name__ == '__main__': IDLE()
+if __name__ == '__main__': ide()
 
 ### TO DO ###
 # BEFORE ANY UPDATE:
 # Check docstrings, 
 #
 # BEFORE UPDATE 1.2.1:
-# Any tag 'PREREQUISITE1.2.1:' or '##PREREQUISITE1.2:'
+# Any tag 'PREREQUISITE1.2.1:' or 'PREREQUISITE1.2:'
 # Update code tagged with '##UPDATEME' for usefulpy 1.2.1
 # 
 # OTHER:
