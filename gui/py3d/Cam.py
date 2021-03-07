@@ -1,4 +1,27 @@
+'''
+Cam
+
+Base class for cameras in py3d
+
+Most important functions:
+   cam_base: base for cam classes
+   cam_shape_method: decorator for cam methods that also need updates to 
+   shape
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Cam_base class allows for camera classes to be created.
+'''
+__author__ = 'Austin Garcia'
+__version__ = '1.1.1'
 __package__ = 'usefulpy.gui.py3d'
+
 from ...mathematics import nmath as _m
 from ...mathematics.quaternion import quaternion, i, j, k
 import time
@@ -79,7 +102,8 @@ class cam_base:
             if distance < self.renderdistance:
                 if fig is not self:
                     self.project(fig)
-        ##if self.personal_objects: pass #TODO: Personal objects not yet implimented
+        ##if self.personal_objects: pass 
+        ##TODO: Personal objects not yet implimented
         for canvas in self.running_canvases:
             canvas.update()
 

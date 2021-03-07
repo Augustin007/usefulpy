@@ -1,3 +1,23 @@
+'''
+Simple_camera
+
+Simple camera class for py3d
+
+Most important functions:
+   simple_camera: camera
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Simple camera type.
+'''
+__author__ = 'Austin Garcia'
+__version__ = '1.1.1'
 __package__ = 'usefulpy.gui.py3d'
 
 from .Cam import cam_base, cam_shape_method
@@ -6,8 +26,6 @@ from ...mathematics import quaternion, i, j, k
 from .shapes import polyhedron, pane, darken
 from .Space import space
 import time
-
-
 
 _m.degrees()
 

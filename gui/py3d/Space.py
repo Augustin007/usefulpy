@@ -1,9 +1,28 @@
-### IMPORTS ###
-import time
+'''
+Space
+
+Stores 3d figures in 3d space
+
+Most important functions:
+   space: stores a space class
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Stores 3d figures in 3d space
+'''
+
 __author__ = 'Austin Garcia'
 __version__ = '3.1.1'
 __package__ = 'usefulpy.gui.py3d'
 
+### IMPORTS ###
+import time
 from ...mathematics import nmath as _m
 from ... import validation as _validation
 from .Cam import cam_base
@@ -53,11 +72,11 @@ class space:
     def _space_update_msg(self, from_):
         self._space_updated = True
 
-    def _update(self, canv):
-        if canv not in self.runningCanvases: raise ValueError
-        cam = self.runningCanvases[canv]
-        self._view_from(cam, canv)
-        canv.update()
+#    def _update(self, canv):
+#        if canv not in self.runningCanvases: raise ValueError
+#        cam = self.runningCanvases[canv]
+#        self._view_from(cam, canv)
+#        canv.update()
 
     def view_from(self, cam, at):
         '''view from cam at a canvas 'at' '''

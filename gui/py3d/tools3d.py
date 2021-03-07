@@ -1,4 +1,23 @@
+'''
+3d tools
+
+tools for 3d processing
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Tools for processing 3d: will probably be merged into a future 
+   mathematics.linear_algebra
+'''
+__author__ = 'Austin Garcia'
+__version__ = '1.1.1'
 __package__ = 'usefulpy.gui.py3d'
+
 from ...mathematics import quaternion, i, j, k, isclose, cis
 import random
 

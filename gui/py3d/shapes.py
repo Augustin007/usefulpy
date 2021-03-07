@@ -1,9 +1,33 @@
+'''
+shapes
+
+3d shape processing for py3d
+
+Most important functions:
+   Material: material class for a surface
+   pane: a surface class
+   polyhedron: 3d surface
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Allows for processing of figures in 3d space. 
+   Somewhat limited: especially in regards to there being no curves
+'''
+
+__author__ = 'Austin Garcia'
+__version__ = '1.1.1'
 __package__ = 'usefulpy.gui.py3d'
 from ...mathematics import nmath as _m
 from ...mathematics.quaternion import quaternion, i, j, k
 import time
 import functools
-from .tools3d import *
+from .tools3d import is_on_plane, PointInTriangle, versor_from_points
 from ... import decorators as _d
 import copy as _c
 #All valid shape types must include these
