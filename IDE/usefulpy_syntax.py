@@ -1,3 +1,28 @@
+'''
+Code partitioning
+
+partitions the code into code and non-code sections, but allows 
+for modification of code sections
+
+Most important functions:
+   _partition_fix: partitions code and fixes code sections
+   _usefulpy_correct_syntax: modifies full code
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file.
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Slicing... some bugs occur when quotes occur in comments, or comments 
+   in quotes. Uses __defaults__... might be improvable?
+
+'''
+
+__version__ = '1.1.1'
+__author__ = 'Austin Garcia'
 __package__ = 'usefulpy.IDE'
 
 import usefulpy.IDE.namespace_management as namespace_management

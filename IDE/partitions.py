@@ -1,3 +1,31 @@
+'''
+Code partitioning
+
+partitions the code into code and non-code sections.
+
+Most important functions:
+   _partition_triple_quotes: slices away triple_quote sections
+   _partition_single_quotes: partitions away single quote sections
+   _partition_comments: partitions away comment sections
+
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Slicing... some bugs occur when quotes occur in comments, or comments 
+   in quotes.
+
+'''
+
+__version__ = '1.1.1'
+__author__ = 'Austin Garcia'
+__package__ = 'usefulpy.IDE'
+
 def _move(string, fornum):
     list = [string]
     for n in range(1, fornum+1): list.append((' '*n)+(string[:-n]))

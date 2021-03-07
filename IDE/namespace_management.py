@@ -1,3 +1,26 @@
+'''
+Scope and namespace management
+
+Contains several objects to be used as variable scopes and tools to 
+manipulate them.
+
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Doesn't do much yet, mostly placeholder and driver for usefulpy-ide 
+   purposes
+'''
+
+__version__ = '1.1.1'
+__author__ = 'Austin Garcia'
+__package__ = 'usefulpy.IDE'
+
 blank_namespace_globals = globals().copy()
 
 del blank_namespace_globals['__name__']

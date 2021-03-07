@@ -1,3 +1,28 @@
+'''
+Code partitioning
+
+Run code with usefulpy-syntax
+
+Most important functions:
+   run_path: usefulpy equilavent of runpy.run_path
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Runs code with usefulpy-syntax.
+   bug: changes to __defaults__['#a'] cause bugs
+
+'''
+
+__version__ = '1.1.1'
+__author__ = 'Austin Garcia'
+__package__ = 'usefulpy.IDE'
+
 import usefulpy.IDE.usefulpy_syntax as usefulpy_syntax
 import os
 
@@ -10,7 +35,7 @@ def _get_code(filename, defaults):
     code=file.read()
     doc = None
     trydoc = usefulpy_syntax._partition_triple_quote(code.strip())[0]
-    if trydoc.startswith('"""') or trydoc.startswith("'''"): doc = trydoc
+    if trydoc.startswith('"""') or trydoc.startswith("'''"): doc = eval(trydoc)
     file.close()
     code = usefulpy_syntax._usefulpy_correct_syntax(code, defaults['#a'])
     return (code, doc)

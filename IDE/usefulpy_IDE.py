@@ -1,3 +1,27 @@
+'''
+IDE
+
+Custom ide for usefulpy.
+This IDE allows you to access previous inputs and outputs easily.
+This IDE also gives access to entire usefulpy library.
+
+Most important functions:
+   ide: start ide
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+1
+ 1.1
+  Version 1.1.1:
+   Custom ide for usefulpy.
+
+'''
+
+__version__ = '1.1.1'
+__author__ = 'Austin Garcia'
 __package__ = 'usefulpy.IDE'
 
 import usefulpy.IDE.usefulpy_syntax as usefulpy_syntax
