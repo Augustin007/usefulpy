@@ -17,9 +17,10 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-pr 1
-——Wednesday the thirteenth of the firstmonth Janurary, 2021——
- Run IDLE() to use Usefulpy's personal IDLE
+Pre releases:
+ pr 1
+ ——Wednesday the thirteenth of the firstmonth Janurary, 2021——
+  Run IDLE() to use Usefulpy's personal IDLE
 1
  1.1
   Version 1.1.1:
