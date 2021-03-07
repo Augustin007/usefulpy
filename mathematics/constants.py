@@ -150,7 +150,6 @@ degree_Fahrenheit = 0.5555555555555556
 deka = 10.0
 dyn = 1e-05
 dyne = 1e-05
-e = 1.602176634e-19
 eV = 1.602176634e-19
 electron_mass = 9.1093837015e-31
 electron_volt = 1.602176634e-19
