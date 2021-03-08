@@ -1,18 +1,11 @@
 '''
-File: quaternion.py
-Version: 2.1.2
-Author: Austin Garcia
+Quaternion
 
 a quaternion class
 
-LICENSE:
-This is a section of usefulpy. See usefulpy's lisence.md file.
-
-PLATFORMS:
-This is a section of usefulpy. See usefulpy.__init__'s "PLATFORMS" section.
-
-INSTALLATION:
-Put this file where Python can see it.
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
 
 RELEASE NOTES:
 1
@@ -44,6 +37,8 @@ RELEASE NOTES:
  2.2
   Version 2.2.1
    __pow__, __rpow__, __ln__, __log__, (et cetera) are working. 
+  Version 2.2.2
+   Small bug-fixes and clean up.
 '''
 ##UPDATED TO: Usefulpy 1.2.1
 

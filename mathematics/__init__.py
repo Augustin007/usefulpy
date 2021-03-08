@@ -1,18 +1,11 @@
 '''
 usefulpy mathematics
-Version: 1.2.3
-Author: Austin Garcia
 
 Several mathematical functions plopped together.
 
-LICENSE:
-This is a section of usefulpy. See usefulpy's lisence.md file.
-
-PLATFORMS:
-This is a section of usefulpy. See usefulpy.__init__'s "PLATFORMS" section.
-
-INSTALLATION:
-Put this file where Python can see it.
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
 
 RELEASE NOTES:
 1
@@ -56,6 +49,7 @@ algebraicsolvers pr 5 (1.1.1)
 quaternion v1.2.2
  a quaternion class
 '''
+
 ##UPDATED TO: Usefulpy 1.2.1
 
 ### INFO ###
@@ -65,7 +59,6 @@ __package__ = 'usefulpy.mathematics'
 
 ### IMPORTS ###
 from .basenum import *
-from .eq import *
 from .nmath import *
 from .PrimeComposite import *
 from .quaternion import *

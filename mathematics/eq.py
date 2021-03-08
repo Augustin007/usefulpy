@@ -60,7 +60,7 @@ RELEASE NOTES:
 '''
 ##UPDATEME: Unreviewed for Usefulpy 1.2.1
 ##TODO: Update for use with eval.
-##PREREQUISITE1.2.1: 3.1.1
+##POSSIBLYOBSOLETE: Probably obsolete? May be removed later?
 __author__ = 'Austin Garcia'
 __version__ = '2.1.6'
 

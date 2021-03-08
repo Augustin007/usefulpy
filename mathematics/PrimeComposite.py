@@ -1,18 +1,11 @@
 '''
-File: PrimeComposite.py
-Version: 1.1.1
-Author: Austin Garcia
+divisiblity
 
 Several functions to do with gcd, lcf, and numbers being prime or composite.
 
-LICENSE:
-This is a section of usefulpy. See usefulpy's lisence.md file.
-
-PLATFORMS:
-This is a section of usefulpy. See usefulpy.__init__'s "PLATFORMS" section.
-
-INSTALLATION:
-Put this file where Python can see it.
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
 
 RELEASE NOTES:
 1

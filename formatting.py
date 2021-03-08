@@ -1,18 +1,11 @@
 '''
-File: formatting.py
-Version: 1.2.3
-Author: Austin Garcia
+formatting
 
 Several useful functions for formatting output.
 
-LICENSE:
-This is a section of usefulpy. See usefulpy's lisence.md file.
-
-PLATFORMS:
-This is a section of usefulpy. See usefulpy.__init__'s "PLATFORMS" section.
-
-INSTALLATION:
-Put this file where Python can see it.
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
 
 RELEASE NOTES:
 1
@@ -35,10 +28,9 @@ RELEASE NOTES:
 
 __version__ = '1.2.3'
 __author__ = 'Austin Garcia'
+__package__ = 'usefulpy'
 
-try: import validation as _validation
-except: from usefulpy import validation as _validation
-import warnings
+from . import validation as _validation
 
 vowels = 'aeiou'
 endingpuncuation = '.?!'

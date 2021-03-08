@@ -1,18 +1,11 @@
 '''
-File: basenum.py
-Version: 1.1.2
-Author: Austin Garcia
+basenum
 
 A basenum class, can hold numbers in a any counting system
 
-LICENSE:
-This is a section of usefulpy. See usefulpy's lisence.md file.
-
-PLATFORMS:
-This is a section of usefulpy. See usefulpy.__init__'s "PLATFORMS" section.
-
-INSTALLATION:
-Put this file where Python can see it.
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
 
 RELEASE NOTES:
 1

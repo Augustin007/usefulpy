@@ -1,7 +1,5 @@
 '''
 usefulpy
-Version: 1.1.1
-Author: Austin Garcia
 
 Simple resources and modules for cleaner programming
 
@@ -24,9 +22,8 @@ RELEASE NOTES:
   Version 1.1.2:
    Bugfixes and improvements throughout.
   Version 1.2.1:
-     ——  ——
-   Addition of more programs that contain more functions. Addition of usefulpy
-   IDLE.
+   Addition of more programs that contain more functions. Addition of 
+   usefulpy IDE. Improvement of functions
 
 SECTIONS:
 validation v1.1.2
@@ -36,8 +33,11 @@ formatting v1.2.2
 mathematics v1.2.3
  Several mathematical functions plopped together.
 gui
+ Functions to help create a gui
 decorators
-IDLE
+ A small group of decorators
+IDE
+ Usefulpy IDE and interpreter
 
 '''
 
