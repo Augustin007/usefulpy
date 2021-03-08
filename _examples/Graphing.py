@@ -73,7 +73,7 @@ import time
 
 ###  Part 3  ###
 ###   Math   ###
-from usefulpy.mathematics import *
+from usefulpy.mathematics.eq import *
 
 def makegraph(t):
     tracer(False)
