@@ -27,7 +27,7 @@ While I would recommend getting aquainted with the code by sifting through it by
 ## validation
 Validation includes various tools for getting input and preparing clean output, as well quick checks for types.
 
-_note: it imports the_ `datetime` _module, as well as namedtuple and deque from the_ `collections` _module_ 
+A couple of its most important sections:
 
 #### Integer/Float Tools:
  - `is_integer`/`is_float`: return `True` if s is an integer/float or can be converted into one.
@@ -37,29 +37,20 @@ _note: it imports the_ `datetime` _module, as well as namedtuple and deque from 
  - `is_intlist`/`is_floatlist`: checks if a list or a string with spaces is composed only of integers/floats.
  - `intlistinput`/`floatlistinput`: continues to ask for input until input can be converted to a list of integers/floats
 
-#### Simple randomizers:
- - `lowbias`/`highbias`/`centerbias`/`outerbias`: random number biased towards the lower/higher/central/outer numbers
- - `rbool`/`truebias`/`falsebias`: return a random bool, not biased or biased to `True` or `False`
-
 #### Custumizable Tools:
  - `validquery`: return `True` if an object can be converted to a type.
  - `validinput`: continue asking for input until the input can be converted to a certain type. This can be used for multiple inputs at once. It has a lot of possible arguments.
  - `trytype`: converts something to a type if `validquery` for the object and the type returns `True`
 
-#### Other Tools:
+#### Some of the Other Tools:
  - `YesOrNo`: return `True` or `False` for most variations of yes and no: returns `None` otherwise.
  - `getYesOrNo`: take inputs until `YesOrNo` returns either `True` or `False`
- - `fromrepr`: is meant to be the inverse of `repr`
- - `makelist`: makelist makes a list from any sort of input, including from the str version of a list, (so `makelist('[1, [1, 2]]')` returns `[1, [1, 2]]`this works well with any sort of iterable, but many non-iterables wind up being a list with a single value, 
- - `validdate`: return `True` if input numbers form a valid date
  - `isbool`: return `type(s)==bool`
  - `is_function`: returns `True` if the object is a function.
 
 ## mathematics
 ### version 1.2.4
 Contains a lot of useful mathematical stuff.
-
-_note: imports the_ `math` _and_ `cmath` _modules,_ `fraction.Fraction as fraction`, `decimal.Decimal as num`, `reduce` _from_ `functools`_,_ `validation`_,_ `formatting`_,_ `warnings`_... is that all?_
 
 mathematics is divided into several programs, though `from usefulpy.mathematics import *` imports all of the functions from all of them.
 - `nmath`: new math, essentially imports and combines `math` and `cmath` (complex math), adds some more constants, and allows for a radians or degrees setting.
