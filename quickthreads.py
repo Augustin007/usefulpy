@@ -1,5 +1,6 @@
-from _thread import *
+import _thread as thread
 from threading import Thread
+import threading
 import time
 import warnings
 
