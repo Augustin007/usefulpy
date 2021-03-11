@@ -67,5 +67,5 @@ __package__ = 'usefulpy.gui.py3d'
 
 from .Cam import cam_base, cam_shape_method
 from .shapes import pane, polyhedron, material
-from .simple_camera import simple_camera, make_rectangular_prism
+from .Simple_camera import simple_camera, make_rectangular_prism
 from .Space import space
