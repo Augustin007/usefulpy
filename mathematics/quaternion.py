@@ -39,6 +39,8 @@ RELEASE NOTES:
    __pow__, __rpow__, __ln__, __log__, (et cetera) are working. 
   Version 2.2.2
    Small bug-fixes and clean up.
+  Version 2.2.3
+   __hash__ implemented
 '''
 ##UPDATED TO: Usefulpy 1.2.1
 
@@ -521,6 +523,9 @@ quaternion'''
 
     def v(self):
         return quaternion(0, self.i, self.j, self.k)
+
+    def __hash__(self):
+        return hash((self.astuple()))
 
     ## TODO: __hash__ still needs to be implimented
 
