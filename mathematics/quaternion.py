@@ -47,7 +47,7 @@ __version__ = '2.1.2'
 __package__ = 'usefulpy.mathematics'
 
 from .. import validation as _validation
-from ..IDLE import _usefulpy_correct_syntax
+from ..IDE.usefulpy_syntax import _usefulpy_correct_syntax
 from .nmath import *
 from .PrimeComposite import *
 
