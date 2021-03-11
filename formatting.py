@@ -22,6 +22,8 @@ RELEASE NOTES:
    Raises warnings at unfinished sections
   Version 1.2.3
    More bug fixes
+  Version 1.2.4
+   A couple new stuff, mostly dealing with the long s
 '''
 
 ##UPDATED TO: Usefulpy 1.2.1
@@ -123,6 +125,41 @@ def scour(obj, of= ''):
             if c in of: obj.pop(count)
             else: obj += 1
         return obj
+
+long_s = 'ſ'
+
+def Fix_stolong(text):
+    if text == '': return ''
+    if 's' not in text: return text
+    textm1 = ' '+text[:-1]
+    textp1 = text[1:]+' '
+    ntext = ''
+    for prevchar, char, nextchar in zip(textm1, text, textp1):
+        if char == 's':
+            if prevchar in ('sſf'):
+                ntext+=char
+            elif nextchar in '?!,–—()";:kfb_ ':
+                ntext += char
+            else:
+                ntext += long_s
+            continue
+        ntext += char
+    return ntext
+
+def Fix_longtos(text):
+    return text.replace('ſ', 's')
+
+def getstr(fn, *args):
+    if len(args) != 0:
+        args = list(args)
+        args[0:1] = [fn, args[0]]
+        return tuple([getstr(a) for a in args])
+    if type(fn) is str: return fn
+    if hasattr(fn, '__name__'): return fn.__name__
+    if hasattr(fn, '__str__'): return str(fn)
+    return repr(fn)
+
+
 
 _numbers={
         'zero': 0,
@@ -626,9 +663,9 @@ class multline(object):
         if type(other) is str: other = self.__class__(other)
         return self.extend(other)
 
-    def __radd__(other, self):
-        if type(self) is str: self = other.__class__(self)
-        return self.extend(other)
+    def __radd__(self, other):
+        if type(other) is str: other = other.__class__(other)
+        return other.extend(self)
 
     def __mul__(self, other):
         n = self.strings
@@ -638,7 +675,7 @@ class multline(object):
             nn.append(l*other)
         return multline(*nn)
 
-    def __rmul__(other, self):
-        return other*self
+    def __rmul__(self, other):
+        return self*other
 
 #eof
