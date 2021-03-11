@@ -19,12 +19,14 @@ RELEASE NOTES:
  1.2
   Version 1.2.1
     ——Friday, the fifteenth day of the firstmonth Janurary, 2021——
-  Code is shorter by about fifty lines, and yet its functionality have
-  increased... Simplicity is better! Who knew?
+   Code is shorter by about fifty lines, and yet its functionality have
+   increased... Simplicity is better! Who knew?
+  Version 1.2.2
+   Small bugfixes
 '''
 ##UPDATED TO: Usefulpy 1.2.1
 __author__ = 'Austin Garcia'
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 __package__ = 'usefulpy'
 import sys
 import datetime
@@ -177,15 +179,17 @@ like I said... big mess'''
 def isbool(s):
     '''Check if s is a boolean value'''
     n = type(s)
-    return s in ('True', 'False') if n is str else n is bool
+    return s in ('True', 'False') if n is str else n is _bool
+
+_bool = bool
 
 def bool(x):
     '''bool(c) -> bool'''
-    return bool({'True':True, 'False':False}.get(x))
+    return _bool({'True':True, 'False':False}.get(x))
 
 def boolinput(Prompt):
     '''Continue to repeat an input prompt until the input is 'True' or 'False'.'''
-    return bool(validinput(isbool, Prompt))
+    return _bool(validinput(isbool, Prompt))
 
 def fromdatainput(data, prompt = ''):
     '''Continue to repeat an input prompt until the input is a value from the
@@ -288,7 +292,7 @@ def trytype(ntype, *s):
 def is_iterable(n):
     '''Check if n is iterable'''
     try:
-        for l in n: pass
+        for l in n: l
         return True
     except: return False
 
@@ -337,7 +341,8 @@ def valideval(s):
     return False
 
 class _empty:
-    def write(*args, **kwargs): pass
+    def write(self, *args, **kwargs): pass
+    def read(self, *args, **kwargs): pass
 
 def validexec(s):
     '''Return True if it can be executed. Note: will trigger the code.'''
@@ -346,8 +351,10 @@ def validexec(s):
             out = sys.stdout
             in_ = sys.stdin
             sys.stdout = _empty()
-            sys.stdout = _empty()
+            sys.stdin = _empty()
             exec(s)
+            sys.stdout = out
+            sys.stdin = in_
             return True
         except: return False
     return False
