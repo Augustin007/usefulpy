@@ -567,14 +567,43 @@ i.e. colors.bold'''
 		cyan='\033[46m'
 		lightgrey='\033[47m'
 
+def justify(string, length):
+    strings = string.split(' ')
+    strlnth = sum([len(s) for s in strings])
+    if strlnth+len(strings)-1 >= length:
+        return ' '.join(strings)
+    required_spaces = length-strlnth
+    a, b = divmod(required_spaces, len(strings)-1)
+    join = ' '*a
+    gap = len(strings)/(b+1)
+    current_gap = gap
+    runstr = ''
+    end = len(strings) -1
+    print(gap)
+    for c, n in enumerate(strings):
+        runstr += n
+        if c == end:
+            break
+        runstr += join
+        if c+1 == round(current_gap):
+            runstr += ' '
+            current_gap += gap
+    return runstr    
+
+_allignments = {'center': str.center, 'left': str.ljust, 'right':str.rjust, 'justify': justify}
+
 ##UNFINISHED: Finish by 1.2.2
 ##PREREQUISITE1.2.2: Finish multline object
 class multline(object):
     '''multi line string character stuff... in progress'''
-    def __init__(self, *strings):
+    def __init__(self, *strings, format_ = 'center'):
+        if len(strings) == 0:
+            strings = tuple(strings.split('\n'))
+        if format_ in _allignments:
+            format_=_allignments[format_]
         self.height = len(strings)
         self.width = max([len(str(x)) for x in strings])
-        self.strings = [str(x).center(self.width) for x in strings]
+        self.strings = [format_(str(x), self.width) for x in strings]
 
     def __repr__(self):
         return '\n'.join(map(repr, self.strings))
@@ -589,11 +618,24 @@ class multline(object):
         return self.height
 
     def getrow(self, line=0):
-        return self.strings[line]
+        if type(line) is int:
+            return self.strings[line]
+        elif type(line) is slice:
+            lines = self.strings[line]
+            return multline(*lines)
+        raise TypeError('index must be an integer or slice')
 
     def getcolumn(self, line=0):
-        return '/n'.join([x[line] for x in self.strings])
+        return multline(*[x[line] for x in self.strings])
 
+    def __getitem__(self, get):
+        ##print(get)
+        if type(get) is tuple:
+            if len(get) == 2:
+                return self.getcolumn(get[0]).getrow(get[1])
+            raise ValueError
+        return self.getcolumn(get)
+        
     def extend(self, other, center = None):
         if self.__class__ != other.__class__:
             raise TypeError('other must be a multline class')
@@ -628,7 +670,7 @@ class multline(object):
             def odd(num): return num%2 != 0
             if not _validation.is_integer(num): raise TypeError
             num = int(num)
-            print('half of', num)
+            ##print('half of', num)
             if odd(num): return (num//2, (num//2)+1)
             return (num//2, num//2)
         Halves = halves(height2)
