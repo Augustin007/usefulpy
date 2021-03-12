@@ -2,6 +2,7 @@ __package__ = 'usefulpy.mathematics'
 from .. import validation as _validation
 from .. import formatting as _formatting
 from . import nmath as _nmath
+import functools
 
 class vector:
     repr_mode = 'simple'
@@ -33,10 +34,22 @@ class vector:
         end = list(v.scalars[v1.dims:])
         start = [a+b for a, b in zip(v.scalars, v1.scalars)]
         return vector(*(start+end))
-    
+
+    def _mstr(v):
+        return _formatting.multline(*v.scalars)
+
     def __repr__(v):
         if v.repr_mode == 'simple':
             return 'vector'+str(v.scalars)
+        mstr = _formatting.multline(*v.scalars)
+        h = mstr.getheight()
+        w = mstr.getwidth()
+        side = _formatting.multline(*tuple('|'*h))
+        mstr = str(side + mstr + side)
+        top = '_'+w*' '+'_'
+        bottom = '‾' + w*' '+'‾'
+        return '\n'.join((top, mstr, bottom))
+        
         
     __str__ = __repr__
 
@@ -133,11 +146,14 @@ class matrix:
             return m._mul_matrix(m1)
         return NotImplemented
 
+    def _mstr(m):
+        mstrs = tuple([v._mstr() for v in m.vectors])
+        return functools.reduce(lambda a, b: a+ ' '+b, mstrs)
+
     def __repr__(m):
         if m.repr_mode == 'simple':
             return 'matrix' + str(m.vectors)
-        tmpstrlst = _organize(*zip(*m.vectors))
-        mstr = _formatting.multline(*tmpstrlst, format_ = 'justify')
+        mstr = m._mstr()
         h = mstr.getheight()
         w = mstr.getwidth()
         side = _formatting.multline(*tuple('|'*h))
@@ -146,7 +162,14 @@ class matrix:
         bottom = '‾' + w*' '+'‾'
         return '\n'.join((top, mstr, bottom))
 
+    def __iter__(m):
+        return m.vectors.__iter__()
+
 def _organize(*row_info):
     boxln = max(map(len, map(str, _validation.flatten(row_info))))
     a = [(' '.join(map(lambda n: str(n).ljust(boxln), row))) for row in row_info]
     return tuple(a)
+
+if __name__ == '__main__': #For testing reasons
+    vector.repr_mode = ''
+    matrix.repr_mode = ''
