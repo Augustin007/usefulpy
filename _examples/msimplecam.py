@@ -1,5 +1,5 @@
 #minecraft-like 20 by 20 block generation
-from usefulpy.gui.py3d import simple_camera as _c
+from usefulpy.gui.py3d import Simple_camera as _c
 import usefulpy.data as _r1
 from usefulpy.gui.py3d import tools3d as _t
 from usefulpy.gui import Frame as _frame
