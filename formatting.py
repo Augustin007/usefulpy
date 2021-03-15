@@ -598,7 +598,7 @@ class multline(object):
     '''multi line string character stuff... in progress'''
     def __init__(self, *strings, format_ = 'center'):
         if len(strings) == 0:
-            strings = tuple(strings.split('\n'))
+            strings = tuple(strings[0].split('\n'))
         if format_ in _allignments:
             format_=_allignments[format_]
         self.height = len(strings)

@@ -7,9 +7,6 @@ import warnings
 ##TODO: Document code
 ##PREREQUISITE1.2.2: quickthreads 1.1.1
 
-#if __name__ != '__main__': warnings.warn(Warning('This is not a completed code'))
-# It is incomplete but the functions are useable, so ...
-
 def _raise(error):
     raise error
 

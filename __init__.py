@@ -23,7 +23,7 @@ RELEASE NOTES:
    Bugfixes and improvements throughout.
   Version 1.2.1:
    Addition of more programs that contain more functions. Addition of 
-   usefulpy IDE. Improvement of functions
+   usefulpy IDE. Improvement of functions.
 
 SECTIONS:
 validation v1.1.2

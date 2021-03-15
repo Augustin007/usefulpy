@@ -317,7 +317,7 @@ quaternion'''
 
     def __str__(self, /):
         '''str(self)'''
-        if self == 0: return '0'
+        if self == 0: return '(0)'
         List = [self.real, self.i, self.j, self.k]
         nList = List.copy()
         List = list(map(str, List))
@@ -480,6 +480,12 @@ quaternion'''
 
     def __rmod__(other, self):
         return self-((self//other)*other)
+    
+    def __realmod__(self, other):
+        return quaternion(self.real%other, self.i, self.j, self.k)
+
+    def __rrealmod__(self, other):
+        return (other.real%self)+other-other.real
 
     def __divmod__(self, other, /):
         return (self//other, self%other)

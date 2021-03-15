@@ -64,7 +64,6 @@ def Composite(num):
 
 def factor(num):
     '''return factors of a number'''
-    #if type(num) in Expression.ExpressionTypes: return num.__factor__ agh!
     if num == 1: return [1]
     PrimeOrComposite((num//2)**2)
     num = int(num)
