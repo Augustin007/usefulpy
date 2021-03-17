@@ -202,21 +202,21 @@ Harking the addition of Py3d and the Usefulpy IDE. This update improves several 
 - formatting
 - decorators
 - mathematics
- - nmath
- - triangles
- - PrimeComposit
- - basenum
- - quaternion
+  - nmath
+  - triangles
+  - PrimeComposit
+  - basenum
+  - quaternion
 - IDE
- - namespace_management
- - partitions
- - run_code
- - usefulpy_IDE
- - usefulpy_syntax
+  - namespace_management
+  - partitions
+  - run_code
+  - usefulpy_IDE
+  - usefulpy_syntax
 - gui #`__init__` contains tkinter wrapper
- - py3d
-  - Cam
-  - Space
-  - Shapes
-  - simple_camera
-  - tools_3d
+  - py3d
+   - Cam
+   - Space
+   - Shapes
+   - simple_camera
+   - tools_3d
