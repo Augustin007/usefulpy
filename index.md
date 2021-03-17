@@ -1,4 +1,5 @@
 # Usefulpy
+
 Filled with simple resources and modules for a cleaner looking program, Usefulpy is a module filled with many useful functions and modules in various subjects geared to cut down and simplify some little bits of code that can become messy or repetitive.
 
 So instead of checking, say
@@ -24,8 +25,11 @@ Simple, but works well and can be used in a variety of situations. This also all
 
 While I would recommend getting aquainted with the code by sifting through it by hand, here is a quick introduction:
 
-## validation
-Validation includes various tools for getting input and preparing clean output, as well quick checks for types.
+## Sections
+
+### validation
+
+Validation includes various tools for getting input and preparing clean output, as well quick checks for types. The main idea is to check whether something fits in a category.
 
 A couple of its most important sections:
 
@@ -48,47 +52,52 @@ A couple of its most important sections:
  - `isbool`: return `type(s)==bool`
  - `is_function`: returns `True` if the object is a function.
 
-## mathematics
-### version 1.2.4
+and more...
+
+### mathematics
+
 Contains a lot of useful mathematical stuff.
 
-mathematics is divided into several programs, though `from usefulpy.mathematics import *` imports all of the functions from all of them.
-- `nmath`: new math, essentially imports and combines `math` and `cmath` (complex math), adds some more constants, and allows for a radians or degrees setting.
-- `triangles`: different functions dealing with triangles, as from `TriangleType` to `LawofCos`.
+The `mathematics` section is divided into several programs, though `from usefulpy.mathematics import *` imports all of the functions from all of them.
+- `constants`: a ton of mathematical constants.
+- `nmath`: new math, essentially imports and combines `math` and `cmath` (complex math), adds some more constants, and allows for a radians or degrees setting. Functions are replaced with a `mathfunc` class, which acts as a function but has a couple math-quirks.
+- `triangles`: different functions dealing with triangles, including a triangle class that does everything for you.
 - `PrimeComposite`: Functions dealing with factoring, gcd, lcm, primes and composites.
 - `basenum`: a class that saves numbers in any base counting system.
-- `quaternion`: a quaternion class: **In progress**
-- `eq`: a class, requires a string argument in a function `create` which returns an object of the class from a string `create('f(s)=s+1')` returns a callable object represented as `(s + 1)`
+- `quaternion`: a quaternion class
+
+These are the smaller programs that are not imported with the `mathematics` `__init__`.
+- `vector`: Little bits of linear algebra **In progress**
+- `eq`: a class, requires a string argument in a function `create` which returns an object of the class from a string `create('f(s)=s+1')` returns a callable object represented as `(s + 1)` **No longer updated**
 - `algebraicsolver`: eventually will be able to solve or simplify algebraic expressions **early stages... still in progress**
 
-#### nmath 2.1.1
- - constants: `e`, `pi`/`π`, `tau`/`τ`, `nan`, `inf`, `infj`, `nanj`, `Phi`/`Φ`, `kappa`/`κ`, `rho`/`ρ`, `lsigma`/`ς`, `sigma`/`σ`, `phi`/`φ`, and `psi`/`ψ`
- - `num`/`fraction`: `Decimal.decimal` and `Fraction.fraction` from python built-ins
- - `makefraction`: creates a correct fraction object out of floats
- - `phase`, `polar`, `rect`, `ceil`, `comb`, `copysign`, `dist`, `erf`, `erfc`, `expm1`, `fabs`, `factorial`, `floor`, `fmod`, `frexp`, `fsum`, `gamma`, `hypot`, `ldexp`, `lgamma`, `modf`, `nextafter`, `perm`, `prod`, `remainder`, `trunc`, `ulp`: functions imported directly `math`, `cmath`
- - `sqrt`, `isqrt`, `exp`, `isclose`, `isfinite`, `isinf`, `isnan`, `ln`, `log`: functions that call `math` and `cmath` versions but are modified to work both for real and complex numbers, instead of only one at a time.
- - `RadiansToDegrees`/`DegreesToRadians`: self explanatory
- - `radians`/`degrees`: functions that set the nmath setting to radians or degrees (default is radians)
- - `acos`, `acosh`, `asin`, `asinh`, `atan`, `atanh`, `asec`, `asech`, `acsc`, `acsch`, `acot`, `acoth`, `cos`, `cosh`, `sin`, `sinh`, `tan`, `tanh`, `sec`, `sech`, `csc`, `csch`, `cot`, `coth`, `cis`: Trigonometric functions, work with real and complex numbers, more functions than available with math and cmath and closer responses for quarter circles. 
- - `rt`, `irt`, `cbrt`, `icbrt`: root functions not in `math` and `cmath`
- - `odd`/`even`: return `True` if number is odd or even.
- - `summation`/`Σ`/`Sigma`: Summation
+#### nmath
 
-#### triangles 1.1.2
- - `isTriangle`: Checks whether a triangle can be formed out of three side lengths.
- - `TriangelType`/`AngleType`: returns the type of triangle/angle
- - `LawofCos`/`LawofSin`: Use the law of cos/sin to determine the missing argument.
- - `Heron`: Uses Heron's formula to get area of triangle.
+`nmath` (new math) recreates and combines the `cmath` and `math` modules.
 
-#### PrimeComposite 1.1.1
+##### Most Important parts
+ - `phase`, `polar`, `rect`, `ceil`, `comb`, `copysign`, `dist`, `erf`, `erfc`, `expm1`, `fabs`, `factorial`, `floor`, `fmod`, `frexp`, `fsum`, `gamma`, `hypot`, `ldexp`, `lgamma`, `modf`, `nextafter`, `perm`, `prod`, `remainder`, `trunc`, `ulp`, `sqrt`, `isqrt`, `exp`, `isclose`, `isfinite`, `isinf`, `isnan`, `ln`, `log`, `acos`, `acosh`, `asin`, `asinh`, `atan`, `atanh`, `asec`, `asech`, `acsc`, `acsch`, `acot`, `acoth`, `cos`, `cosh`, `sin`, `sinh`, `tan`, `tanh`, `sec`, `sech`, `csc`, `csch`, `cot`, `coth`, `cis`: functions that call `math` and `cmath` versions (I realize some of these math/cmath versions don't exist) but most are modified to work both for real and complex numbers, instead of only one at a time. These have also mostly turned into mathfunc and modified to also try to call a object's methods if it cannot be find (so `cos(x)` tries to call `x.__cos__` if `x` is not valid for `math` and `cmath` versions.
+ - `convert`: converts a value from a variable `frm` to `to`.
+ - `radians`/`degrees`/`grad`: functions that set the default nmath trigonometric setting to radians or degrees (default is radians)
+ - `rt`, `irt`, `cbrt`, `icbrt`, `square`, `cube`, `tesser`: quick root and power functions not in `math` and `cmath`
+ - `mathfunc`/`trig_func`/`inverse_trig_func`: wrapper for function, so you can add, subtract, and derive functions! (`cos+sin` returns a function that does `cos(x)+sin(x)`)
+
+#### triangles
+
+A triangle class that allow, you input three keyword arguments from a, b, c, alpha, beta, gamma, (including 1 side) and if 1 (not 2) real, valid triangle can be formed from these values it generates the rest. Also functions such as LawOfCos and Heron which do basic trig and grometric stuff. 
+(Note: only works in radians)
+
+#### PrimeComposite
+
+Just some number theory stuff
  - `PrimeOrComposite`: return `'Prime'` and `'Composite'`
  - `Prime`/`Composite`: return `True` if prime/composite
  - `factor`: return a list containing the factors of any given number
  - `lcm`: least common multiple
- - `gcd`/`gcd2`/`findgcd`: use `gcd` for most cases, `gcd2` is meant to work with more classes, but isn't wuite developed, `findgcd` is for a larger number of arguments.
+ - `gcd`/`gcd2`/`findgcd`: use `gcd` for most cases, `gcd2` is meant to work with more classes, but isn't quite developed, `findgcd` is for a larger number of arguments.
 
 
-#### basenum 1.1.2
+#### basenum
 A basenum class:
 ```python
 >>> x = basenum('3a2', 16)
@@ -118,26 +127,12 @@ A quaternion class:
 >>> quaternion(1, 2, 3, 4)
 (1+2i+3j+4k)
 >>> quaternion(1+3j)
-(1+3i)
+(1+3j)
 >>> 
 ```
+This class has a full range of functions and methods implimented... have fun!
 
-#### eq 2.2.1
-This program stores the 'eq' class. It takes a string of an expression of a
-function and returns an 'eq' object, which can be called with a number which
-replaces the variable with a number.
-
-Note: I originally created this for a specific sceneario in a graphing program
-I created that used this to make a turtle graph an input equation. While I am
-sure that there are other practical uses for this, some areas are only develope
-as necessary within the original program, though I have attempted to broaden its
-abilities.
-
-#### algebraicsolver 
-_Algebraic expressions/algebraic simplification_ ***Work in progress.*** 
-
-## formatting
-### version 1.2.3
+### formatting
 
 #### Data
 - `vowels`: a string with all the vowels
@@ -155,14 +150,29 @@ _Algebraic expressions/algebraic simplification_ ***Work in progress.***
 - `write`/`ComposeNumber`/`syllables`/`unformat`: write adds commas to string numbers, syllables counts syllables in a word/phrase, compose number writes out an input integer (`ComposeNumber(100)` returns `'one hundred'`, unformat .lowers the text, replaces any written out greek letters (for example: pi with π) or written out numbers (`unformat('two hundred forty three thousand six hundred twelve')` returns `'243612'`.
 
 #### Multline class
-Formatting includes a `multline` class, still a bit confusing and in its early stages but, in theory, cocinate and deal with strings that can span various lines as if they were single line 
+Formatting includes a `multline` class, still a bit confusing and in its early stages but, cocinates and deals with strings that can span various lines as if they were single line/matrix. 
 in theory:
 ```
 ' 3 '   '12'   ' 3 12'
 '---' + '--' = '-----'
 ' 4 '   '13'   ' 4 13'
 ```
+
+Now supports some pretty neat slicing.
+
 (of course, in the IDLE this would look different)
+
+## Decorators
+
+Decorators just has a few decorators. Nothing much to see here.
+
+## IDE
+
+A usefulpy IDE, in progress
+
+## gui
+
+Includes a wrapper around tkinter, which can be frustrating to work with, to make it simpler and a set of programs called py3d, for a 3d space in the built-in tkinter canvas.
 
 ## Versions
 
@@ -184,3 +194,29 @@ Most changes are to the mathematics section.
   - eq 2.1.5
   - algebraicsolver pr 5 (1.1.1)
   - quaternion 1.2.2
+
+###### [Usefulpy 1.2.1](https://github.com/Augustin007/usefulpy/releases/tag/1.2.1)
+Simple resources and modules for a cleaner looking program
+Harking the addition of Py3d and the Usefulpy IDE. This update improves several sections of Usefulpy, Very large changes and improvements to its math ability.
+- validation
+- formatting
+- decorators
+- mathematics
+ - nmath
+ - triangles
+ - PrimeComposit
+ - basenum
+ - quaternion
+- IDE
+ - namespace_management
+ - partitions
+ - run_code
+ - usefulpy_IDE
+ - usefulpy_syntax
+- gui #`__init__` contains tkinter wrapper
+ - py3d
+  - Cam
+  - Space
+  - Shapes
+  - simple_camera
+  - tools_3d
