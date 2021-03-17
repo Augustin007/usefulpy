@@ -215,8 +215,8 @@ Harking the addition of Py3d and the Usefulpy IDE. This update improves several 
   - usefulpy_syntax
 - gui #`__init__` contains tkinter wrapper
   - py3d
-   - Cam
-   - Space
-   - Shapes
-   - simple_camera
-   - tools_3d
+    - Cam
+    - Space
+    - Shapes
+    - simple_camera
+    - tools_3d
