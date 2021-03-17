@@ -36,8 +36,8 @@ A couple of its most important sections:
 #### Integer/Float Tools:
  - `is_integer`/`is_float`: return `True` if s is an integer/float or can be converted into one.
  - `intinput`/`floatinput`: continue to ask for input until input is an integer/float... Useless in a gui environment but useful in shell scripts
- - `tryint`/`tryfloat`: converts to an integer if `is_integer`/`is_float`
- - `trynumber`: `tryfloat(tryint(s))`
+ - `tryint`/`tryfloat`: converts to an `int`/`float` if `is_integer`/`is_float`
+ - `trynumber`: tries to convert something into some sort of number (this includes complex.
  - `is_intlist`/`is_floatlist`: checks if a list or a string with spaces is composed only of integers/floats.
  - `intlistinput`/`floatlistinput`: continues to ask for input until input can be converted to a list of integers/floats
 
