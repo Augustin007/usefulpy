@@ -87,6 +87,8 @@ def ide(namespace = None):
                     namespace['__'] = old_1
                     namespace['___'] = old__1
                 except: pass
+                In.append(input_)
+                count += 1
                 continue
             except: pass
             try:
