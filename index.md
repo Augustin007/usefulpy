@@ -170,6 +170,68 @@ Decorators just has a few decorators. Nothing much to see here.
 
 A usefulpy IDE, in progress
 
+```python
+>>> import usefulpy
+>>> usefulpy.ide()
+In [0] : 1+1i-2j+4k
+
+Out[0] : (1+1i-2j+4k)
+
+In [1] : cos(tau/4)
+
+Out[1] : 6.123233995736766e-17
+
+In [2] : _0
+
+Out[2] : (1+1i-2j+4k)
+
+In [3] : _1
+
+Out[3] : 6.123233995736766e-17
+
+In [4] : 1+i+j+k
+
+Out[4] : (1+1i+1j+1k)
+
+In [5] : cos(_)
+
+Out[5] : (1.5747529115583139-1.3300177322185731i-1.3300177322185731j-1.3300177322185731k)
+
+In [6] : sin(__)
+
+Out[6] : (2.452532348883716+0.8539945649192698i+0.8539945649192698j+0.8539945649192698k)
+
+In [7] : __**2+_**2
+
+Out[7] : (0.9999999999999964)
+
+In [8] : ___
+
+Out[8] : (1.5747529115583139-1.3300177322185731i-1.3300177322185731j-1.3300177322185731k)
+
+In [9] : _==_5
+
+Out[9] : True
+
+In [10] : Out[8]
+
+Out[10] : (1.5747529115583139-1.3300177322185731i-1.3300177322185731j-1.3300177322185731k)
+
+In [11] : In[0]
+
+Out[11] : '1+1i-2j+4k'
+
+In [12] : 1.0
+
+Out[12] : 1
+
+In [13] : __defaults__['#'] = float
+
+In [14] : 1
+
+Out[14] : 1.0
+```
+
 ## gui
 
 Includes a wrapper around tkinter, which can be frustrating to work with, to make it simpler and a set of programs called py3d, for a 3d space in the built-in tkinter canvas.
