@@ -26,6 +26,7 @@ __package__ = 'usefulpy.IDE'
 
 import usefulpy.IDE.usefulpy_syntax as usefulpy_syntax
 from usefulpy.quickthreads import raise_separately
+from .namespace_management import usefulpy_namespace_globals
 import time
 def _output(object, count):
     if object is None: return
@@ -52,7 +53,7 @@ def _quit():
 def ide(namespace = None):
     ide.quit = False
     if namespace is None: namespace = {}
-    namespace = {**namespace, **usefulpy_syntax.namespace_management.usefulpy_namespace_globals}
+    namespace = {**namespace, **usefulpy_namespace_globals}
     original = namespace.copy()
     In = []
     Out = {}

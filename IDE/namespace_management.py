@@ -36,7 +36,7 @@ exec('print(end = \'\')', built_in_namespace)
 from usefulpy.mathematics import *
 from usefulpy.validation import *
 from usefulpy.formatting import *
-
+print(i)
 usefulpy_namespace_globals = {**built_in_namespace, **globals().copy()}
 
 del usefulpy_namespace_globals['blank_namespace_globals']
@@ -70,3 +70,5 @@ def keep_unique(in_, from_):
         if n not in from_: continue
         if in_[n] is not from_[n]: continue
         del in_[n]
+
+print('i' in usefulpy_namespace_globals)
