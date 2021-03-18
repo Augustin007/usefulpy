@@ -230,6 +230,29 @@ In [13] : __defaults__['#'] = float
 In [14] : 1
 
 Out[14] : 1.0
+
+In [15] : acos(1)
+
+Out[15] : 0
+
+In [16] : arccos(1)
+
+Traceback (most recent call last):
+  File "/Users/mac/Documents/usefulpy/IDE/usefulpy_IDE.py", line 95, in ide
+    exec(corrected_input, namespace)
+  File "<string>", line 1, in <module>
+NameError: name 'arccos' is not defined
+
+In [16] : a = 2
+
+In [17] : a
+
+Out[17] : 2 
+
+In [18]: quit()
+
+{'a':2}
+>>> #returns dictionary of scope.
 ```
 
 ## gui
