@@ -28,6 +28,8 @@ import usefulpy.IDE.usefulpy_syntax as usefulpy_syntax
 from usefulpy.quickthreads import raise_separately
 from .namespace_management import usefulpy_namespace_globals
 import time
+import traceback
+
 def _output(object, count):
     if object is None: return
     print(f'Out[{count}] : ', repr(object), sep = '')
@@ -85,23 +87,24 @@ def ide(namespace = None):
                     namespace['__'] = old_1
                     namespace['___'] = old__1
                 except: pass
-            except:
-                try:
-                    exec(corrected_input, namespace)
-                    print()
-                except BaseException as err:
-                    print()
-                    print(err) ##raise seperately later
-                    Out[count] = err
-                    namespace[f'_{count}'] = err
-                    addedOuts[f'_{count}'] = err
-                    print()
+                continue
+            except: pass
+            try:
+                exec(corrected_input, namespace)
+                print()
+            except BaseException as err:
+                print()
+                traceback.print_exc() ##raise seperately later
+                Out[count] = err
+                namespace[f'_{count}'] = err
+                addedOuts[f'_{count}'] = err
+                print()
             In.append(input_)
             count += 1
+            continue
         except:
-            print('...')
-            print('Internal Error Occured:')
-            print('...')
+            print()
+            traceback.print_exc()
             print()
     usefulpy_syntax.namespace_management.keep_unique(namespace, original)
     usefulpy_syntax.namespace_management.keep_unique(namespace, addedOuts)
