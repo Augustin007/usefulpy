@@ -49,7 +49,6 @@ __version__ = '2.1.2'
 __package__ = 'usefulpy.mathematics'
 
 from .. import validation as _validation
-from ..IDE.usefulpy_syntax import _usefulpy_correct_syntax
 from .nmath import *
 from .PrimeComposite import *
 
@@ -543,11 +542,11 @@ def hyperrect(r, theta1, theta2, theta3):
     k = r*sin(theta3)
     return quaternion(real, i, j, k)
 
-def fromstring(string):
-    string = _usefulpy_correct_syntax(string)
-    try: return quaternion(eval(string))
-    except: pass
-    return ValueError('String does not represent a quaternion')
+#def fromstring(string):
+#    string = _usefulpy_correct_syntax(string) #agh! causing circular import!
+#    try: return quaternion(eval(string))
+#    except: pass
+#    return ValueError('String does not represent a quaternion')
 
 i = quaternion(b = 1)
 j = quaternion(c = 1)
