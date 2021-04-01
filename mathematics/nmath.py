@@ -1032,7 +1032,7 @@ def get_angle():
 def acos(x):
     '''Return the arc cosine of x,
 recources to x.__acos__ if cos cannot be found'''
-    if _validation.is_float(x):
+    if _validation.is_float(x) and (x<=1 and x>=-1):
         return _math.acos(x)
     elif _validation.is_complex(x):
         return _cmath.acos(x)
@@ -1058,7 +1058,7 @@ recources to x.__acos__ if cosh cannot be found'''
 def asin(x):
     '''Return the arc sine of x,
 recources to x.__asin__ if sin cannot be found'''
-    if _validation.is_float(x):
+    if _validation.is_float(x)  and (x<=1 and x>=-1):
         return _math.asin(x)
     elif _validation.is_complex(x):
         return _cmath.asin(x)
