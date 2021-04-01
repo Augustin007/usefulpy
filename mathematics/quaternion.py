@@ -60,6 +60,10 @@ class quaternion(object):
 (1+3i)
 >>> 
 '''
+    real:float
+    i:float
+    j:float
+    k:float
     def __new__(cls, a = None, b = None, c = None, d = None):
         '''__new__ for quaternion class, works well (hopefully) for most
 variations of input'''
@@ -88,10 +92,10 @@ variations of input'''
                 self.j = 0
                 self.k = 0
                 return self
-            if type(a) is str:
-                try: return quaternion(fromstring(a))
-                except: pass
-                raise ValueError('quaternion() arg is a malformed string')
+#            if type(a) is str:
+#                try: return quaternion(fromstring(a))
+#                except: pass
+#                raise ValueError('quaternion() arg is a malformed string')
             try:
                 q = a.__quaternion__()
                 if type(q) is quaternion: return q
@@ -146,8 +150,6 @@ variations of input'''
         a1, b1, c1, d1 = v1.astuple()
         a2, b2, c2, d2 = v2.astuple()
         return a1*a2+b1*b2+c1*c2+d1*d2
-
-    
 
     def cross(v1, v2):
         '''cross product of v1 and v2'''
@@ -216,6 +218,7 @@ variations of input'''
         return q.__cos__()**-1
 
     def __atan__(q, /):
+        r, p, n = q.__polar__()
         return -(n/2)*ln((n-q)/(n+q))
 
     def __acos__(q, /):
