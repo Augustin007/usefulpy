@@ -1,6 +1,6 @@
 # Usefulpy
 
-![Alt text](https://github.com/Augustin007/Augustin007/blob/main/UsefulPY.png)
+![Usefulpy Logo](https://github.com/Augustin007/Augustin007/blob/main/UsefulPY_with_quote.png)
 
 [Check out the Usefulpy site](https://augustin007.github.io/usefulpy/)
 
@@ -30,3 +30,6 @@ losing any value'''
 Simple, but works well and can be used in a variety of situations.
 
 Essentially, usefulpy is a large library of functions that improve the quality of python programming. One catch, it can't use any sort of third party libraries... so no numpy, scipy, manim, or any others... 
+
+
+![mini_usefulpy_logo](https://github.com/Augustin007/Augustin007/blob/main/Mini_usefulpy.png)
