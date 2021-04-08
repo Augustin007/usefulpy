@@ -263,13 +263,13 @@ Includes a wrapper around tkinter, which can be frustrating to work with, to mak
 
 ## Versions
 
-###### [Usefulpy 1.1.1](https://github.com/Augustin007/usefulpy/releases/tag/1.1.1):
+###### [Usefulpy 0.0.0](https://github.com/Augustin007/usefulpy/releases/tag/0.0.0):
 A series of simple functions, data, and programs to make code cleaner
 - validation 1.1.2
 - formatting 1.2.2
 - mathematics 1.1.3
 
-###### [Usefulpy 1.1.2](https://github.com/Augustin007/usefulpy/releases/tag/v1.1.2):
+###### [Usefulpy 0.0.1](https://github.com/Augustin007/usefulpy/releases/tag/0.0.1):
 These are all simple functions that pop up a lot in programming geared to cut down a lot of the little bits of code that can become quite messy and repetitive.
 Most changes are to the mathematics section.
 - validation 1.1.2
@@ -282,7 +282,7 @@ Most changes are to the mathematics section.
   - algebraicsolver pr 5 (1.1.1)
   - quaternion 1.2.2
 
-###### [Usefulpy 1.2.1](https://github.com/Augustin007/usefulpy/releases/tag/1.2.1)
+###### [Usefulpy 0.1.0](https://github.com/Augustin007/usefulpy/releases/tag/0.1.0)
 Simple resources and modules for a cleaner looking program
 Harking the addition of Py3d and the Usefulpy IDE. This update improves several sections of Usefulpy, Very large changes and improvements to its math ability.
 - validation
