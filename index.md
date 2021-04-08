@@ -1,6 +1,6 @@
 # Usefulpy
 
-![Alt text](https://github.com/Augustin007/Augustin007/blob/main/UsefulPY.png)
+![Alt text](https://github.com/Augustin007/Augustin007/blob/main/UsefulPY_with_quote.png)
 
 Filled with simple resources and modules for a cleaner looking program, Usefulpy is a module filled with many useful functions and modules in various subjects geared to cut down and simplify some little bits of code that can become messy or repetitive.
 
