@@ -603,7 +603,7 @@ class multline(object):
             format_=_allignments[format_]
         self.height = len(strings)
         self.width = max([len(str(x)) for x in strings])
-        self.strings = [format_(str(x), self.width) for x in strings]
+        self.strings = tuple([format_(str(x), self.width) for x in strings])
 
     def __repr__(self):
         return '\n'.join(map(repr, self.strings))
@@ -619,7 +619,7 @@ class multline(object):
 
     def getrow(self, line=0):
         if type(line) is int:
-            return self.strings[line]
+            return multline(self.strings[line])
         elif type(line) is slice:
             lines = self.strings[line]
             return multline(*lines)
@@ -630,15 +630,22 @@ class multline(object):
 
     def __getitem__(self, get):
         ##print(get)
+        unpack = lambda value, default: value if type(value) is tuple else (value, default)
         if type(get) is tuple:
             if len(get) == 2:
                 return self.getcolumn(get[0]).getrow(get[1])
             raise ValueError
+        if type(get) is slice:
+            if tuple in map(type, (get.start, get.stop, get.step)):
+                start1, start2 = unpack(get.start, None)
+                stop1, stop2 = unpack(get.stop, None)
+                step1, step2 = unpack(get.step, get.step)
+                return self.getcolumn(slice(start1, stop1, step1)).getrow(slice(start2, stop2, step2))
         return self.getcolumn(get)
         
     def extend(self, other, center = None):
         if self.__class__ != other.__class__:
-            raise TypeError('other must be a multline class')
+            return NotImplemented
         height1 = self.height
         height2 = other.height
         if center == None:
@@ -663,6 +670,7 @@ class multline(object):
                 except: second = ' '*other.width
                 new.append(first+second)
             return multline(*new)
+        if __name__ !='__main__': return NotImplemented
         ##print(height1)
         ##print(height2)
         if center not in range(height1): raise ValueError
@@ -701,9 +709,59 @@ class multline(object):
             new.append(first+second)
         return multline(*new)
 
+    def __contains__(self, value):
+        if type(value) is not self.__class__:
+            raise TypeError('other must be a multline class')
+        shape = value.shape()
+        firstline = value.strings[0]
+        matching_starts = []
+        for row, rowstr in enumerate(self.strings):
+            while firstline in rowstr:
+                column = rowstr.index(firstline)
+                matching_starts.append((column, row))
+                rowstr = rowstr[column+1:]
+        for location in matching_starts:
+            x, y = location
+            nx = x+shape[0]
+            ny = y+shape[1]
+            if self[x:nx, y:ny] == value:
+                return True
+        return False
+
+    def index(self, value):
+        if type(value) is not self.__class__:
+            raise TypeError('other must be a multline class')
+        shape = value.shape()
+        firstline = value.strings[0]
+        matching_starts = []
+        for row, rowstr in enumerate(self.strings):
+            while firstline in rowstr:
+                column = rowstr.index(firstline)
+                matching_starts.append((column, row))
+                rowstr = rowstr[column+1:]
+        for location in matching_starts:
+            x, y = location
+            nx = x+shape[0]
+            ny = y+shape[1]
+            if self[x:nx, y:ny] == value:
+                return True
+        return False
+
+    def shape(self):
+        return self.getwidth(), self.getheight()
+
+    def __len__(self):
+        return self.getwidth()*self.getheight()
+
     def __add__(self, other):
         if type(other) is str: other = self.__class__(other)
         return self.extend(other)
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+    def __hash__(self):
+        return hash(self.strings)
 
     def __radd__(self, other):
         if type(other) is str: other = other.__class__(other)

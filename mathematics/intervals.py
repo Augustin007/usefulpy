@@ -69,11 +69,23 @@ class interval:
                 return interval(self.start, other.stop, int(_nbin(self.mode, 2)[0]+_nbin(other.mode, 2)[-1], base = 2))
             return unified_interval(self, other)
         if type(other) is unified_interval:
-            pass
-            
+            for inter in unified:pass
         return NotImplemented
 
     def __ror__(self, other):
+        if type(other) is interval:
+            if other.start in self:
+                if other.stop in self: return self
+                return interval(self.start, other.stop, int(_nbin(self.mode, 2)[0]+_nbin(other.mode, 2)[-1], base = 2))
+            if other.stop in self:
+                return interval(other.start, self.stop, int(_nbin(other.mode, 2)[0]+_nbin(self.mode, 2)[-1], base = 2))
+            if self.start in other: return other
+            if self.stop in other:
+                return interval(self.start, other.stop, int(_nbin(self.mode, 2)[0]+_nbin(other.mode, 2)[-1], base = 2))
+            return unified_interval(self, other)
+        if type(other) is unified_interval:
+            pass
+            
         return NotImplemented
 
     def __xor__(self, other):
@@ -102,7 +114,7 @@ class unified_interval:
     intervals: tuple[interval]
     def __new__(cls, *intervals):
         self = super(unified_interval, cls).__new__(cls)
-        self.intervals = tuple(sorted(intervals))
+        self.intervals = sorted(intervals)
         return self
 
     def __contains__(self, x):
@@ -116,3 +128,5 @@ class unified_interval:
 
     def __str__(self):
         return 'U'.join(map(str, self.intervals))
+
+    def __iter__(): pass
