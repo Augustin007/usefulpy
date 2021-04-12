@@ -17,20 +17,20 @@ Put this file where Python can see it.
 RELEASE NOTES:
 1
  1.1
-  pr 1 (1.1.1)
+  pr 1 (0.0.0)
    creates expression class
    a lot of work has been done on the divexpression class
-  pr 2 (1.1.1)
+  pr 2 (0.0.0)
    bugfixes for the divexpression class
-  pr 3 (1.1.1)
+  pr 3 (0.0.0)
    addexpression class. a lot of work has been done.
-  pr 4 (1.1.1)
+  pr 4 (0.0.0)
    Worked a lot on clearing dozens of little bugs that would crop up
    when adding or dividing objects of two different classes. Also when working
    between the two current expression classes.  AGH!
-  pr 5 (1.1.1)
+  pr 5 (0.0.0)
    Warnings, for the sake of sanity! Oh, bug fixes as well, of course.
-  pr 6 (1.1.1)
+  pr 6 (0.0.0)
    To prevent infinite recursion and yet still support adding and subtracting
    variables: the 'frozen'  is added to the statement.
 

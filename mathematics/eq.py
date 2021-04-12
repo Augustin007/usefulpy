@@ -23,46 +23,46 @@ INSTALLATION:
 Put this file where Python can see it.
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1
+0
+ 0.1
+  Version 0.0.0
    eq is stored as a function with a list as a non-positional argument that
    defaults to the data, this equation is returned from a function 'make_eq'
-  Version 1.1.2
+  Version 0.0.1
    some bug fixes and whatnot.
- 1.2
-  Version 1.2.1
+ 0.1
+  Version 0.1.0
    Things moved around, a few new functions added
-2
- 2.1
-  2.1.1
+1
+ 1.0
+  1.0.0
    Swiched to using a class for eq. Everything has been moved around. More
    efficient and elegant code
-  2.1.2
+  1.0.1
    added 'prepare' and 'create' to avoid small bugs. added 'translations',
    'constants', and 'mathfuncs' for same reason 
-  2.1.3
+  1.0.2
    eq class is now callable, a small bugfix or two.
    added to the usefulpy module
-  2.1.4
+  1.0.3
    Really, really small bugfixes, and thus small improvements in quality.
-  2.1.5
+  1.0.4
    Hopefully fixed a couple elusive bugs...
    Improvement with 'create' and involving function.
    Functions are addable.
-  2.1.6
+  1.0.5
    Bugfixes... made to work with nmath > 2.1.1
    more functions
- 2.2
-  2.2.1
+ 1.1
+  1.1.0
    Calculus foundations being laid... adding the 'derivate'
-  2.2.2
+  1.1.1
 '''
 ##UPDATEME: Unreviewed for Usefulpy 1.2.1
 ##TODO: Update for use with eval.
 ##POSSIBLYOBSOLETE: Probably obsolete? May be removed later?
 __author__ = 'Austin Garcia'
-__version__ = '2.1.6'
+__version__ = '1.1.1'
 
 try: from nmath import *
 except: from usefulpy.mathematics.nmath import *

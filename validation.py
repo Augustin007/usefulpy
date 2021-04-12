@@ -8,25 +8,25 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    validation.py contains various useful modules for validation of input and
    output
-  Version 1.1.2:
+  Version 0.0.1:
    An updated description and various bug fixes. Cleaner looking code with more
    comments. Addition of several different biases, now imports random.
- 1.2
-  Version 1.2.1
+ 0.1
+  Version 0.1.0
     ——Friday, the fifteenth day of the firstmonth Janurary, 2021——
    Code is shorter by about fifty lines, and yet its functionality have
    increased... Simplicity is better! Who knew?
-  Version 1.2.2
+  Version 0.1.1
    Small bugfixes
 '''
 ##UPDATED TO: Usefulpy 1.2.1
 __author__ = 'Austin Garcia'
-__version__ = '1.2.2'
+__version__ = '0.1.1'
 __package__ = 'usefulpy'
 import sys
 import datetime

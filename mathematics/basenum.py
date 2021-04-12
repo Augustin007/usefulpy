@@ -25,7 +25,7 @@ __package__ = 'usefulpy.mathematics'
 
 ### IMPORTS ###
 from .. import validation as _validation
-from .PrimeComposite import *
+#from .PrimeComposite import *
 
 
 ### BASENUM ###
@@ -45,7 +45,10 @@ def fromNumBaseFormat(text):
 
 class basenum(object):
     '''Stores numbers of different bases'''
-
+    base:int
+    num:str
+    floatpart:str
+    Negative:bool
     ### INITIALIZING ###
     def __new__(cls, strint, base = 10):
         '''__new__ for basenum class:
@@ -166,9 +169,9 @@ class basenum(object):
         basenumb = (floatbase.convert(self.base))
         return basenumb
 
-    def __radd__(other, self):
+    def __radd__(self, other):
         '''return self+other'''
-        return _validation.tryint(float(self)+float(other))
+        return _validation.tryint(self+float(other))
 
     def __mul__(self, other):
         '''return self*other'''
@@ -184,9 +187,9 @@ class basenum(object):
         basenumb = (floatbase.convert(self.base))
         return basenumb
 
-    def __rpow__(other, self):
+    def __rpow__(self, other):
         '''return self**other'''
-        return _validation.tryint(float(self)**float(other))
+        return _validation.tryint(other**float(self))
 
     def __rmul__(other, self):
         '''return self*other'''
@@ -234,6 +237,7 @@ class basenum(object):
                 return int(self)
             return int(self)+1
 
+##TODO: Fix this area.
     def __floordiv__(self, other):
         self = self/other
         return floor(self)

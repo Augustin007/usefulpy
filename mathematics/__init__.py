@@ -8,45 +8,45 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    mathematics.py contains many mathematical functions.
-  Version 1.1.2:
+  Version 0.0.1:
    An updated description and various bug fixes. Cleaner looking code with more
    comments.
-  Version 1.1.3:
+  Version 0.0.2:
    Some small bug fixes
    Raises warnings at unfinished sections
- 1.2
-  Version 1.2.1
+ 0.1
+  Version 0.1.0
    Separated into sections and placed into a folder of its own
-  Version 1.2.2
+  Version 0.1.1
    Mostly some small bugfixes and clearer commenting throughout
-  Version 1.2.3
+  Version 0.1.2
    Several bugfixes, some work on algebraic solver and improvements on eq
-  Version 1.2.4
+  Version 0.1.3
    Heavy improvements in nmath, small bugfixes throughout
-  Version 1.2.5
+  Version 0.1.4
    Small improvement throughout.
 
 SECTIONS:
-PrimeComposite v1.1.1
+PrimeComposite
  Several functions to do with gcd, lcf, and numbers being prime or composite.
-nmath v1.1.2
+nmath
  This file is essentially the importation of the math module, but a few small
  functions are added or changed
-triangles v1.1.2
+triangles
  Several functions to do with triangles
-basenum v1.1.1
+basenum
  A basenum class, can hold numbers in a any counting system
-eq v2.1.5
+eq
  This program stores the 'eq' class. It takes a string of an expression of a
  function and returns an 'eq' object, which can be called with a number which
  replaces the variable with a number.
-algebraicsolvers pr 5 (1.1.1)
+algebraicsolvers
  Algebraic expressions/algebraic simplification
-quaternion v1.2.2
+quaternion
  a quaternion class
 '''
 

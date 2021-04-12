@@ -8,27 +8,25 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    formatting.py contains a small amount of functions for formatting.
-  Version 1.1.2
+  Version 0.0.1
    An updated description, some bug fixes
- 1.2
-  Version 1.2.1:
+ 0.1
+  Version 0.1.0:
    Addition of 'color', 'composenumber', 'syllable', 'write' and 'unformat'
-  Version 1.2.2:
+  Version 0.1.1:
    Some small bug fixes
    Raises warnings at unfinished sections
-  Version 1.2.3
+  Version 0.1.2
    More bug fixes
-  Version 1.2.4
+  Version 0.2.3
    A couple new stuff, mostly dealing with the long s
 '''
 
-##UPDATED TO: Usefulpy 1.2.1
-
-__version__ = '1.2.3'
+__version__ = '0.2.3'
 __author__ = 'Austin Garcia'
 __package__ = 'usefulpy'
 
