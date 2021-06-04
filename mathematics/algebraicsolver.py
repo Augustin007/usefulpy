@@ -55,6 +55,10 @@ except:
 from usefulpy.formatting import multline
 from usefulpy import validation as _validation
 
+import warnings
+
+warnings.warn(DeprecationWarning('The code "algebraicsolver.py" is very outdated and will soon be removed'))
+
 class FrozenError(Exception):
     def __init__(self, source = ''):
         if scource: self.message = "'"+str(scource)+"' is frozen and cannot be updated"

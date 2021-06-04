@@ -64,6 +64,9 @@ RELEASE NOTES:
 __author__ = 'Austin Garcia'
 __version__ = '1.1.1'
 
+import warnings
+warnings.warn(DeprecationWarning('Module "eq" is out of date, and will soon be removed'))
+
 try: from nmath import *
 except: from usefulpy.mathematics.nmath import *
 
