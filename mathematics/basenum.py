@@ -8,12 +8,15 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1
+0
+ 0.0
+  Version 0.0.0
    Basenum class can hold a number in a certain counting system
-  Version 1.1.2
+  Version 0.0.1
    Some bug fixes and implementation of __pow__
+ 0.1
+  Version 0.1.0
+   Code cleanup, removing inter-dependency, bugfixes, and versioneering fix
 '''
 ##UPDATED TO: Usefulpy 1.2.1
 ##PREREQUISITE1.2.2: basenum 1.2.1
@@ -24,7 +27,8 @@ __author__ = 'Austin Garcia'
 __package__ = 'usefulpy.mathematics'
 
 ### IMPORTS ###
-from .. import validation as _validation
+import math as _math
+#from .. import validation as _validation
 #from .PrimeComposite import *
 
 
@@ -40,7 +44,8 @@ def fromNumBaseFormat(text):
         if not base.isdigit(): raise ValueError('This could not be converted into a basenum object')
         return basenum(num, int(base))
     else:
-        if _validation.is_float(text): return eval(text)
+        try: return float(text)
+        except: pass
         else: raise ValueError('This could not be converted into a basenum object')
 
 class basenum(object):
@@ -63,6 +68,7 @@ class basenum(object):
 >>> int(y)
 465
 >>> '''
+        strint = str(strint)
         self = super(basenum, cls).__new__(cls)
         
         if 'e' in strint and base == 10:
@@ -142,7 +148,7 @@ class basenum(object):
         if base == self.base: return self
         number = abs(float(self))
         if number == 0: return basenum('0', base)
-        if base == 10: return basenum(str(_validation.trynumber(self)))
+        if base == 10: return basenum(float(self))
         strint, n = "", 0
         if number >= 1:
             while (base**n)<= number: n+=1
@@ -171,7 +177,7 @@ class basenum(object):
 
     def __radd__(self, other):
         '''return self+other'''
-        return _validation.tryint(self+float(other))
+        return other+float(self)
 
     def __mul__(self, other):
         '''return self*other'''
@@ -189,11 +195,11 @@ class basenum(object):
 
     def __rpow__(self, other):
         '''return self**other'''
-        return _validation.tryint(other**float(self))
+        return other**float(self)
 
     def __rmul__(other, self):
         '''return self*other'''
-        return _validation.tryint(float(self)*float(other))
+        return other * float(self)
 
     def __sub__(self, other):
         '''return self-other'''
@@ -204,7 +210,7 @@ class basenum(object):
 
     def __rsub__(other, self):
         '''return self-other'''
-        return _validation.tryint(float(self)-float(other))
+        return self-float(other)
 
     def __truediv__(self, other):
         '''return self/other'''
@@ -224,30 +230,26 @@ class basenum(object):
     def floor(self):
         if not self.Negative:
             return int(self)
-        else:
-            if _validation.is_integer(self):
-                return int(self)
-            return int(self)-1
+        if float(self)== int(self):
+            return int(self)
+        return int(self)-1
         
     def ceil(self):
         if self.Negative:
             return int(self)
-        else:
-            if _validation.is_integer(self):
-                return int(self)
-            return int(self)+1
+        if float(self)== int(self):
+            return int(self)
+        return int(self)+1
 
-##TODO: Fix this area.
     def __floordiv__(self, other):
         self = self/other
-        return floor(self)
+        return (self/other).floor()
 
     def __rfloordiv__(self, other):
-        self = other/self
-        return floor(self)
+        return _math.floor(other/self)
 
     def __gcd__(self, other, /):
-        return findgcd(self, other)
+        return _math.gcd(float(self), other)
 
     def __rgcd__(self, other, /):
         return self.__gcd__(other)
