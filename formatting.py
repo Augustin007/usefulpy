@@ -119,9 +119,10 @@ def scour(obj, of= ''):
                 if c == of: obj.pop(count)
                 else: count += 1
             return obj
+        count = 0
         for c in obj.copy():
             if c in of: obj.pop(count)
-            else: obj += 1
+            else: count += 1
         return obj
 
 long_s = 'ſ'
