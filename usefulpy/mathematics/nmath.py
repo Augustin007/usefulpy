@@ -9,50 +9,50 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1
+0
+ 0.0
+  Version 0.0.0
    Simple math importations with some changes and additions
-  Version 1.1.2
+  Version 0.0.1
    Changed some variable names and importations. More comments.
-2
- 2.1
-  Version 2.1.1
+1
+ 1.0
+  Version 1.0.0
    Reworked a lot of little details to allow for use with complex numbers
    throughout.
-  Version 2.1.2
+  Version 1.0.1
    Several new functions.
-  Version 2.1.3
+  Version 1.0.2
    Bug fixes
- 2.2
-  Version 2.2.1
+ 1.1
+  Version 1.1.0
    Some new functions and changing some internal workings
-  Version 2.2.2
+  Version 1.1.1
    Bug fixes (again)
-3
- 3.1
-  Version 3.1.1
+2
+ 2.0
+  Version 2.0.0
      ——Wednesday, the thirteenth day of the firstmonth Janurary, 2021——
    Rewrote on another document, cleaning up, improving, and adding functions
    throughout
-  Version 3.2.2
+  Version 2.0.1
    Small bugfixes
- 3.2
-  Version 3.2.1
+ 2.1
+  Version 2.1.0
    Mathfunc improvements/ trigfunc stuff, decorators
-  Version 3.2.2
+  Version 2.1.1
    Mathfunc bugfixes
-  Version 3.2.3
+  Version 2.1.2
    More mathfunc and such bugfixes
-  Version 3.2.4
+  Version 2.1.3
    Clean up of code
 '''
 
 ##UPDATED TO: Usefulpy 1.2.1
 
 ### DUNDERS ###
-__version__='3.1.1'
-__author__ = 'Austin Garcia'
+__version__='2.1.3'
+__author__ = 'Augustin Garcia'
 __package__='usefulpy.mathematics'
 
 ### IMPORTS ###
@@ -1111,7 +1111,7 @@ recources to x.__asec__ if sec cannot be found'''
     else:
         try:
             try: return x.__asec__()
-            except: ZeroDivisionError: zde = True
+            except ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1131,7 +1131,7 @@ recources to x.__asech__ if sech cannot be found'''
     else:
         try:
             try: return x.__asech__()
-            except: ZeroDivisionError: zde = True
+            except ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1151,7 +1151,7 @@ recources to x.__acsc__ if csc cannot be found'''
     else:
         try:
             try: return x.__acsc__()
-            except: ZeroDivisionError: zde = True
+            except ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1171,7 +1171,7 @@ recources to x.__acsch__ if csch cannot be found'''
     else:
         try:
             try: return x.__acsch__()
-            except: ZeroDivisionError: zde = True
+            except ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1191,7 +1191,7 @@ recources to x.__acot__ if cot cannot be found'''
     else:
         try:
             try: return x.__acot__()
-            except: ZeroDivisionError: zde = True
+            except ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1211,7 +1211,7 @@ recources to x.__acoth__ if coth cannot be found'''
     else:
         try:
             try: return x.__acoth__()
-            except: ZeroDivisionError: zde = True
+            except ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1341,8 +1341,6 @@ recources to θ.__sech__ if sech cannot be found'''
 def csc(θ):
     '''Return the cosecant of θ,
 recources to θ.__csc__ if csc cannot be found'''
-    if setting is None: setting = _angle
-    θ = (_validation.trynumber(convert(θ, setting, 'rad')))
     
     if _validation.is_float(θ):
         try: return _math.sin(1/θ)
