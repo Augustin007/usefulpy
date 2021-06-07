@@ -24,10 +24,10 @@ RELEASE NOTES:
   Version 0.1.1
    Small bugfixes
 '''
-##UPDATED TO: Usefulpy 1.2.1
-__author__ = 'Austin Garcia'
+
+__author__ = 'Augustin Garcia'
 __version__ = '0.1.1'
-__package__ = 'usefulpy'
+
 import sys
 import datetime
 
