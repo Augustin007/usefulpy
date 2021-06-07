@@ -17,8 +17,7 @@ RELEASE NOTES:
 '''
 
 __version__ = '0.0.1'
-__author__ = 'Austin Garcia'
-__package__ = 'usefulpy'
+__author__ = 'Augustin Garcia'
 
 import functools
 import time
