@@ -1,2 +1,4 @@
+'''This code has not been started'''
+
 import warnings
-warnings.warn(Warning('This code has not been started'))
+warnings.warn(Warning(__doc__))
