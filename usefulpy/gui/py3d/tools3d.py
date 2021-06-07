@@ -8,19 +8,22 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Tools for processing 3d: will probably be merged into a future 
-   mathematics.linear_algebra
+   mathematics.linear_algebra or .vectors?
 '''
-__author__ = 'Austin Garcia'
-__version__ = '1.1.1'
-__package__ = 'usefulpy.gui.py3d'
 
-from ...mathematics import quaternion, i, j, k, isclose, cis
+### DUNDERS ###
+__author__ = 'Augustin Garcia'
+__version__ = '0.0.0'
+
+### IMPORTS ###
+from ...mathematics import quaternion, i, j, k, isclose
 import random
 
+### TOOLS ###
 test_pane = ((-3*i-2j-1*k), (-i+2j+1*k), (i-j-2*k))
 
 def random_plane():
