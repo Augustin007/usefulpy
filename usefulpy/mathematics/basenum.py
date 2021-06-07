@@ -16,15 +16,14 @@ RELEASE NOTES:
    Some bug fixes and implementation of __pow__
  0.1
   Version 0.1.0
-   Code cleanup, removing inter-dependency, bugfixes, and versioneering fix
+   Code cleanup, removing inter-dependency, bugfixes, and versioning fix
 '''
 ##UPDATED TO: Usefulpy 1.2.1
 ##PREREQUISITE1.2.2: basenum 1.2.1
 
 ### INFO ###
-__version__ = '1.1.2'
-__author__ = 'Austin Garcia'
-__package__ = 'usefulpy.mathematics'
+__version__ = '0.1.0'
+__author__ = 'Augustin Garcia'
 
 ### IMPORTS ###
 import math as _math
