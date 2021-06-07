@@ -11,15 +11,14 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Stores 3d figures in 3d space
 '''
 
-__author__ = 'Austin Garcia'
-__version__ = '3.1.1'
-__package__ = 'usefulpy.gui.py3d'
+__author__ = 'Augustin Garcia'
+__version__ = '0.0.0'
 
 ### IMPORTS ###
 import time
