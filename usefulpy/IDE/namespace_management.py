@@ -10,16 +10,16 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Doesn't do much yet, mostly placeholder and driver for usefulpy-ide 
    purposes
 '''
 
-__version__ = '1.1.1'
-__author__ = 'Austin Garcia'
-__package__ = 'usefulpy.IDE'
+### DUNDERS ###
+__version__ = '0.0.0'
+__author__ = 'Augustin Garcia'
 
 blank_namespace_globals = globals().copy()
 
@@ -29,13 +29,12 @@ del blank_namespace_globals['__loader__']
 del blank_namespace_globals['__file__']
 blank_namespace_globals['__defaults__'] = {'#':int, '.':float, '#a': tuple()}
 
-
 built_in_namespace = {}
 exec('print(end = \'\')', built_in_namespace)
 
-from usefulpy.mathematics import *
-from usefulpy.validation import *
-from usefulpy.formatting import *
+from ..mathematics import *
+from ..validation import *
+from ..formatting import *
 usefulpy_namespace_globals = {**built_in_namespace, **globals().copy()}
 
 del usefulpy_namespace_globals['blank_namespace_globals']
