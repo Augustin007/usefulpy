@@ -13,32 +13,44 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Allows for processing of figures in 3d space. 
-   Somewhat limited: especially in regards to there being no curves
+   Somewhat limited: especially in regards to there being no way to create 3d curves
 '''
 
-__author__ = 'Austin Garcia'
-__version__ = '1.1.1'
-__package__ = 'usefulpy.gui.py3d'
-from ...mathematics import nmath as _m
+### DUNDERS ###
+__author__ = 'Augustin Garcia'
+__version__ = '0.0.0'
+
+### IMPORTS ###
 from ...mathematics.quaternion import quaternion, i, j, k
-import time
-import functools
 from .tools3d import is_on_plane, PointInTriangle, versor_from_points
-from ... import decorators as _d
 import copy as _c
-#All valid shape types must include these
-shape_methods = [
- 'rotate', 'shift', '_tilt_up', '_tilt_dn', '_tilt_rt', '_tilt_lt',
- '_fdx', '_fdy', '_fdz', '_bkx', '_bky', '_bkz', '_fdxy', '_fdyz',
- '_fdzx', '_bkzx', '_bkxy', '_bkyz', '_rt', '_lt', '_up', '_dn',
- 'tp', 'seth', '_fd', '_bk', 'setx', 'sety', 'setz'
- ]
+
+### UTILITY ###
+def shift_iter(iter, num):
+    amount =range(len(iter)-num+1)
+    iters = []
+    for n in amount:
+        iters.append(iter[n, n+num])
+    return zip(*iters)
+
+def darken(r, g, b, by):
+    r -= by
+    if r > 255: r = 255
+    if r < 0: r = 0
+    g -= by
+    if g > 255: g = 255
+    if g < 0: g = 0
+    b -= by
+    if b > 255: b = 255
+    if b < 0: b = 0
+    return r, g, b
 
 
+### MATERIALS CLASS ###
 class material:
     def __init__(self, color, opacity, metallicity, roughness, normals_function):
         ##TODO: Replace 'color' argument with 'texture' that can support an image
@@ -56,18 +68,6 @@ def smooth_normal(x, y):
 
 default = material((255, 0, 0), 1, 1, 0, smooth_normal)
 
-def darken(r, g, b, by):
-    r -= by
-    if r > 255: r = 255
-    if r < 0: r = 0
-    g -= by
-    if g > 255: g = 255
-    if g < 0: g = 0
-    b -= by
-    if b > 255: b = 255
-    if b < 0: b = 0
-    return r, g, b
-
 class pane:
     def __init__(self, universe, *points, material = None):
         if material == None:
@@ -83,20 +83,25 @@ class pane:
                     raise ValueError(f'Point {point} cannot properly be interpreted as a three-dimensional point')
                 npoints.append(point)
                 continue
+
             try:
                 npoint = quaternion(point)
+            except: pass
+            else:
                 if npoint.real != 0:
-                    raise PointError
+                    raise ValueError(f'Point {point} cannot properly be interpreted as a three-dimensional point')
                 npoints.append(npoint)
                 continue
-            except: pass
+
             try:
                 npoint = quaternion(0, *point)
+            except: pass
+            else:
                 if npoint.real != 0:
-                    raise PointError
+                    raise ValueError(f'Point {point} cannot properly be interpreted as a three-dimensional point')
                 npoints.append(npoint)
                 continue
-            except: pass
+
             raise ValueError(f'Point {point} cannot properly be interpreted as a three-dimensional point')
         points = tuple(npoints)
         del npoints
@@ -150,15 +155,16 @@ class pane:
     def shift(self, by):
         self.points = tuple([point+by for point in self.points])
         self._updated = True
-        
 
-def shift_iter(iter, num):
-    amount =range(len(iter)-num+1)
-    iters = []
-    for n in amount:
-        iters.append(iter[n, n+num])
-    return zip(*iters)
+### SHAPES ###
 
+#All valid shape types must include these
+shape_methods = [
+ 'rotate', 'shift', '_tilt_up', '_tilt_dn', '_tilt_rt', '_tilt_lt',
+ '_fdx', '_fdy', '_fdz', '_bkx', '_bky', '_bkz', '_fdxy', '_fdyz',
+ '_fdzx', '_bkzx', '_bkxy', '_bkyz', '_rt', '_lt', '_up', '_dn',
+ 'tp', 'seth', '_fd', '_bk', 'setx', 'sety', 'setz'
+ ]
 
 class polyhedron:
     def __init__(self, universe, *faces):
