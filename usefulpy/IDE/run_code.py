@@ -11,19 +11,18 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Runs code with usefulpy-syntax.
    bug: changes to __defaults__['#a'] cause bugs
 
 '''
 
-__version__ = '1.1.1'
-__author__ = 'Austin Garcia'
-__package__ = 'usefulpy.IDE'
+__version__ = '0.0.0'
+__author__ = 'Augustin Garcia'
 
-import usefulpy.IDE.usefulpy_syntax as usefulpy_syntax
+from . import usefulpy_syntax
 import os
 
 uglobals = usefulpy_syntax.namespace_management.usefulpy_namespace_globals
