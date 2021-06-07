@@ -53,8 +53,8 @@ quaternion
 ##UPDATED TO: Usefulpy 1.2.1
 
 ### INFO ###
-__version__ = '1.2.5'
-__author__ = 'Austin Garcia'
+__version__ = '0.1.4'
+__author__ = 'Augustin Garcia'
 __package__ = 'usefulpy.mathematics'
 
 ### IMPORTS ###
