@@ -56,22 +56,20 @@ RELEASE NOTES:
  1.1
   1.1.0
    Calculus foundations being laid... adding the 'derivate'
-  1.1.1
 '''
 ##UPDATEME: Unreviewed for Usefulpy 1.2.1
 ##TODO: Update for use with eval.
 ##POSSIBLYOBSOLETE: Probably obsolete? May be removed later?
 __author__ = 'Austin Garcia'
-__version__ = '1.1.1'
+__version__ = '1.1.0'
 
 import warnings
 warnings.warn(DeprecationWarning('Module "eq" is out of date, and will soon be removed'))
 
-try: from nmath import *
-except: from usefulpy.mathematics.nmath import *
+from .nmath import *
 
-from usefulpy import validation as _validation
-from usefulpy import formatting
+from .. import validation as _validation
+from .. import formatting
 import copy
 
 def derivate(eq, at):
