@@ -1,4 +1,3 @@
-__package__ = 'usefulpy.mathematics'
 from .. import validation as _validation
 from .. import formatting as _formatting
 from . import nmath as _nmath
