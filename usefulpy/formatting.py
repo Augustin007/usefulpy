@@ -27,8 +27,7 @@ RELEASE NOTES:
 '''
 
 __version__ = '0.2.3'
-__author__ = 'Austin Garcia'
-__package__ = 'usefulpy'
+__author__ = 'Augustin Garcia'
 
 from . import validation as _validation
 
