@@ -16,22 +16,25 @@ RELEASE NOTES:
   Version 0.0.0:
    Simple camera type.
 '''
-__author__ = 'Austin Garcia'
-__version__ = '0.0.0'
-__package__ = 'usefulpy.gui.py3d'
 
-from .Cam import cam_base, cam_shape_method
+### DUNDERS ###
+__author__ = 'Augustin Garcia'
+__version__ = '0.0.0'
+
+### IMPORTS ###
+from .Cam import cam_base, #cam_shape_method
 from ...mathematics import nmath as _m
 from ...mathematics import quaternion, i, j, k
 from .shapes import polyhedron, pane, darken
 from .Space import space
-import time
+#import time
 
-_m.degrees()
 
+### INITIALIZATIONS ###
 light_scource = k
 old_light = light_scource
 
+### UTILITIES ###
 def rgb2hex(r, g, b):
     r = hex(r)[2:]
     if len(r) == 1: r = '0'+r
@@ -41,6 +44,7 @@ def rgb2hex(r, g, b):
     if len(b) == 1: b = '0'+b
     return '#'+r+g+b
 
+# Temporary shader
 light_scalar = _m.polynomial(1.4834383937541313, -74.97492931129165, 264.354983605755, -249.77887679968808, 90.73400104839939, -10.067233808282387)
 
 def light(object):
@@ -72,6 +76,49 @@ def get_thetaz(q):
 def euler_angle(q):
     return get_thetax(q), get_thetaz(q)
 
+def rescale(point, to):
+    h = int(to.getHeight())
+    w = int(to.getWidth())
+    x, y = point
+    scale = max(h, w)//2
+    xadj = w//2
+    yadj = h//2
+    x *= scale
+    y *= scale
+    x += xadj
+    y += yadj
+    return x, y
+
+def add_polygon(points, hex, canvas):
+    args = []
+    for point in points: args.extend(point)
+    canvas.create_polygon(*args, fill = hex, outline = hex)
+
+def point(x, y, z):
+    return quaternion(0, x, y, z)
+
+def make_rectangular_prism(universe, point1, point2, color):
+    x1, y1, z1 = point1.vtuple()
+    x2, y2, z2 = point2.vtuple()
+    rectangular_prism = polyhedron(
+        universe,
+        cpane(universe, point(x1, y2, z2), point(x2, y2, z2), point(x2, y1, z2), point(x1, y1, z2), color = color),
+        cpane(universe, point(x1, y2, z1), point(x1, y2, z2), point(x2, y2, z2), point(x2, y2, z1), color = color),
+        cpane(universe, point(x2, y1, z1), point(x2, y2, z1), point(x2, y2, z2), point(x2, y1, z2), color = color),
+        cpane(universe, point(x1, y1, z1), point(x2, y1, z1), point(x2, y1, z2), point(x1, y1, z2), color = color),
+        cpane(universe, point(x1, y1, z1), point(x1, y2, z1), point(x1, y2, z2), point(x1, y1, z2), color = color),
+        cpane(universe, point(x1, y1, z1), point(x1, y2, z1), point(x2, y2, z1), point(x2, y1, z1), color = color)
+        )
+    
+    return rectangular_prism
+
+def cpane(universe, *points, color):
+    npane = pane(universe, *points)
+    npane.material.texture = color
+    return npane
+
+
+### SIMPLE CAMERA ###
 class simple_camera(cam_base):
     def __init__(self, universe, position, heading, fov = 0.5, renderdistance = 12, personal_objects = None, shape = None):
         self.shape = shape
@@ -229,47 +276,6 @@ class simple_camera(cam_base):
         yrot = self._yr1(x, y, z)
         zrot = self._zr1(x, y, z)
         if zrot > 0: return (xrot/zrot, -yrot/zrot)
-
-def rescale(point, to):
-    h = int(to.getHeight())
-    w = int(to.getWidth())
-    x, y = point
-    scale = max(h, w)//2
-    xadj = w//2
-    yadj = h//2
-    x *= scale
-    y *= scale
-    x += xadj
-    y += yadj
-    return x, y
-
-def add_polygon(points, hex, canvas):
-    args = []
-    for point in points: args.extend(point)
-    canvas.create_polygon(*args, fill = hex, outline = hex)
-
-def point(x, y, z):
-    return quaternion(0, x, y, z)
-
-def make_rectangular_prism(universe, point1, point2, color):
-    x1, y1, z1 = point1.vtuple()
-    x2, y2, z2 = point2.vtuple()
-    rectangular_prism = polyhedron(
-        universe,
-        cpane(universe, point(x1, y2, z2), point(x2, y2, z2), point(x2, y1, z2), point(x1, y1, z2), color = color),
-        cpane(universe, point(x1, y2, z1), point(x1, y2, z2), point(x2, y2, z2), point(x2, y2, z1), color = color),
-        cpane(universe, point(x2, y1, z1), point(x2, y2, z1), point(x2, y2, z2), point(x2, y1, z2), color = color),
-        cpane(universe, point(x1, y1, z1), point(x2, y1, z1), point(x2, y1, z2), point(x1, y1, z2), color = color),
-        cpane(universe, point(x1, y1, z1), point(x1, y2, z1), point(x1, y2, z2), point(x1, y1, z2), color = color),
-        cpane(universe, point(x1, y1, z1), point(x1, y2, z1), point(x2, y2, z1), point(x2, y1, z1), color = color)
-        )
-    
-    return rectangular_prism
-
-def cpane(universe, *points, color):
-    npane = pane(universe, *points)
-    npane.material.texture = color
-    return npane
 
 if __name__ == '__main__':
     import tkinter
