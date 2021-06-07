@@ -8,46 +8,45 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1
+0
+ 0.0
+  Version 0.0.0
    quaternion class holds data for a quaternion, can be added, subtracted, etc.
-  Version 1.1.2
+  Version 0.0.1
    several bug fixes
- 1.2
-  Version 1.2.1
+ 0.1
+  Version 0.1.0
    __init__ changed to work for a lot more classes.
    Comparison operators are now supported
    i, j, and k are added as variables.
-  Version 1.2.2
+  Version 0.1.1
    Some more testing and thus... more bug fixes
- 1.3
-  Version 1.3.1
+ 0.2
+  Version 0.2.0
    Small internal changes, addition of __pow__, but not complete, only works
    with integers.
-2
- 2.1
-  Version 2.1.1
+1
+ 1.0
+  Version 1.0.0
    quaternion class recreated, is now immutable, much more broad reach
    implimented. __pow__ now works for floats more often, but still has some
    problems
-  Version 2.1.2
+  Version 1.0.1
    improved __pow__ somewhat, still has problems (gah!)
    improved look of repr and str.
- 2.2
-  Version 2.2.1
+ 1.1
+  Version 1.1.0
    __pow__, __rpow__, __ln__, __log__, (et cetera) are working. 
-  Version 2.2.2
+  Version 1.1.1
    Small bug-fixes and clean up.
-  Version 2.2.3
+  Version 1.1.2
    __hash__ implemented
 '''
-##UPDATED TO: Usefulpy 1.2.1
+### DUNDERS ###
+__author__ = 'Augustin Garcia'
+__version__ = '1.1.2'
 
-__author__ = 'Austin Garcia'
-__version__ = '2.1.2'
-__package__ = 'usefulpy.mathematics'
-
+### IMPORTS ###
 from .. import validation as _validation
 from .nmath import *
 from .PrimeComposite import *
