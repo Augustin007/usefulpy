@@ -40,7 +40,7 @@ RELEASE NOTES:
 ##PREREQUISITE1.3: 1.1.1
 
 __author__ = 'Austin Garcia'
-__version__ = 'pr 6 (1.1.1)'
+__version__ = 'pr 6 (0.0.0)'
 
 try:
     from nmath import *
