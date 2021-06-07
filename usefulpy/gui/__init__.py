@@ -1,9 +1,10 @@
 '''
-Work in progress... but getting there...
+Work in progress... but getting there... IGNORE THE MESS!
 '''
 ##PREREQUISITE1.3: Version 1.1.1
 ##FIXME: turtle field is not working
 ##TODO: Make functioning more uniform
+
 import tkinter as Tkinter
 from tkinter import *
 from tkinter import ttk
