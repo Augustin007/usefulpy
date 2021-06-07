@@ -8,16 +8,15 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1
-   Basenum class can hold a number in a certain counting system
+0
+ 0.0
+  Version 0.0.0
+   Several functions to do with gcd, lcf, and numbers being prime or composite.
 
 '''
-##UPDATEME: Unreviewed for Usefulpy 1.2.1
-__author__ = 'Austin Garcia'
-__version__ = '1.1.1'
-__package__ = 'usefulpy.mathematics'
+
+__author__ = 'Augustin Garcia'
+__version__ = '0.0.0'
 
 from .nmath import *
 
