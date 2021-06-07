@@ -13,20 +13,23 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Cam_base class allows for camera classes to be created.
 '''
-__author__ = 'Austin Garcia'
-__version__ = '1.1.1'
-__package__ = 'usefulpy.gui.py3d'
 
+### DUNDERS ###
+__author__ = 'Augustin Garcia'
+__version__ = '0.0.0'
+
+### IMPORTS ###
 from ...mathematics import nmath as _m
 from ...mathematics.quaternion import quaternion, i, j, k
 import time
 import functools
 
+### CAMERA ###
 def cam_shape_method(func):
     @functools.wraps(func)
     def cam_method_wrapper(cam, *args, **kwargs):
