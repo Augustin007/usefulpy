@@ -13,21 +13,19 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file.
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Slicing... some bugs occur when quotes occur in comments, or comments 
    in quotes. Uses __defaults__... might be improvable?
-
 '''
 
-__version__ = '1.1.1'
-__author__ = 'Austin Garcia'
-__package__ = 'usefulpy.IDE'
+__version__ = '0.0.0'
+__author__ = 'Augustin Garcia'
 
-import usefulpy.IDE.namespace_management as namespace_management
+from . import namespace_management
 from .partitions import _partition_triple_quote, _partition_single_quote, _partition_comments
-from usefulpy import formatting as _formatting, validation as _validation
+from .. import formatting as _formatting, validation as _validation
 
 splitter = '\\1r3f2g4\\'
 trnsltdct = {}
