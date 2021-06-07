@@ -8,24 +8,21 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Several functions to do with triangles
-  Version 1.1.2:
+  Version 0.0.1:
    Changed some variable names and importations. More comments.
- 1.2
-  Version 1.2.1:
+ 0.1
+  Version 0.1.0:
    Triangle class, improved performance, bug fixes
 
 '''
-##UPDATED TO: Usefulpy 1.2.1
 
 ### INFO ###
-__version__ = '1.1.2'
-__author__ = 'Austin Garcia'
-__package__ = 'usefulpy.mathematics'
-
+__version__ = '0.1.0'
+__author__ = 'Augustin Garcia'
 
 ### IMPORTS ###
 import math as _math
