@@ -33,38 +33,42 @@ Pre releases
   Pr 2b
    The addition of figure classes.
    Figures can now be added to a space.
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Now can work with a canvas.
-  Version 1.1.2:
+  Version 0.0.1:
    Now works with colors
    small bugfixes regarding objects going 'behind' a camera causing errors.
-  Version 1.1.3:
+  Version 0.0.2:
    Better updating abilities
    Increased performance
    Increased handling
-  Version 1.1.4:
+  Version 0.0.3:
    Stiched panes of 3d figures. (there was a gap between the panes)
  1.2
-  Version 1.2.1:
+  Version 0.1.0:
    Heavy testing and debugging in movement... no more upside-down/backward/
    inverted movement when trying to navigate a 3d space. Also nicer loading.
-  Version 1.2.2:
+  Version 0.1.1:
    make rectangle function... pseudo-shades the rectangles
    this is a placeholder for the actual shading abilities.
-2
- 2.1
-  Version 2.1.1
-   The entire system has been shifted for use with quaternion-coordinates
-   Lighting system implemented
-
+1
+ 1.0
+  Version 1.0.0
+   The entire system has been shifted for use with quaternion-coordinates.
+   Lighting system implemented.
+   Removing several bugs.
+   Advanced transformation system for 3d objects
+   Better ways to move camera around.
+   More efficient code.
 '''
 
-__author__ = 'Austin Garcia'
-__version__ = '2.1.1'
-__package__ = 'usefulpy.gui.py3d'
+### DUNDERS ###
+__author__ = 'Augustin Garcia'
+__version__ = '1.0.0'
 
+### IMPORTS ###
 from .Cam import cam_base, cam_shape_method
 from .shapes import pane, polyhedron, material
 from .Simple_camera import simple_camera, make_rectangular_prism
