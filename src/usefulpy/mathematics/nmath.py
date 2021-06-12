@@ -9,50 +9,50 @@ This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
 file
 
 RELEASE NOTES:
-0
- 0.0
-  Version 0.0.0
-   Simple math importations with some changes and additions
-  Version 0.0.1
-   Changed some variable names and importations. More comments.
 1
- 1.0
-  Version 1.0.0
+ 1.1
+  Version 1.1.1
+   Simple math importations with some changes and additions
+  Version 1.1.2
+   Changed some variable names and importations. More comments.
+2
+ 2.1
+  Version 2.1.1
    Reworked a lot of little details to allow for use with complex numbers
    throughout.
-  Version 1.0.1
+  Version 2.1.2
    Several new functions.
-  Version 1.0.2
+  Version 2.1.3
    Bug fixes
- 1.1
-  Version 1.1.0
+ 2.2
+  Version 2.2.1
    Some new functions and changing some internal workings
-  Version 1.1.1
+  Version 2.2.2
    Bug fixes (again)
-2
- 2.0
-  Version 2.0.0
+3
+ 3.1
+  Version 3.1.1
      ——Wednesday, the thirteenth day of the firstmonth Janurary, 2021——
    Rewrote on another document, cleaning up, improving, and adding functions
    throughout
-  Version 2.0.1
+  Version 3.2.2
    Small bugfixes
- 2.1
-  Version 2.1.0
+ 3.2
+  Version 3.2.1
    Mathfunc improvements/ trigfunc stuff, decorators
-  Version 2.1.1
+  Version 3.2.2
    Mathfunc bugfixes
-  Version 2.1.2
+  Version 3.2.3
    More mathfunc and such bugfixes
-  Version 2.1.3
+  Version 3.2.4
    Clean up of code
 '''
 
 ##UPDATED TO: Usefulpy 1.2.1
 
 ### DUNDERS ###
-__version__='2.1.3'
-__author__ = 'Augustin Garcia'
+__version__='3.1.1'
+__author__ = 'Austin Garcia'
 __package__='usefulpy.mathematics'
 
 ### IMPORTS ###
@@ -75,11 +75,123 @@ from math import lgamma, modf, nextafter, perm, prod, remainder, trunc, ulp
 
 ### CONVERSIONS ###
 ##TODO: Add more values to conversions
-_dirlist = __file__.split(_os.sep)
-_dirlist[-1] = 'Conversions.json'
-_conversions_file_name = _os.sep.join(_dirlist)
-conversions = _json.loads(open(_conversions_file_name).read())
-
+{'rad':
+  {'type': 'angle',
+   'value': 'tau'
+  },
+ 'deg':
+  {'type': 'angle',
+   'value': '360'
+  },
+ 'grad':
+  {'type': 'angle',
+   'value': '400'
+  },
+ 'meter':
+  {'type': 'length',
+   'value': 1
+  },
+ 'decameter':
+  {'type': 'length',
+   'value': 1/10
+  },
+ 'hectometer':
+  {'type': 'length',
+   'value': 1/100
+  },
+ 'kilometer':
+  {'type': 'length',
+   'value': 1/1000
+  },
+ 'megameter':
+  {'type': 'length',
+   'value': 1/1000000
+  },
+ 'gigameter':
+  {'type': 'length',
+   'value': 1/1000000000
+  },
+ 'terrameter':
+  {'type': 'length',
+   'value': 1/1000000000
+  },
+ 'petameter':
+  {'type': 'length',
+   'value': 1/1000000000000000
+  },
+ 'exameter':
+  {'type': 'length',
+   'value': 1/1000000000000000000
+  },
+ 'zettameter':
+  {'type': 'length',
+   'value': 1/1000000000000000000000
+  },
+ 'yottameter':
+  {'type': 'length',
+   'value': 1/1000000000000000000000000
+  },
+ 'decimeter':
+  {'type': 'length',
+   'value': 10
+  },
+ 'centimeter':
+  {'type': 'length',
+   'value': 100
+  },
+ 'millimeter':
+  {'type': 'length',
+   'value': 1000
+  },
+ 'micrometer':
+  {'type': 'length',
+   'value': 1000000
+  },
+ 'nanometer':
+  {'type': 'length',
+   'value': 1000000000
+  },
+ 'picometer':
+  {'type': 'length',
+   'value': 1000000000000
+  },
+ 'femtometer':
+  {'type': 'length',
+   'value': 1000000000000000
+  },
+ 'attometer':
+  {'type': 'length',
+   'value': 1000000000000000000
+  },
+ 'zeptometer':
+  {'type': 'length',
+   'value': 1000000000000000000000
+  },
+ 'yoctometer':
+  {'type': 'length',
+   'value': 1000000000000000000000000
+  },
+ 'foot':
+  {'type': 'length',
+   'value': 3.2808398949899997
+  },
+ 'inches':
+  {'type': 'length',
+   'value': 39.37007873988
+  },
+ 'yard':
+  {'type': 'length',
+   'value': 1.09361329833
+  },
+ 'mile':
+  {'type': 'length',
+   'value': 0.0006213711922329545
+  },
+ 'nautical_mile':
+  {'type': 'length',
+   'value': 0.0005399670663248847
+  }
+}
 
 
 ### checks ###
@@ -594,11 +706,13 @@ class mathfunc:
     @_decorators.arg_modifier(_validation.trynumber)
     def derivative(f, kth=1):
         '''find the kth derivative of f'''
-        if 'prime_cycle' in f.__dict__: kth = f.prime_cycle+(kth%f.prime_cycle)
+        if 'prime_cycle' in f.__dict__:
+            if kth > f.prime_cycle:
+                kth = f.prime_cycle+(kth%f.prime_cycle)
         if f'prime{kth}' in f.__dict__: return f.solve_key(f'prime{kth}')
         
-        assert _validation.is_integer(kth)
-        assert kth >= 0 #anti-derivate not implimented yet
+        assert _validation.is_integer(kth) #fractional derivative not implemented yet
+        assert kth >= 0 #anti-derivate not implemented yet
 
         
         
@@ -606,9 +720,6 @@ class mathfunc:
         if kth == 1:
             return mathfunc(lambda x: ((f(x+dx)-f(x))/dx))
         return f.derivative(kth-1).derivative()
-
-    
-        
 
 trivial = mathfunc(lambda x: 0)
 trivial.__name__ = 'trivial'
@@ -1111,7 +1222,7 @@ recources to x.__asec__ if sec cannot be found'''
     else:
         try:
             try: return x.__asec__()
-            except ZeroDivisionError: zde = True
+            except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1131,7 +1242,7 @@ recources to x.__asech__ if sech cannot be found'''
     else:
         try:
             try: return x.__asech__()
-            except ZeroDivisionError: zde = True
+            except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1151,7 +1262,7 @@ recources to x.__acsc__ if csc cannot be found'''
     else:
         try:
             try: return x.__acsc__()
-            except ZeroDivisionError: zde = True
+            except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1171,7 +1282,7 @@ recources to x.__acsch__ if csch cannot be found'''
     else:
         try:
             try: return x.__acsch__()
-            except ZeroDivisionError: zde = True
+            except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1191,7 +1302,7 @@ recources to x.__acot__ if cot cannot be found'''
     else:
         try:
             try: return x.__acot__()
-            except ZeroDivisionError: zde = True
+            except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1211,7 +1322,7 @@ recources to x.__acoth__ if coth cannot be found'''
     else:
         try:
             try: return x.__acoth__()
-            except ZeroDivisionError: zde = True
+            except: ZeroDivisionError: zde = True
         except:pass
     if zde:
         raise ValueError ('math domain error')
@@ -1341,6 +1452,8 @@ recources to θ.__sech__ if sech cannot be found'''
 def csc(θ):
     '''Return the cosecant of θ,
 recources to θ.__csc__ if csc cannot be found'''
+    if setting is None: setting = _angle
+    θ = (_validation.trynumber(convert(θ, setting, 'rad')))
     
     if _validation.is_float(θ):
         try: return _math.sin(1/θ)
