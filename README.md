@@ -6,6 +6,14 @@
 
 _Usefulpy site is not always up to date_
 
+## Download and Import
+
+download with `pip install usefulpython`
+
+import with `import usefulpy`
+
+## Description
+
 Filled with simple resources and modules for a cleaner looking program, Usefulpy is a module filled with many useful functions and modules in various subjects geared to cut down and simplify some little bits of code that can become messy or repetitive.
 
 So instead of checking, say
