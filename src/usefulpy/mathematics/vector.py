@@ -1,3 +1,24 @@
+'''
+vector
+
+DESCRIPTION
+a simple linear algebra calculator
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+0
+ 0.0
+  Version 0.0.0:
+   A simple linear algebra calculator
+'''
+
+### DUNDERS ###
+__author__ = 'Augustin Garcia'
+__version__ = '0.0.0'
+
 from .. import validation as _validation
 from .. import formatting as _formatting
 from . import nmath as _nmath
