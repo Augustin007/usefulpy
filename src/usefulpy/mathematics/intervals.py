@@ -1,7 +1,23 @@
-def _nbin(num, length):
-    binnum = bin(num)[2:]
-    if len(binnum) >= length: return binnum[-length:]
-    return (length - len(binnum))*'0'+binnum
+'''
+intervals
+
+DESCRIPTION
+an interval class than support and, or, and xor functions
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+0
+ 0.0
+  Version 0.0.0:
+   Simple interval class
+'''
+
+### DUNDERS ###
+__author__ = 'Augustin Garcia'
+__version__ = '0.0.0'
 
 class Interval:
     def __new__(cls, *args):
@@ -26,11 +42,12 @@ class interval:
     def __init__(self, start:float, stop:float, mode = 'open'):
         if type(mode) is str and mode not in ('open', 'left', 'right', 'close'):
             raise ValueError('Invalid Mode')
-        elif type(mode) is int and mode not in range(0, 4):
+        elif type(mode) is int and mode not in range(4):
             raise ValueError('Invalid Mode')
         elif type(mode) in (int, str): pass
         else:
             raise TypeError('Invalid Mode')
+        assert start < stop
         self.start = float(start)
         self.stop = float(stop)
         if mode in ('open', 0):
@@ -74,12 +91,12 @@ class interval:
         if type(other) is interval:
             if other.start in self:
                 if other.stop in self: return self
-                return interval(self.start, other.stop, int(_nbin(self.mode, 2)[0]+_nbin(other.mode, 2)[-1], base = 2))
+                return interval(self.start, other.stop, self.mode&2^other.mode&1)
             if other.stop in self:
-                return interval(other.start, self.stop, int(_nbin(other.mode, 2)[0]+_nbin(self.mode, 2)[-1], base = 2))
+                return interval(other.start, self.stop, other.mode&2^self.mode&1)
             if self.start in other: return other
             if self.stop in other:
-                return interval(self.start, other.stop, int(_nbin(self.mode, 2)[0]+_nbin(other.mode, 2)[-1], base = 2))
+                return interval(self.start, other.stop, self.mode&2^other.mode&1)
             return unified_interval(self, other)
         if type(other) is unified_interval:
             return unified_interval(*other.intervals, self)
@@ -91,27 +108,52 @@ class interval:
     def __xor__(self, other):
         if type(other) is interval:
             if other.start in self:
-                if other.stop in self: return other
+                if other.stop in self:
+                    a = interval(self.start, other.start, (self.mode&2^(other.mode^2)&2))
+                    b = interval(other.stop, self.stop, ((other.mode^1)&1^self.mode&1))
+                    return unified_interval(a, b)
+                a = interval(self.start, other.start, (self.mode&2^(other.mode^2)&2))
+                b = interval(self.stop, other.stop, ((self.mode^1)&1^other.mode&1))
+                return unified_interval(a, b)
+            if other.stop in self:
+                a = interval(other.start, self.start, other.mode&2^(self.mode^2)&2)
+                b = interval(other.stop, self.stop, ((other.mode^1)&1^self.mode&1))
+                return unified_interval(a, b)
+            if self.start in other:
+                return other|self
+            if self.stop in other:
+                return other|self
+            return unified_interval(a, b) 
         return NotImplemented
 
     def __rxor__(self, other):
         return NotImplemented
 
     def __and__(self, other):
-        return NotImplemented
+        if type(other) is interval:
+            if other.start in self:
+                if other.stop in self: return other
+                return interval(other.start, self.stop, (other.mode&2^self.mode&1))
+            if other.stop in self:
+                return interval(self.start, other.stop, (other.mode&2^self.mode&1))
+            if self.start in other:
+                return other|self
+            if self.stop in other:
+                return other|self
+            return None
 
     def __rand__(self, other):
         return NotImplemented
 
     def __lt__(self, other):
         if self.start != other.start:
-            return self.start < other.start
-        return self.stop<other.stop
+            return self.start <= other.start
+        return self.stop<=other.stop
 
     def __gt__(self, other):
         if self.start != other.start:
-            return self.start > other.start
-        return self.stop>other.stop
+            return self.start >= other.start
+        return self.stop>=other.stop
 
 class unified_interval:
     intervals: tuple[interval]
