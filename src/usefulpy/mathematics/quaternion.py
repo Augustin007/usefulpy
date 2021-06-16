@@ -49,7 +49,6 @@ __version__ = '1.1.2'
 ### IMPORTS ###
 from .. import validation as _validation
 from .nmath import *
-from .PrimeComposite import *
 
 class quaternion(object):
     '''A quaternion class:
@@ -182,7 +181,7 @@ variations of input'''
 
     def gcd(self, /):
         '''return gcd of self'''
-        return findgcd(self.real, self.i, self.j, self.k)
+        return gcd(self.real, self.i, self.j, self.k)
 
     def floor(self, /):
         '''return a quaternion composed only of integers and i, j, and k
@@ -437,10 +436,7 @@ quaternion'''
         return _validation.trynumber(self/other)
 
     def __gcd__(self, other, /):
-        return findgcd(self.gcd(), other)
-
-    def __rgcd__(self, other, /):
-        return self.__gcd__(other)
+        return gcd(self.gcd(), other)
     
     def __pow__(self, other, /):
         '''return self**other'''
