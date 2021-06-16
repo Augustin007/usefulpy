@@ -18,8 +18,6 @@ RELEASE NOTES:
   Version 0.1.0
    Code cleanup, removing inter-dependency, bugfixes, and versioning fix
 '''
-##UPDATED TO: Usefulpy 1.2.1
-##PREREQUISITE1.2.2: basenum 1.2.1
 
 ### INFO ###
 __version__ = '0.1.0'
