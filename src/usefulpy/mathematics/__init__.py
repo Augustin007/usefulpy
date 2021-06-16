@@ -29,39 +29,31 @@ RELEASE NOTES:
    Heavy improvements in nmath, small bugfixes throughout
   Version 0.1.4
    Small improvement throughout.
-
-SECTIONS:
-PrimeComposite
- Several functions to do with gcd, lcf, and numbers being prime or composite.
-nmath
- This file is essentially the importation of the math module, but a few small
- functions are added or changed
-triangles
- Several functions to do with triangles
-basenum
- A basenum class, can hold numbers in a any counting system
-eq
- This program stores the 'eq' class. It takes a string of an expression of a
- function and returns an 'eq' object, which can be called with a number which
- replaces the variable with a number.
-algebraicsolvers
- Algebraic expressions/algebraic simplification
-quaternion
- a quaternion class
+ 0.2
+  Version 0.2.0
+   Heavy bugfixing throughout. Deprecated algebraic solver and eq
+  Version 0.2.1
+   More bugfixing, some more functions. Efficiency increased
+1
+ 1.0
+  Version 1.0.0
+   Entirety of folder restructured. Much improved use of mathfuncs. Expression
+   check has taken the place of eq and algebraic solver. Basic CAS implemented
+   for the new mathfunc-eq-solver merge. Greater efficiency and power to most
+   other areas. nmath made much smaller, most of its functionality has been
+   moved to the mathfunc file.
 '''
 
-##UPDATED TO: Usefulpy 1.2.1
-
 ### INFO ###
-__version__ = '0.1.4'
+__version__ = '1.0.0'
 __author__ = 'Augustin Garcia'
-__package__ = 'usefulpy.mathematics'
 
 ### IMPORTS ###
-from .basenum import *
+from .mathfuncs import *
 from .nmath import *
-from .PrimeComposite import *
+from .basenum import *
 from .quaternion import *
-from .triangles import *
+from .vector import *
+from .intervals import *
 
 #eof
