@@ -46,7 +46,7 @@ Pre releases
    Increased handling
   Version 0.0.3:
    Stiched panes of 3d figures. (there was a gap between the panes)
- 1.2
+ 0.1
   Version 0.1.0:
    Heavy testing and debugging in movement... no more upside-down/backward/
    inverted movement when trying to navigate a 3d space. Also nicer loading.
@@ -62,6 +62,10 @@ Pre releases
    Advanced transformation system for 3d objects
    Better ways to move camera around.
    More efficient code.
+  Version 1.0.1
+   Bugfixes
+  Version 1.0.2 
+   Bugfixes, efficiency improvements
 '''
 
 ### DUNDERS ###
