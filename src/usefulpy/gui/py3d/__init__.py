@@ -20,7 +20,7 @@ Pre releases
 
    The way this works is that you imagine a 3d vector from a point to an 'eye'
    (a point with a plane in front of it), where this vector intersects with the
-   plane (in the plane) is the point is should be graphed at.
+   plane (in the plane) is where the point should be graphed at.
  Pr 2
   Pr 2a
    space object will hold figures and cameras. cameras now belong to a space.
