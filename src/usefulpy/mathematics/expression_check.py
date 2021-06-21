@@ -26,7 +26,7 @@ __author__ = 'Augustin Garcia'
 __version__ = '0.0.2'
 
 ### IMPORTS ###
-from collections import Counter, abc
+from collections import abc
 from functools import cache
 
 ### UTILITY ###
@@ -195,9 +195,9 @@ def _simplify_add(composition:tuple)->tuple:
                 if count != 1:
                     if type(value) == tuple:
                         if value[0] == 'mul':
-                            run_list_composition.append(('mul', (count, *value[1])))
-                            continue                    
-                    run_list_composition.append(('mul', (count, value)))
+                            run_list_composition.append(('mul', (*value[1], count)))
+                            continue
+                    run_list_composition.append(('mul', (value, count)))
                 else:
                     run_list_composition.append(value)
     
