@@ -123,7 +123,7 @@ class interval:
                 return other|self
             if self.stop in other:
                 return other|self
-            return unified_interval(a, b) 
+            return unified_interval(self, other) 
         return NotImplemented
 
     def __rxor__(self, other):
