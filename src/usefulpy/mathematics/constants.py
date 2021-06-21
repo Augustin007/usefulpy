@@ -1,122 +1,20 @@
-### CONVERSIONS ###
-##TODO: Add more values to conversions
-conversions = {'rad':
-  {'type': 'angle',
-   'value': 'tau'
-  },
- 'deg':
-  {'type': 'angle',
-   'value': '360'
-  },
- 'grad':
-  {'type': 'angle',
-   'value': '400'
-  },
- 'meter':
-  {'type': 'length',
-   'value': 1
-  },
- 'decameter':
-  {'type': 'length',
-   'value': 1/10
-  },
- 'hectometer':
-  {'type': 'length',
-   'value': 1/100
-  },
- 'kilometer':
-  {'type': 'length',
-   'value': 1/1000
-  },
- 'megameter':
-  {'type': 'length',
-   'value': 1/1000000
-  },
- 'gigameter':
-  {'type': 'length',
-   'value': 1/1000000000
-  },
- 'terrameter':
-  {'type': 'length',
-   'value': 1/1000000000
-  },
- 'petameter':
-  {'type': 'length',
-   'value': 1/1000000000000000
-  },
- 'exameter':
-  {'type': 'length',
-   'value': 1/1000000000000000000
-  },
- 'zettameter':
-  {'type': 'length',
-   'value': 1/1000000000000000000000
-  },
- 'yottameter':
-  {'type': 'length',
-   'value': 1/1000000000000000000000000
-  },
- 'decimeter':
-  {'type': 'length',
-   'value': 10
-  },
- 'centimeter':
-  {'type': 'length',
-   'value': 100
-  },
- 'millimeter':
-  {'type': 'length',
-   'value': 1000
-  },
- 'micrometer':
-  {'type': 'length',
-   'value': 1000000
-  },
- 'nanometer':
-  {'type': 'length',
-   'value': 1000000000
-  },
- 'picometer':
-  {'type': 'length',
-   'value': 1000000000000
-  },
- 'femtometer':
-  {'type': 'length',
-   'value': 1000000000000000
-  },
- 'attometer':
-  {'type': 'length',
-   'value': 1000000000000000000
-  },
- 'zeptometer':
-  {'type': 'length',
-   'value': 1000000000000000000000
-  },
- 'yoctometer':
-  {'type': 'length',
-   'value': 1000000000000000000000000
-  },
- 'foot':
-  {'type': 'length',
-   'value': 3.2808398949899997
-  },
- 'inches':
-  {'type': 'length',
-   'value': 39.37007873988
-  },
- 'yard':
-  {'type': 'length',
-   'value': 1.09361329833
-  },
- 'mile':
-  {'type': 'length',
-   'value': 0.0006213711922329545
-  },
- 'nautical_mile':
-  {'type': 'length',
-   'value': 0.0005399670663248847
-  }
-}
+'''
+Constants
+
+DESCRIPTION
+Stores constants for mathematical calculation.
+
+LICENSE PLATAFORMS and INSTALLATION:
+This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
+file
+
+RELEASE NOTES:
+0
+ 0.0
+  Version 0.0.0:
+   Stores constants for mathematical calculation.
+'''
+
 
 inf = float('inf')
 neg_inf = -inf
@@ -378,3 +276,123 @@ zepto = 1e-21
 zero_Celsius = 273.15
 zetta = 1e+21
 
+
+### CONVERSIONS ###
+##TODO: Add more values to conversions
+conversions = {'rad':
+  {'type': 'angle',
+   'value': tau
+  },
+ 'deg':
+  {'type': 'angle',
+   'value': 360
+  },
+ 'grad':
+  {'type': 'angle',
+   'value': 400
+  },
+ 'meter':
+  {'type': 'length',
+   'value': 1
+  },
+ 'decameter':
+  {'type': 'length',
+   'value': 1/10
+  },
+ 'hectometer':
+  {'type': 'length',
+   'value': 1/100
+  },
+ 'kilometer':
+  {'type': 'length',
+   'value': 1/1000
+  },
+ 'megameter':
+  {'type': 'length',
+   'value': 1/1000000
+  },
+ 'gigameter':
+  {'type': 'length',
+   'value': 1/1000000000
+  },
+ 'terrameter':
+  {'type': 'length',
+   'value': 1/1000000000
+  },
+ 'petameter':
+  {'type': 'length',
+   'value': 1/1000000000000000
+  },
+ 'exameter':
+  {'type': 'length',
+   'value': 1/1000000000000000000
+  },
+ 'zettameter':
+  {'type': 'length',
+   'value': 1/1000000000000000000000
+  },
+ 'yottameter':
+  {'type': 'length',
+   'value': 1/1000000000000000000000000
+  },
+ 'decimeter':
+  {'type': 'length',
+   'value': 10
+  },
+ 'centimeter':
+  {'type': 'length',
+   'value': 100
+  },
+ 'millimeter':
+  {'type': 'length',
+   'value': 1000
+  },
+ 'micrometer':
+  {'type': 'length',
+   'value': 1000000
+  },
+ 'nanometer':
+  {'type': 'length',
+   'value': 1000000000
+  },
+ 'picometer':
+  {'type': 'length',
+   'value': 1000000000000
+  },
+ 'femtometer':
+  {'type': 'length',
+   'value': 1000000000000000
+  },
+ 'attometer':
+  {'type': 'length',
+   'value': 1000000000000000000
+  },
+ 'zeptometer':
+  {'type': 'length',
+   'value': 1000000000000000000000
+  },
+ 'yoctometer':
+  {'type': 'length',
+   'value': 1000000000000000000000000
+  },
+ 'foot':
+  {'type': 'length',
+   'value': 3.2808398949899997
+  },
+ 'inches':
+  {'type': 'length',
+   'value': 39.37007873988
+  },
+ 'yard':
+  {'type': 'length',
+   'value': 1.09361329833
+  },
+ 'mile':
+  {'type': 'length',
+   'value': 0.0006213711922329545
+  },
+ 'nautical_mile':
+  {'type': 'length',
+   'value': 0.0005399670663248847
+  }
+}
