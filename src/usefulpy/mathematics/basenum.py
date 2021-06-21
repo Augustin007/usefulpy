@@ -17,17 +17,16 @@ RELEASE NOTES:
  0.1
   Version 0.1.0
    Code cleanup, removing inter-dependency, bugfixes, and versioning fix
+  Version 0.1.1
+   Fixing some bugs, particularily regarding arithmetic operations.
 '''
 
 ### INFO ###
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __author__ = 'Augustin Garcia'
 
 ### IMPORTS ###
 import math as _math
-#from .. import validation as _validation
-#from .PrimeComposite import *
-
 
 ### BASENUM ###
 def fromNumBaseFormat(text):
@@ -43,14 +42,16 @@ def fromNumBaseFormat(text):
     else:
         try: return float(text)
         except: pass
-        else: raise ValueError('This could not be converted into a basenum object')
+        raise ValueError('This could not be converted into a basenum object')
 
 class basenum(object):
     '''Stores numbers of different bases'''
+
     base:int
     num:str
     floatpart:str
     Negative:bool
+
     ### INITIALIZING ###
     def __new__(cls, strint, base = 10):
         '''__new__ for basenum class:
@@ -67,13 +68,14 @@ class basenum(object):
 >>> '''
         strint = str(strint)
         self = super(basenum, cls).__new__(cls)
-        
+
         if 'e' in strint and base == 10:
             nindex = strint.index('e')
             before = strint[:nindex]
             sn = strint[nindex+1]
             try: after = int(strint[nindex+2:])
-            except: raise ValueError('This is not a base', str(base), 'number')
+            except: 
+                raise ValueError('This is not a base', str(base), 'number')
             if sn == '-':
                 if '.' in before:
                     nlen = before.index('.')
@@ -167,57 +169,75 @@ class basenum(object):
     ### ARITHMETIC OPERATIONS ###
     def __add__(self, other):
         '''return self+other'''
-        decanum = float(self) + float(other)
-        floatbase = basenum(str(decanum))
-        basenumb = (floatbase.convert(self.base))
-        return basenumb
+        try:
+            decanum = float(self) + float(other)
+            floatbase = basenum(str(decanum))
+            basenumb = (floatbase.convert(self.base))
+            return basenumb
+        except: return NotImplemented
 
     def __radd__(self, other):
         '''return self+other'''
-        return other+float(self)
+        try: return other+float(self)
+        except: return NotImplemented
 
     def __mul__(self, other):
         '''return self*other'''
-        decanum = float(self) * float(other)
-        floatbase = basenum(str(decanum))
-        basenumb = (floatbase.convert(self.base))
-        return basenumb
+        try:
+            decanum = float(self) * float(other)
+            floatbase = basenum(str(decanum))
+            basenumb = (floatbase.convert(self.base))
+            return basenumb
+        except: return NotImplemented
 
     def __pow__(self, other):
         '''return self**other'''
-        decanum = float(self)**float(other)
-        floatbase = basenum(str(decanum))
-        basenumb = (floatbase.convert(self.base))
-        return basenumb
+        try: 
+            decanum = float(self)**float(other)
+            floatbase = basenum(str(decanum))
+            basenumb = (floatbase.convert(self.base))
+            return basenumb
+        except: return NotImplemented
 
     def __rpow__(self, other):
         '''return self**other'''
-        return other**float(self)
+        try: return other**float(self)
+        except: return NotImplemented
 
     def __rmul__(other, self):
         '''return self*other'''
-        return other * float(self)
+        try: return other * float(self)
+        except: return NotImplemented
 
     def __sub__(self, other):
         '''return self-other'''
-        decanum = float(self) - float(other)
-        floatbase = basenum(str(decanum))
-        basenumb = (floatbase.convert(self.base))
-        return basenumb
+        try:
+            decanum = float(self) - float(other)
+            floatbase = basenum(str(decanum))
+            basenumb = (floatbase.convert(self.base))
+            return basenumb
+        except: return NotImplemented
 
     def __rsub__(other, self):
         '''return self-other'''
-        return self-float(other)
+        try: return self-float(other)
+        except: return NotImplemented
 
     def __truediv__(self, other):
         '''return self/other'''
-        decanum = float(self)/float(other)
-        floatbase = basenum(str(decanum))
-        basenumb = (floatbase.convert(self.base))
-        return basenumb
+        if other == 0:
+            raise ZeroDivisionError('Division by zero')
+        try:
+            decanum = float(self)/float(other)
+            floatbase = basenum(str(decanum))
+            basenumb = (floatbase.convert(self.base))
+            return basenumb
+        except: return NotImplemented
 
     def __rtruediv__(other, self):
         '''return self/other'''
+        if other == 0:
+            raise ZeroDivisionError ('Division by zero')
         return float(self)/float(other)
 
     def __abs__(self):
@@ -239,14 +259,21 @@ class basenum(object):
         return int(self)+1
 
     def __floordiv__(self, other):
+        if other == 0: 
+            raise ZeroDivisionError ('Division by zero')
         self = self/other
-        return (self/other).floor()
+        try: return (self/other).floor()
+        except: return NotImplemented
 
     def __rfloordiv__(self, other):
-        return _math.floor(other/self)
+        if self == 0: 
+            raise ZeroDivisionError ('Division by zero')
+        try:  return _math.floor(other/self)
+        except: return NotImplemented
 
     def __gcd__(self, other, /):
-        return _math.gcd(float(self), other)
+        try: return _math.gcd(float(self), other)
+        except: return NotImplemented
 
     def __rgcd__(self, other, /):
         return self.__gcd__(other)
@@ -256,19 +283,23 @@ class basenum(object):
 
     def __lt__(self, other):
         '''return self<other'''
-        return float(self)<float(other)
+        try: return float(self)<float(other)
+        except: return NotImplemented
 
     def __gt__(self, other):
         '''return self>other'''
-        return float(self)>float(other)
+        try: return float(self)>float(other)
+        except: return NotImplemented
 
     def __le__(self, other):
         '''return self<=other'''
-        return float(self)<=float(other)
+        try: return float(self)<=float(other)
+        except: return NotImplemented
 
     def __ge__(self, other):
         '''return self>=other'''
-        return float(self)>=float(other)
+        try: return float(self)>=float(other)
+        except: return NotImplemented
 
     def __eq__(self, other):
         '''return self==other'''
