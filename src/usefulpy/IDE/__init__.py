@@ -22,13 +22,13 @@ Pre releases:
   pr 1a
   ——Wednesday the thirteenth of the firstmonth Janurary, 2021——
    Run IDLE() to use Usefulpy's personal IDLE
-1
- 1.1
-  Version 1.1.1:
+0
+ 0.0
+  Version 0.0.0:
    Custom ide and interpreter for usefulpy.
 
 '''
-__version__ = '1.1.1'
+__version__ = '0.0.0'
 __author__ = 'Austin Garcia'
 __package__ = 'usefulpy.IDE'
 
