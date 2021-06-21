@@ -29,9 +29,6 @@ RELEASE NOTES:
 __author__ = 'Augustin Garcia'
 __version__='0.1.0'
 
-##TEMP
-__package__ = 'usefulpy.mathematics'
-
 ### IMPORTS ###
 from .constants import *
 from .. import validation as _validation
