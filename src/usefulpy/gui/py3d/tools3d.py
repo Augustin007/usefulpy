@@ -102,12 +102,9 @@ def is_on_plane(plane, point):
     return isclose(point, new_point)
 
 def _same_side(p1, p2, a, b):
-    cp1 = (b-a).corss(p1-a)
-    cp2 = (b-a).corss(p2-a)
-    if cp1.dot(cp2) >= 0:
-        return True
-    else:
-        return False
+    cp1 = (b-a).cross(p1-a)
+    cp2 = (b-a).cross(p2-a)
+    return cp1.dot(cp2) >= 0
 
 def PointInTriangle(p, a, b, c):
     if not is_on_plane((a, b, c), p):
