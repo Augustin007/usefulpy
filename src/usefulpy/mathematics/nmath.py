@@ -62,8 +62,8 @@ __author__ = 'Augustin Garcia'
 ##TEMP
 __package__ = 'usefulpy.mathematics'
 
+
 ### IMPORTS ###
-from .. import validation as _validation
 from .mathfuncs import *
 from functools import reduce as _reduce
 import math as _math
@@ -71,7 +71,6 @@ import cmath as _cmath
 
 from math import comb, copysign, erf, erfc, fabs, factorial, fmod, fsum, gamma
 from math import lgamma, modf, nextafter, perm, prod, remainder, trunc, ulp
-
 
 ### checks ###
 
@@ -84,6 +83,12 @@ def even(num, /):
     '''Return True if num is even'''
     try: return num%2 == 0
     except: return False
+
+def persistance(n):
+    if n >= 10: 
+        yield n
+        yield from persistance(prod([int(i) for i in str(n)]))
+    else: yield n
 
 def isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0):
     '''Return True if a is close to b'''
@@ -305,11 +310,9 @@ class t: #taylor series
     def ln(x):
         '''taylor series for ln. Only works for real numbers. A complex number
 will return an incorrect value.'''
-        x = _validation.trynumber(x)
         if x == 0: raise ValueError('math domain error')
         if x == 1: return 0
         if x == 2: return 0.6931471805599453
-        if not _validation.is_numeric(x): raise TypeError(f'Value {x} is not a numeric value (a numeric type is any which supports all arithmetic operations with int, float, and complex')
         if abs(x) >=2: return 0.6931471805599453+t.ln(x/2)
         def iteration(n):
             if n == 0: return 0
@@ -445,10 +448,10 @@ Cosine, one or the other must be given, not both'''
     if gamma == None:
         pyth = (a**2)+(b**2)-(c**2)
         anglecos = (pyth)/(2*a*b); Angle = _math.acos(anglecos)
-        return _validation.tryint(Angle)
+        return Angle
     pyth = (a**2)+(b**2); anglecos = _math.cos(gamma)
     c = _math.sqrt(pyth - (2*a*b*anglecos))
-    return _validation.tryint(c)
+    return c
 
 def LawofSin(alpha, a, *, beta = None, b = None):
     '''Return the appropiate value of either beta or b, using law of Sines,
@@ -457,13 +460,13 @@ one or the other must be given, not both'''
         raise TypeError('Either b or beta must be defined')
     if beta != None and b != None:
         raise TypeError('b and beta cannot both be defined')
-    if beta == None: ratio = _math.sin(alpha)/a; beta = _math.asin(ratio*b); return _validation.tryint(beta)
-    ratio = a/_math.sin(alpha); b = ratio*_math.sin(beta); return _validation.tryint(b)
+    if beta == None: ratio = _math.sin(alpha)/a; beta = _math.asin(ratio*b); return beta
+    ratio = a/_math.sin(alpha); b = ratio*_math.sin(beta); return b
 
 def Heron(a, b, c):
     '''Use heron's formula to find the area of a triangle'''
     s = (a+b+c)/2; Area = _math.sqrt(s*(s-a)*(s-b)*(s-c))
-    return _validation.tryint(Area)
+    return Area
 
 
 ### TRIANGLE ###
