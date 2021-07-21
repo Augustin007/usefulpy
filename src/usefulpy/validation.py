@@ -23,11 +23,14 @@ RELEASE NOTES:
    increased... Simplicity is better! Who knew?
   Version 0.1.1
    Small bugfixes
+  Version 0.1.2
+   Code cleanup.
 '''
 
 __author__ = 'Augustin Garcia'
 __version__ = '0.1.1'
 
+from collections import abc
 import sys
 import datetime
 
@@ -40,7 +43,7 @@ Please try again
 function = type(lambda: None)
 
 def is_function(s):
-    '''Check whether variable s is a function'''
+    '''Check whether variable s points to a function'''
     return type(s) is function
 
 def is_integer(s):
@@ -179,17 +182,15 @@ like I said... big mess'''
 def isbool(s):
     '''Check if s is a boolean value'''
     n = type(s)
-    return s in ('True', 'False') if n is str else n is _bool
+    return s in ('True', 'False') if n is str else n is bool
 
-_bool = bool
-
-def bool(x):
-    '''bool(c) -> bool'''
-    return _bool({'True':True, 'False':False}.get(x))
+def bool_(x):
+    '''bool_(x) -> bool'''
+    return bool({'True':True, 'False':False}.get(x))
 
 def boolinput(Prompt):
     '''Continue to repeat an input prompt until the input is 'True' or 'False'.'''
-    return _bool(validinput(isbool, Prompt))
+    return bool_(validinput(isbool, Prompt))
 
 def fromdatainput(data, prompt = ''):
     '''Continue to repeat an input prompt until the input is a value from the
@@ -254,18 +255,6 @@ into a boolean value, this includes variations of Yes and No.'''
 
 del _chastise
 
-def is_numeric(s):
-    '''Return True if s supports all arithmetic operations.'''
-    try:
-        s += 1
-        s -= 1.0
-        s *= 2
-        s /= 2.0
-        s **= 2
-        s **= (1/2)
-        return True
-    except: return False
-
 def validdate(year, month, day):
     '''Check if a year, month, day combo is valid'''
     try: datetime.date(year, month, day); return True
@@ -289,13 +278,6 @@ def trytype(ntype, *s):
     if validquery(ntype, *s): return ntype(*s)
     return s
 
-def is_iterable(n):
-    '''Check if n is iterable'''
-    try:
-        for l in n: l
-        return True
-    except: return False
-
 def merge_dicts(a, b, exclude = True, fill_val = None):
     ndict = {}
     for key in a:
@@ -305,17 +287,11 @@ def merge_dicts(a, b, exclude = True, fill_val = None):
         ndict[key] = (a.get(key, fill_val),b.get(key, fill_val))
     return ndict
 
-def flatten(iterable):
-    '''Flatten an iterable into a single dimension'''
-    assert is_iterable(iterable)
-    itertype = type(iterable)
-    new_iterable = []
-    for n in iterable:
-        if is_iterable(n):
-            new_iterable.extend(list(flatten(n)))
-            continue
-        new_iterable.append(n)
-    return itertype(new_iterable)
+def _flatten(l):
+    '''flatten an iterable'''
+    for el in l:
+        if isinstance(el, abc.Iterable) and not isinstance(el, (str, bytes)): yield from _flatten(el)
+        else: yield el
 
 def tryfloat(s):
     '''Convert s to a float if is_float(s)'''
@@ -323,6 +299,7 @@ def tryfloat(s):
     try: return float(s)
     except: return s
 
+#Only kept to support older functions. will soon be removed.
 def tryeval(s):
     '''Tries to evaluate a string if it is a string. returns input if it cannot
 be evaluated'''
@@ -330,34 +307,6 @@ be evaluated'''
         try: return eval(s)
         except: return s
     return s
-
-def valideval(s):
-    '''Returns True if a string can be evaluated'''
-    if type(s) is str:
-        try:
-            eval(s)
-            return True
-        except: return False
-    return False
-
-class _empty:
-    def write(self, *args, **kwargs): pass
-    def read(self, *args, **kwargs): pass
-
-def validexec(s):
-    '''Return True if it can be executed. Note: will trigger the code.'''
-    if type(s) is str:
-        try:
-            out = sys.stdout
-            in_ = sys.stdin
-            sys.stdout = _empty()
-            sys.stdin = _empty()
-            exec(s)
-            sys.stdout = out
-            sys.stdin = in_
-            return True
-        except: return False
-    return False
 
 def is_complex(s):
     '''Return True if s can be interpreted as a complex number'''
