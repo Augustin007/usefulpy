@@ -24,9 +24,11 @@ RELEASE NOTES:
    More bug fixes
   Version 0.2.3
    A couple new stuff, mostly dealing with the long s
+  Version 0.2.4
+   Bugfixes, deactivated section of multline... will be reimplemented soon.
 '''
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 __author__ = 'Augustin Garcia'
 
 from . import validation as _validation
@@ -668,12 +670,14 @@ class multline(object):
                 except: second = ' '*other.width
                 new.append(first+second)
             return multline(*new)
+        return NotImplemented
+        '''
         if __name__ !='__main__': return NotImplemented
         ##print(height1)
         ##print(height2)
         if center not in range(height1): raise ValueError
         def halves(num):
-            def odd(num): return num%2 != 0
+            odd = lambda n: (n%2)!= 0
             if not _validation.is_integer(num): raise TypeError
             num = int(num)
             ##print('half of', num)
@@ -705,7 +709,7 @@ class multline(object):
                 second = seconds[num-offset2]
             except: second = ' '*self.width
             new.append(first+second)
-        return multline(*new)
+        return multline(*new)'''
 
     def __contains__(self, value):
         if type(value) is not self.__class__:
