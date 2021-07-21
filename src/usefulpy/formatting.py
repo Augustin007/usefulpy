@@ -88,7 +88,11 @@ def punctuate(n, witha = '.'):
     return n
 
 def multisplit(string, *by, whitespacetoo = False):
-    if not by: return string.split()
+    '''split by various keys'''
+    if not by: 
+        if whitespacetoo:
+            return string.split()
+        return [string]
     if whitespacetoo:
         run = string.split()
     else:
@@ -129,6 +133,7 @@ def scour(obj, of= ''):
 long_s = 'ſ'
 
 def Fix_stolong(text):
+    '''replace certain instances of s with long s according to older spelling rules'''
     if text == '': return ''
     if 's' not in text: return text
     textm1 = ' '+text[:-1]
@@ -147,19 +152,8 @@ def Fix_stolong(text):
     return ntext
 
 def Fix_longtos(text):
+    '''Replace long s with s'''
     return text.replace('ſ', 's')
-
-def getstr(fn, *args):
-    if len(args) != 0:
-        args = list(args)
-        args[0:1] = [fn, args[0]]
-        return tuple([getstr(a) for a in args])
-    if type(fn) is str: return fn
-    if hasattr(fn, '__name__'): return fn.__name__
-    if hasattr(fn, '__str__'): return str(fn)
-    return repr(fn)
-
-
 
 _numbers={
         'zero': 0,
@@ -379,12 +373,14 @@ _LargeGroups = {
     '9': 'octillion',
     }
 def _TensGroup(num):
+    '''support for compose number'''
     if str(num) in _OddOnes: return _OddOnes[str(num)]
     else:
         if str(num)[0] == '0': return _Digit[(str(num)[1])]
         if str(num)[1] == '0': return _tensPlace[(str(num)[0])]
         return _tensPlace[(str(num)[0])] + ' ' + _Digit[(str(num)[1])]
 def _HundredsGroup(num):
+    '''support for compose number'''
     num = str(int(num))
     if int(num) == 0: return ''
     elif len(str(num)) == 1: return _Digit[str(num)]
@@ -568,6 +564,7 @@ i.e. colors.bold'''
 		lightgrey='\033[47m'
 
 def justify(string, length):
+    '''justify a string according to a given length'''
     strings = string.split(' ')
     strlnth = sum([len(s) for s in strings])
     if strlnth+len(strings)-1 >= length:
@@ -592,8 +589,7 @@ def justify(string, length):
 
 _allignments = {'center': str.center, 'left': str.ljust, 'right':str.rjust, 'justify': justify}
 
-##UNFINISHED: Finish by 1.2.2
-##PREREQUISITE1.2.2: Finish multline object
+##TODO: Finish multline object
 class multline(object):
     '''multi line string character stuff... in progress'''
     def __init__(self, *strings, format_ = 'center'):
