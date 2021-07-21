@@ -22,7 +22,7 @@ RELEASE NOTES:
    more versatility
    trig func and inverse trig func decorators
    functions moved here
-   
+
 '''
 
 ### DUNDERS ###
