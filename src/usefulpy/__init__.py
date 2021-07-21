@@ -25,6 +25,16 @@ RELEASE NOTES:
   Version 0.1.0:
    Addition of more programs that contain more functions. Addition of 
    usefulpy IDE. Improvement of functions.
+  Version 0.1.1:
+   Restructured to be supported as a package
+  Version 0.1.2:
+   A couple bugfixes
+  Version 0.1.3:
+   Fixed error in folder structure.
+  Version 0.1.4:
+   More bugfixes!
+  Version 0.1.5:
+   Succesfully restructured to be a package. Also bugfixes.
 
 SECTIONS:
 validation
