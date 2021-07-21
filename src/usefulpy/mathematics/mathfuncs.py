@@ -29,6 +29,7 @@ RELEASE NOTES:
 __author__ = 'Augustin Garcia'
 __version__='0.1.0'
 
+
 ### IMPORTS ###
 from .constants import *
 from .. import validation as _validation
@@ -36,10 +37,12 @@ from .. import decorators as _decorators
 from functools import cache, wraps as _wraps
 from .expression_check import *
 
+
 import cmath as _cmath
 import math as _math
 
 from . import expression_check as _expression_check
+
 
 _simplify = _expression_check._simplify
 _flatten= _expression_check._flatten
