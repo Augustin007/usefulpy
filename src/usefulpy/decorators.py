@@ -36,29 +36,27 @@ def debug(func):
         return value
     return wrapper_debug
 
-io_opt = functools.cache 
-# Used to be my own cache- I've temporarily kept this 
-# version until I can rename all of its instances to cache.
-
-@io_opt
-def repeat(num_times):
+@functools.cache
+def repeat(n):
+    '''Make a function repeat 'n' times'''
     def decorator_repeat(func):
         @functools.wraps(func)
         def wrapper_repeat(*args, **kwargs):
-            for _ in range(num_times):
+            for _ in range(n):
                 value = func(*args, **kwargs)
             return value
         return wrapper_repeat
     return decorator_repeat
 
-@io_opt
-def timed_repeat(num_times, timing):
+@functools.cache
+def timed_repeat(n, t):
+    '''Make a function repeat 'n' times, with a 't' time inbetween a return and a call'''
     def decorator_repeat(func):
         @functools.wraps(func)
         def wrapper_repeat(*args, **kwargs):
-            for _ in range(num_times):
+            for _ in range(n):
                 value = func(*args, **kwargs)
-                time.sleep(timing)
+                time.sleep(t)
             return value
         return wrapper_repeat
     return decorator_repeat
@@ -66,14 +64,13 @@ def timed_repeat(num_times, timing):
 
 # Sample Dictionary: {2:(0, 1), 1:((10,), 0)}
 def shift_args(dict_):
-    ''' Decorator for a function
+    ''' Custom input-output for a function.
 
 example:
 @shift_args({2:(0, 1), 1:((10,), 0)})
 def log(base, x):
 	\'''log(x) -> log(10, x)\'''
 	print(f'log base {base} of {x}')
-
 	
 >>> log(2)
 log base 10 of 2
@@ -82,6 +79,7 @@ log base 10 of 1
 >>> log(1, 2)
 log base 1 of 2
 '''
+    # validation
     assert type(dict_) is dict
     for x, y in dict_.items():
         assert type(x) is int
@@ -92,7 +90,7 @@ log base 1 of 2
             if type(z) is int:
                 assert z < x
                 assert z >= 0
-    def deccorator_shift_args(func):
+    def decorator_shift_args(func):
         @functools.wraps(func)
         def wrapper_shift_args(*args, **kwargs):
             if kwargs:
@@ -108,9 +106,10 @@ log base 1 of 2
                 return func(*nargs)
             return func(*args, **kwargs)
         return wrapper_shift_args
-    return deccorator_shift_args
+    return decorator_shift_args
 
 def _getstr(fn, *args):
+    '''Generates a string representation for pipeline'''
     if len(args) != 0:
         args = list(args)
         args[0:1] = [fn, args[0]]
@@ -120,7 +119,7 @@ def _getstr(fn, *args):
     if hasattr(fn, '__str__'): return str(fn)
     return repr(fn)
 
-@io_opt
+@functools.cache
 def pipeline(b):
     class _pipeline(object):
         def __init__(self, a, b):
@@ -142,8 +141,9 @@ def pipeline(b):
 
     return pipe_dec
 
-@io_opt
+@functools.cache
 def default_setter(func):
+    '''Make a function with a forced first argument'''
     def wrapper_func(arg):
         @functools.wraps(func)
         def nfunc(*args, **kwargs):
@@ -154,10 +154,13 @@ def default_setter(func):
     wrapper_func.__name__ = func.__name__
     return wrapper_func
 
-@io_opt # minimize exact returns
+@functools.cache # minimize exact returns
 def default_with_decorator(*decorators, check = None):
+    '''Make a function with a forced first argument.
+     Apply decorators to the returning function function
+     Check that the first argument is valid'''
     def default_setter(func):
-        @io_opt #io_opt minimizes duplicate functions in this case
+        @functools.cache #io_opt minimizes duplicate functions in this case
         def wrapper_func(arg):
             if check:
                 if not check(arg):
