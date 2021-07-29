@@ -11,7 +11,7 @@ fractions, random, collections and datetime, should work on any python platform
 where these are available.
 
 INSTALLATION:
-Put the folder where Python can see it.
+pip install usefulpython
 
 RELEASE NOTES:
 0
