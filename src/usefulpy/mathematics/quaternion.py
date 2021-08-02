@@ -41,16 +41,24 @@ RELEASE NOTES:
    Small bug-fixes and clean up.
   Version 1.1.2
    __hash__ implemented
+2
+ 2.0
+Version 2.0.0
+   Code rewritten, heavy efficiency improvements, bugfixes.
+   Customized setattr, better documentation.
 '''
+
 ### DUNDERS ###
 __author__ = 'Augustin Garcia'
-__version__ = '1.1.2'
+__version__ = '2.0.0'
 
 ### IMPORTS ###
-from .. import validation as _validation
-from .nmath import *
+import math
+import cmath
+import functools
 
-class quaternion(object):
+### QUATERNION ###
+class quaternion:
     '''A quaternion class:
 >>> quaternion(1, 2, 3, 4)
 (1+2i+3j+4k)
@@ -58,98 +66,95 @@ class quaternion(object):
 (1+3i)
 >>> 
 '''
-    real:float
-    i:float
-    j:float
-    k:float
-    def __new__(cls, a = None, b = None, c = None, d = None):
-        '''__new__ for quaternion class, works well (hopefully) for most
-variations of input'''
-        ##print(a, b, c, d)
+    real:float =0
+    i:float =0
+    j:float =0
+    k:float =0
 
+    @functools.cache
+    def __new__(cls, a = 0, b = 0, c = 0, d = 0):
+        '''__new__ for quaternion class'''
         self = super(quaternion, cls).__new__(cls)
-        
-        if a == None: a = 0
 
-        if b == None and c == None and d == None:
+
+        # If there is a single argument input
+        if all(map(lambda x:not x, (b, c, d))):
             if type(a) is quaternion:
-                self.real = _validation.trynumber(a.real)
-                self.i = _validation.trynumber(a.i)
-                self.j = _validation.trynumber(a.j)
-                self.k = _validation.trynumber(a.k)
+                return a
+            elif isinstance(a, complex):
+                return quaternion(a.real, 0, a.imag, 0)
+            elif isinstance(a, (int, float)):
+                super.__setattr__(self, 'real', a)
                 return self
-            if _validation.is_complex(a):
-                self.real = _validation.trynumber(a.real)
-                self.i = 0
-                self.j = _validation.trynumber(a.imag)
-                self.k = 0
-                return self
-            if _validation.is_float(a):
-                self.real = _validation.trynumber(a)
-                self.i = 0
-                self.j = 0
-                self.k = 0
-                return self
-#            if type(a) is str:
-#                try: return quaternion(fromstring(a))
-#                except: pass
-#                raise ValueError('quaternion() arg is a malformed string')
             try:
                 q = a.__quaternion__()
                 if type(q) is quaternion: return q
                 else: raise TypeError(f'__quaternion__ method returned a non-quaternion type: (type {type(q)})')
-            except: pass
+            except AttributeError: pass
             raise TypeError('A quaternion could not be made from a type {type(a)}')
-
-        if b == None: b = 0
-        if c == None: c = 0
-        if d == None: d = 0
-
-        allnums = True
-        for num in (a, b, c, d):
-            if not _validation.is_float(num): allnums = False
-
-        if allnums:
-            self.real = _validation.trynumber(a)
-            self.i = _validation.trynumber(b)
-            self.j = _validation.trynumber(c)
-            self.k = _validation.trynumber(d)
+        
+        # If all arguments are real numbers
+        if all(map(lambda x:isinstance(x, (int, float)), (a, b, c, d))):
+            super.__setattr__(self, 'real', float(a))
+            super.__setattr__(self, 'i', float(b))
+            super.__setattr__(self, 'j', float(c))
+            super.__setattr__(self, 'k', float(d))
             return self
+        
+        # Otherwise
+        try:
+            qsum = 0
 
-        qsum = 0
+            for multer, num in zip((1, i, j, k), (a, b, c, d)):
+                qsum += num*multer
 
-        for multer, num in zip((1, i, j, k), (a, b, c, d)):
-            ##print(qsum)
-            qsum += multer*num
-
-        return qsum
+            return qsum
+        except: pass
+        raise TypeError('A quaternion could not be made from a type {type(a)}')
 
     ### Miscelaneous ###
-
+    
     def vector(self, /):
         '''return self as a vector in a tuple'''
         return self.__getnewargs__()
 
+    def v(self):
+        ''' return imag part of self'''
+        return quaternion(0, self.i, self.j, self.k)
+    
+    @property
+    def imag(self):
+        return self.v()
+
+    def __setattr__(self, name, value):
+        '''set attribute name to value'''
+        raise AttributeError('Attributes may not be assigned')
+
     def is_versor(self, /):
         '''return True if quaternion is a versor (unit quaternion)'''
-        return isclose(1, abs(self), rel_tol = 0, abs_tol = 1e-14)
+        return math.isclose(1, abs(self), rel_tol = 0, abs_tol = 1e-14)
 
-    def normal(self):
-        return self/abs(self)
+    def normal(self, /):
+        '''return normal of vector'''
+        return self*(1/abs(self))
 
-    def vtuple(q):
+    def vtuple(q, /):
+        '''return tuple containing imag parts'''
         return q.i, q.j, q.k
 
-    def astuple(q):
-        return q.real, q.i, q.j, q/k
-
-    def dot(v1, v2):
+    def astuple(q, /):
+        '''self as tuple'''
+        return q.real, q.i, q.j, q.k
+    
+    @staticmethod
+    def dot(v1, v2, /):
         '''dot product of v1 and v2'''
         a1, b1, c1, d1 = v1.astuple()
         a2, b2, c2, d2 = v2.astuple()
         return a1*a2+b1*b2+c1*c2+d1*d2
-
-    def cross(v1, v2):
+    
+    @staticmethod
+    def cross(v1, v2, /):
         '''cross product of v1 and v2'''
         if v1.real:
             raise ValueError('v1 must have no real part')
@@ -161,15 +166,135 @@ variations of input'''
 
     def is_unit(self, /):
         '''return True if distance from 0 is a single unit'''
-        return isclose(1, abs(self), rel_tol = 0, abs_tol = 1e-14)
+        return math.isclose(1, abs(self), rel_tol = 0, abs_tol = 1e-14)
 
     def rotate(p, r, v, a):
         '''rotate point p r radians around vector v'''
         p = p-a
         v = v.normal().v()
-        q = cis(r/2, v)
+        q = math.cos(r/2)+v*math.sin(r/2)
         p1 = q*p*(q**-1)
         return p1.v()+a.v()
+
+    def gcd(self, /):
+        '''return gcd of self'''
+        return math.gcd(self.real, self.i, self.j, self.k)
+
+    def floor(self, /):
+        '''return a quaternion composed only of integers and i, j, and k
+(closer to zero)'''
+        return quaternion(math.floor(self.real), math.floor(self.i), math.floor(self.j), math.floor(self.k))
+
+    def ceil(self, /):
+        '''return a quaternion composed only of integers and i, j, and k
+(farther to zero)'''
+        return quaternion(math.ceil(self.real), math.ceil(self.i), math.ceil(self.j), math.ceil(self.k))
+
+    ### TRIG ###
+
+    def __cos__(q, /):
+        '''return mcos of self in radians'''
+        r, p, n = q.__polar__()
+        return math.cos(q.real)*math.cosh(r*math.sin(p))-n*math.sin(q.real)*math.sinh(r*math.sin(p))
+
+    def __sin__(q, /):
+        '''return sin of self in radians'''
+        r, p, n = q.__polar__()
+        return math.sin(q.real)*math.cosh(r*math.sin(p))+n*math.cos(q.real)*math.sinh(r*math.sin(p))
+
+    def __tan__(q, /):
+        '''return tan of self in radians'''
+        return q.__sin__()*(q.__cos__()**-1)
+
+    def __cot__(q, /):
+        '''return cot of self in radians'''
+        return q.__cos__()*(q.__sin__()**-1)
+
+    def __csc__(q, /):
+        '''return csc of self in radians'''
+        return q.__sin__()**-1
+
+    def __sec__(q, /):
+        '''return sec of self in radians'''
+        return q.__cos__()**-1
+
+    def __atan__(q, /):
+        '''return atan of self in radians'''
+        r, p, n = q.__polar__()
+        return -(n/2)*math.log((n-q)/(n+q))
+
+    def __acos__(q, /):
+        '''return acos of self in radians'''
+        return math.pi/2-q.__asin__()
+
+    def __asin__(q, /):
+        '''return asin of self in radians'''
+        r, p, n = q.__polar__()
+        return n*math.log(math.sqrt(1-(q**2))-n*q)
+
+    def __acsc__(q, /):
+        '''return acsc of self in radians'''
+        return (q**-1).__asin__()
+
+    def __asec__(q, /):
+        '''return asec of self in radians'''
+        return (q**-1).__asin__()
+
+    def __acot__(q, /):
+        '''return acot of self in radians'''
+        return (1/q).__atan__()
+
+    def __cosh__(q, /):
+        '''return cosh of self in radians'''
+        r, p, n = q.__polar__()
+        return math.cosh(q.real)*math.cos(r*math.sin(p))+n*math.sinh(q.real)*math.sin(r*math.sin(p))
+
+    def __sinh__(q, /):
+        '''return sinh of self in radians'''
+        r, p, n = q.__polar__()
+        return math.sinh(q.real)*math.cos(r*math.sin(p))+n*math.cosh(q.real)*math.sin(r*math.sin(p))
+
+    def __tanh__(q, /):
+        '''return tanh of self in radians'''
+        return q.__sinh__()*(q.__cosh__()**-1)
+
+    def __sech__(q, /):
+        '''return sech of self in radians'''
+        return q.__cosh__()**-1
+
+    def __csch__(q, /):
+        '''return csch of self in radians'''
+        return q.__sinh__()**-1
+
+    def __coth__(q, /):
+        '''return coth of self in radians'''
+        return q.__cosh__()*(q.__sinh__()**-1)
+
+    def __acosh__(q, /):
+        '''return acosh of self in radians'''
+        return math.log(q+((q**2)-1**(1/2)))
+
+    def __asinh__(q, /):
+        '''return asinh of self in radians'''
+        return math.log(q+((q**2)+1**(1/2)))
+
+    def __atanh__(q, /):
+        '''return atanh of self in radians'''
+        return (1/2)*math.log(((1+q)*((1-q)**-1)))
+
+    def __asech__(q, /):
+        '''return asech of self in radians'''
+        return (1/q).__acosh__()
+
+    def __acsch__(q, /):
+        '''return acsch of self in radians'''
+        return (1/q).__asin__()
+
+    def __acoth__(q, /):
+        '''return acoth of self in radians'''
+        return (1/q).__atan__()
+
+    ### ALGEBRAIC ###
 
     def __invert__(self, /):
         '''return the mathematical conjugate of self'''
@@ -178,172 +303,61 @@ variations of input'''
     def conjugate(self, /):
         '''return the mathematical conjugate of self'''
         return quaternion(self.real, -self.i, -self.j, -self.k)
-
-    def gcd(self, /):
-        '''return gcd of self'''
-        return gcd(self.real, self.i, self.j, self.k)
-
-    def floor(self, /):
-        '''return a quaternion composed only of integers and i, j, and k
-(closer to zero)'''
-        return quaternion(floor(self.real), floor(self.i), floor(self.j), floor(self.k))
-
-    def ceil(self, /):
-        '''return a quaternion composed only of integers and i, j, and k
-(farther to zero)'''
-        return quaternion(ceil(self.real), ceil(self.i), ceil(self.j), ceil(self.k))
-
-    def __cos__(q, /):
-        '''return cos of self in radians'''
-        r, p, n = q.__polar__()
-        return cos(q.real)*cosh(r*sin(p))-n*sin(q.real)*sinh(r*sin(p))
-
-    def __sin__(q, /):
-        '''return cos of self in radians'''
-        r, p, n = q.__polar__()
-        return sin(q.real)*cosh(r*sin(p))+n*cos(q.real)*sinh(r*sin(p))
-
-    def __tan__(q, /):
-        return q.__sin__()*(q.__cos__()**-1)
-
-    def __cot__(q, /):
-        return q.__cos__()*(q.__sin__()**-1)
-
-    def __csc__(q, /):
-        return q.__sin__()**-1
-
-    def __sec__(q, /):
-        return q.__cos__()**-1
-
-    def __atan__(q, /):
-        r, p, n = q.__polar__()
-        return -(n/2)*ln((n-q)/(n+q))
-
-    def __acos__(q, /):
-        return pi/2-asin(q)
-
-    def __asin__(q, /):
-        r, p, n = q.__polar__()
-        return n*ln(sqrt(1-(q**2))-n*q)
-
-    def __acsc__(q, /):
-        return asin(1/q)
-
-    def __asec__(q, /):
-        return acos(1/q)
-
-    def __acot__(q, /):
-        return atan(1/q)
-
-    def __cosh__(q, /):
-        r, p, n = q.__polar__()
-        return cosh(q.real)*cos(r*sin(p))+n*sinh(q.real)*sin(r*sin(p))
-
-    def __sinh__(q, /):
-        r, p, n = q.__polar__()
-        return sinh(q.real)*cos(r*sin(p))+n*cosh(q.real)*sin(r*sin(p))
-
-    def __tanh__(q, /):
-        return q.__sinh__()*(q.__cosh__()**-1)
-
-    def __sech__(q, /):
-        return q.__cosh__()**-1
-
-    def __csch__(q, /):
-        return q.__sinh__()**-1
-
-    def __coth__(q, /):
-        return q.__cosh__()*(q.__sinh__()**-1)
-
-    def __acosh__(q, /):
-        return ln(q+sqrt((q**2)-1))
-
-    def __asinh__(q, /):
-        return ln(q+sqrt((q**2)+1))
-
-    def __atanh__(q, /):
-        return (1/2)*ln((1+q)*((1-q)**-1))
-
-    def __asech__(q, /):
-        return acosh(1/q)
-
-    def __acsch__(q, /):
-        return asinh(1/q)
-
-    def __acoth__(q, /):
-        return atanh(1/q)
-
+    
+    @functools.cache
     def __polar__(q, /):
-        '''the distance and three angles from 0 that can represent the
+        '''the distance and angles and slice from 0 that can represent the
 quaternion'''
-        r = hypot(q.real, q.i, q.j, q.k)
-        phi = acos(q.real/abs(q))
+        r = math.hypot(q.real, q.i, q.j, q.k)
+        phi = math.acos(q.real/abs(q))
         ñ = q.v()/abs(q.v())
         return (r, phi, ñ)
 
     def __phase__(self, /):
-        theta1 = atan(self.i/self.real)
-        theta2 = atan(self.j/hypot(self.i, self.real))
-        theta3 = atan(self.k/hypot(self.real, self.i, self.j))
-        return (theta1, theta2, theta3)
+        '''returns the angle phase between (0, 1) and self'''
+        return  math.acos(self.real/abs(self))
 
     def __ln__(x, /):
-        return ln(abs(x))+(x.v()/abs(x.v())*acos(x.real/abs(x)))
+        '''return the natural logarithm of self'''
+        return math.log(abs(x))+(x.v()/abs(x.v())*math.acos(x.real/abs(x)))
 
     def __log__(self, other):
-        return ln(self)/ln(other)
+        '''return the logarithm of self'''
+        return math.log(self)/math.log(other)
 
-    ### Conversion to other types ###
+    def __exp__(q):
+        '''return e**self'''
+        a = q.real
+        v = q.v()
+        return math.exp(a)*(math.cos(abs(v))+ ((v/abs(v)*math.sin(abs(v)))))
+    
+    ### CONVERSION ###
 
     def __complex__(self, /):
         '''return complex(self) if j and k are empty'''
-        if self.i != 0: return
-        if self.k != 0: return
+        if self.i != 0: return NotImplemented
+        if self.k != 0: return NotImplemented
         return complex(self.real, self.i)
 
     def __int__(self, /):
         '''return int(self) if i, j, and k are empty'''
-        if self.i != 0: return
-        if self.j != 0: return
-        if self.k != 0: return
+        if 0 not in (self.i, self.j, self.k): return NotImplemented
         return int(self.real)
 
     def __float__(self, /):
         '''return float(self) if i, j, and k are empty'''
-        if self.i != 0: return
-        if self.j != 0: return
-        if self.k != 0: return
+        if 0 not in (self.i, self.j, self.k): return NotImplemented
         return float(self.real)
-
+    
+    @functools.cache
     def __str__(self, /):
-        '''str(self)'''
+        '''return string representation of self'''
         if self == 0: return '(0)'
-        List = [self.real, self.i, self.j, self.k]
-        nList = List.copy()
-        List = list(map(str, List))
-        List[1] += 'i'
-        List[2] += 'j'
-        List[3] += 'k'
-        count = 0
-        for val in nList:
-            if val == 0: List.pop(count)
-            else: count+=1
-        return '+'.join(List).replace('+-', '-')
-
-    def __repr__(self, /):
-        '''IDLE representation'''
-        if self == 0: return '(0)'
-        List = [self.real, self.i, self.j, self.k]
-        nList = List.copy()
-        List = list(map(str, List))
-        List[1] += 'i'
-        List[2] += 'j'
-        List[3] += 'k'
-        count = 0
-        for val in nList:
-            if val == 0: List.pop(count)
-            else: count+=1
-        return '('+'+'.join(List).replace('+-', '-')+')'
+        return '+'.join([(str(a if int(a) != float(a) else int(a))+b \
+                          if a not in (1, -1) or b == '' else b) \
+                         for a, b in zip(self.astuple(), ('', 'i', 'j', 'k')) \
+                         if a]).replace('+', '-')
+    __repr__=__str__
 
     def __bool__(self, /):
         '''return False if self is 0, return True otherwise'''
@@ -352,152 +366,110 @@ quaternion'''
     def __getnewargs__(self, /):
         return self.real, self.i, self.j, self.k
 
-    ### Arithmetic Operators ###
-
+    ### ARITHMETIC ###
     def __abs__(self, /):
         '''return abs(self)'''
-        return hypot(self.real, self.i, self.j, self.k)
+        return math.hypot(self.real, self.i, self.j, self.k)
 
     def __add__(self, other, /):
         '''return self+other'''
-        if type(self) != type(other):
-            other = quaternion(other)
-        real = self.real+other.real
-        i = self.i+other.i
-        j = self.j+other.j
-        k = self.k+other.k
-        return quaternion(real, i, j, k)
+        if isinstance(other, (int, float, complex)):
+            return quaternion(self.real+other.real, self.i,
+                              self.j+other.imag, self.k)
+        elif type(other) is quaternion:
+            return quaternion(self.real+other.real, self.i+other.i,
+                              self.j+other.j, self.k+other.k)
+        return NotImplemented
 
-    def __radd__(other, self, /):
-        '''return self+other'''
-        return other+self
+    __radd__ = __add__
 
     def __sub__(self, other, /):
         '''return self-other'''
-        if type(self) != type(other): other = quaternion(other)
-        real = self.real-other.real
-        i = self.i-other.i
-        j = self.j-other.j
-        k = self.k-other.k
-        return quaternion(real, i, j, k)
+        if isinstance(other, (int, float, complex)):
+            return quaternion(self.real-other.real, self.i,
+                              self.j-other.imag, self.k)
+        elif type(other) is quaternion:
+            return quaternion(self.real-other.real, self.i-other.i,
+                              self.j-other.j, self.k-other.k)
+        return NotImplemented
 
-    def __rsub__(other, self, /):
-        '''return self-other'''
-        return self+(-1*other)
+    def __rsub__(self, other,/):
+        '''return other-self'''
+        if isinstance(other, (int, float, complex)):
+            return quaternion(other.real-self.real, -self.i,
+                              other.imag-self.j, -self.k)
+        elif type(other) is quaternion:
+            return quaternion(other.real-self.real, other.i-self.i,
+                              self.j+other.j, self.k+other.k)
+        return NotImplemented
 
     def __mul__(self, other, /):
         '''return self*other'''
-        if type(self) != type(other): other = quaternion(other)
-        a, b, c, d = self.real, self.i, self.j, self.k
-        e, f, g, h = other.real, other.i, other.j, other.k
-        real = a*e - b*f - c*g - d*h
-        i = a*f + b*e + c*h - d*g
-        j = a*g - b*h + c*e + d*f
-        k = a*h + b*g - c*f + d*e
-        return quaternion(real, i, j, k)
+        if isinstance(other, (int, float)):
+            return quaternion(*map(lambda q: q*other, self.astuple()))
+        if isinstance(other, complex): other = quaternion(other)
+        if type(other) is quaternion:
+            a, b, c, d = self.astuple()
+            e, f, g, h = other.astuple()
+            real = a*e - b*f - c*g - d*h
+            i = a*f + b*e + c*h - d*g
+            j = a*g - b*h + c*e + d*f
+            k = a*h + b*g - c*f + d*e
+            return quaternion(real, i, j, k)
+        return NotImplemented
 
-    def __rmul__(other, self, /):
-        '''return self*other'''
-        if type(self) != type(other): self = quaternion(self)
-        a, b, c, d = self.real, self.i, self.j, self.k
-        e, f, g, h = other.real, other.i, other.j, other.k
-        real = a*e - b*f - c*g - d*h
-        i = a*f + b*e + c*h - d*g
-        j = a*g - b*h + c*e + d*f
-        k = a*h + b*g - c*f + d*e
-        return quaternion(real, i, j, k)
-
-    def __floordiv__(self, other, /):
-        '''return self//other'''
-        n = self/other
-        if type(n) in (int, float): return int(n)
-        return n.floor()
-
-    def __rfloordiv__(other, self, /):
-        '''return self//other'''
-        n = self/other
-        if type(n) in (int, float): return int(n)
-        return n.floor()
+    def __rmul__(self, other, /):
+        '''return other*self'''
+        if type(other, (int, float)):
+            return quaternion(*map(lambda q: q*other, self.astuple()))
+        if isinstance(other, complex): other = quaternion(other)
+        if type(other) is quaternion:
+            a, b, c, d = other.astuple()
+            e, f, g, h = self.astuple()
+            real = a*e - b*f - c*g - d*h
+            i = a*f + b*e + c*h - d*g
+            j = a*g - b*h + c*e + d*f
+            k = a*h + b*g - c*f + d*e
+            return quaternion(real, i, j, k)
+        return NotImplemented
 
     def __truediv__(self, other, /):
-        '''return self/other'''
-        if type(self) != type(other): other = quaternion(other)
-        another = quaternion(self*(other.conjugate()))
-        divfactor=((abs(other))**2)
-        real = another.real/divfactor
-        i = another.i/divfactor
-        j = another.j/divfactor
-        k = another.k/divfactor
-        return quaternion(real, i, j, k)
+        '''return self/other if other is real'''
+        if type(other, (int, float)):
+            return quaternion(*map(lambda q: q/other, self.astuple()))
+        return NotImplemented
 
-    def __rtruediv__(other, self, /):
-        '''return self/other'''
-        if type(self) != other.__class__: self = other.__class__(self)
-        return _validation.trynumber(self/other)
+    def __rtruediv__(self, other, /):
+        '''Not possible with quaternion'''
+        return NotImplemented
 
-    def __gcd__(self, other, /):
-        return gcd(self.gcd(), other)
-    
     def __pow__(self, other, /):
         '''return self**other'''
         if other == 0: return 1
-        if _validation.is_complex(self):
-            self = _validation.trynumber(self)
-            return quaternion(self**other)
-        if _validation.is_integer(other) and other>=0:
-            current = 1
-            for l in range(int(other)): current *= self
-            return quaternion(current)
-        if _validation.is_integer(other):
-            return 1/(self**-other)
-        r, p, n = self.__polar__()
-        return (r**other)*(cos(other*p)+n*sin(other*p))
+        if isinstance(other, (int, float, complex)) or type(other) is quaternion:
+            r, p, n = self.__polar__()
+            return (r**other)*(math.cos(other*p)+n*math.sin(other*p))
+        return NotImplemented
 
-    def __exp__(q):
-        a = q.real
-        v = q.v()
-        return (e**a)*(cos(abs(v))+ ((v/abs(v)*sin(abs(v)))))
-    
     def __rpow__(self, other, /):
         '''return other**self'''
-        # okay, I know math... so I can figure this out! I think:
-        # My thought process is such:
-        # e**n = x^0/0!+x^1/1!+x^2/2!+x^3/3!...
-        # so o**s = e**(ln(o)*s)
-        num = ln(other)*self
-        # Here the comparison of two versions: 
-        # The left one is my method
-        # The right one is python's built in method for
-        # the identical complex method
-        # ((1.5384778027279444+1.277922552627269i), (1.5384778027279442+1.2779225526272695j))
-        return exp(num)
-
-    def __mod__(self, other):
-        return self-((self//other)*other)
-
-    def __rmod__(other, self):
-        return self-((self//other)*other)
-    
-    def __realmod__(self, other):
-        return quaternion(self.real%other, self.i, self.j, self.k)
-
-    def __rrealmod__(self, other):
-        return (other.real%self)+other-other.real
-
-    def __divmod__(self, other, /):
-        return (self//other, self%other)
-
-    def __rdivmod__(other, self, /):
-        return (self//other, self%other)
+        if isinstance(other, (int, float)):
+            return (math.log(other)*self).__exp__()
+        if isinstance(other, (complex)):
+            return (cmath.log(other)*self).__exp__()
+        if type(other) is quaternion: ##TODO: double check this
+            return (other.__ln__()*self).__exp__()
+        return NotImplemented
 
     def __neg__(self, /):
-        return -1*self
+        '''return -self'''
+        return quaternion(*map(lambda x:-x, (self.astuple())))
 
     def __pos__(self, /):
+        '''return +self'''
         return self
 
-    ### Comparison Operators ###
-
+    ### COMPARISON OPERATORS ###
     def __eq__(self, other, /):
         '''return self==other'''
         try:
@@ -508,47 +480,34 @@ quaternion'''
             return self.k == other.k
         except: return False
 
+    def __hash__(self):
+        '''__hash__ for self'''
+        return hash((self.astuple()))
+    
     def __ne__(self, other, /):
         '''return self != other'''
         return not self == other
 
     def __ge__(self, other, /):
-        return float(self)>=float(other)
+        '''return self >= other'''
+        try: return float(self)>=float(other)
+        except: return NotImplemented
 
     def __le__(self, other, /):
-        return float(self)<=float(other)
+        '''return self <= other'''
+        try: return float(self)<=float(other)
+        except: return NotImplemented
 
     def __lt__(self, other, /):
-        return float(self)<float(other)
+        '''return self < other'''
+        try: return float(self)<float(other)
+        except: return NotImplemented
 
     def __gt__(self, other, /):
+        '''return self > other'''
         return float(self)>float(other)
-
-    def v(self):
-        return quaternion(0, self.i, self.j, self.k)
-
-    def __hash__(self):
-        return hash((self.astuple()))
-
-    ## TODO: __hash__ still needs to be implimented
-
-
-def hyperrect(r, theta1, theta2, theta3):
-    real = r*cos(theta1)*cos(theta2)*cos(theta3)
-    i = r*sin(theta1)*cos(theta2)*cos(theta3)
-    j = r*sin(theta2)*cos(theta3)
-    k = r*sin(theta3)
-    return quaternion(real, i, j, k)
-
-#def fromstring(string):
-#    string = _usefulpy_correct_syntax(string) #agh! causing circular import!
-#    try: return quaternion(eval(string))
-#    except: pass
-#    return ValueError('String does not represent a quaternion')
-
+            
 i = quaternion(b = 1)
 j = quaternion(c = 1)
 k = quaternion(d = 1)
 tesseract = 1+i+j+k
-
-#eof
