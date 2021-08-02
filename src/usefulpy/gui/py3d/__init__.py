@@ -70,7 +70,7 @@ Pre releases
 
 ### DUNDERS ###
 __author__ = 'Augustin Garcia'
-__version__ = '1.0.0'
+__version__ = '1.0.2'
 
 ### IMPORTS ###
 from .Cam import cam_base, cam_shape_method
