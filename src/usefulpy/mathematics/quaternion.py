@@ -43,9 +43,17 @@ RELEASE NOTES:
    __hash__ implemented
 2
  2.0
-Version 2.0.0
+  Version 2.0.0
    Code rewritten, heavy efficiency improvements, bugfixes.
    Customized setattr, better documentation.
+  Verion 2.0.1
+   You guessed it! debugging!
+
+   Parenthesis wrong in asin function, fixed!
+
+   Several functions were depending on the old nmath functions even though
+    These were no longer being imported and built-in math and cmath were being
+    imported instead
 '''
 
 ### DUNDERS ###
@@ -168,6 +176,20 @@ class quaternion:
         '''return True if distance from 0 is a single unit'''
         return math.isclose(1, abs(self), rel_tol = 0, abs_tol = 1e-14)
 
+    def isinf(self):
+        ''' return True if any value is infinite '''
+        if math.inf in self.astuple(): return True
+        if -math.inf in self.astuple(): return True
+        return False
+
+    def isnan(self):
+        ''' return True if any value is infinite '''
+        if math.nan in self.astuple(): return True
+        return False
+
+    def isfinite(self):
+        return not (self.isinf() & self.isnan())
+
     def rotate(p, r, v, a):
         '''rotate point p r radians around vector v'''
         p = p-a
@@ -184,115 +206,115 @@ class quaternion:
         '''return a quaternion composed only of integers and i, j, and k
 (closer to zero)'''
         return quaternion(math.floor(self.real), math.floor(self.i), math.floor(self.j), math.floor(self.k))
-
+    __floor__ = floor
     def ceil(self, /):
         '''return a quaternion composed only of integers and i, j, and k
 (farther to zero)'''
         return quaternion(math.ceil(self.real), math.ceil(self.i), math.ceil(self.j), math.ceil(self.k))
-
+    __ceil__ = ceil
+    
     ### TRIG ###
-
-    def __cos__(q, /):
+    def cos(q, /):
         '''return mcos of self in radians'''
         r, p, n = q.__polar__()
         return math.cos(q.real)*math.cosh(r*math.sin(p))-n*math.sin(q.real)*math.sinh(r*math.sin(p))
 
-    def __sin__(q, /):
+    def sin(q, /):
         '''return sin of self in radians'''
         r, p, n = q.__polar__()
         return math.sin(q.real)*math.cosh(r*math.sin(p))+n*math.cos(q.real)*math.sinh(r*math.sin(p))
 
-    def __tan__(q, /):
+    def tan(q, /):
         '''return tan of self in radians'''
-        return q.__sin__()*(q.__cos__()**-1)
+        return q.sin()*(q.cos()**-1)
 
-    def __cot__(q, /):
+    def cot(q, /):
         '''return cot of self in radians'''
-        return q.__cos__()*(q.__sin__()**-1)
+        return q.cos()*(q.sin()**-1)
 
-    def __csc__(q, /):
+    def csc(q, /):
         '''return csc of self in radians'''
-        return q.__sin__()**-1
+        return q.sin()**-1
 
-    def __sec__(q, /):
+    def sec(q, /):
         '''return sec of self in radians'''
-        return q.__cos__()**-1
+        return q.cos()**-1
 
-    def __atan__(q, /):
+    def atan(q, /):
         '''return atan of self in radians'''
         r, p, n = q.__polar__()
         return -(n/2)*math.log((n-q)/(n+q))
 
-    def __acos__(q, /):
+    def acos(q, /):
         '''return acos of self in radians'''
-        return math.pi/2-q.__asin__()
+        return math.pi/2-q.asin()
 
-    def __asin__(q, /):
+    def asin(q, /):
         '''return asin of self in radians'''
         r, p, n = q.__polar__()
-        return n*math.log(math.sqrt(1-(q**2))-n*q)
+        return n*((1-(q**2))**(1/2)-n*q).ln()
 
-    def __acsc__(q, /):
+    def acsc(q, /):
         '''return acsc of self in radians'''
-        return (q**-1).__asin__()
+        return (q**-1).asin()
 
-    def __asec__(q, /):
+    def asec(q, /):
         '''return asec of self in radians'''
-        return (q**-1).__asin__()
+        return (q**-1).asin()
 
-    def __acot__(q, /):
+    def acot(q, /):
         '''return acot of self in radians'''
-        return (1/q).__atan__()
+        return (1/q).atan()
 
-    def __cosh__(q, /):
+    def cosh(q, /):
         '''return cosh of self in radians'''
         r, p, n = q.__polar__()
         return math.cosh(q.real)*math.cos(r*math.sin(p))+n*math.sinh(q.real)*math.sin(r*math.sin(p))
 
-    def __sinh__(q, /):
+    def sinh(q, /):
         '''return sinh of self in radians'''
         r, p, n = q.__polar__()
         return math.sinh(q.real)*math.cos(r*math.sin(p))+n*math.cosh(q.real)*math.sin(r*math.sin(p))
 
-    def __tanh__(q, /):
+    def tanh(q, /):
         '''return tanh of self in radians'''
-        return q.__sinh__()*(q.__cosh__()**-1)
+        return q.sinh()*(q.cosh()**-1)
 
-    def __sech__(q, /):
+    def sech(q, /):
         '''return sech of self in radians'''
-        return q.__cosh__()**-1
+        return q.cosh()**-1
 
-    def __csch__(q, /):
+    def csch(q, /):
         '''return csch of self in radians'''
-        return q.__sinh__()**-1
+        return q.sinh()**-1
 
-    def __coth__(q, /):
+    def coth(q, /):
         '''return coth of self in radians'''
-        return q.__cosh__()*(q.__sinh__()**-1)
+        return q.cosh()*(q.sinh()**-1)
 
-    def __acosh__(q, /):
+    def acosh(q, /):
         '''return acosh of self in radians'''
-        return math.log(q+((q**2)-1**(1/2)))
+        return (q+((q**2)-1**(1/2))).ln()
 
-    def __asinh__(q, /):
+    def asinh(q, /):
         '''return asinh of self in radians'''
-        return math.log(q+((q**2)+1**(1/2)))
+        return (q+((q**2)+1**(1/2))).ln()
 
-    def __atanh__(q, /):
+    def atanh(q, /):
         '''return atanh of self in radians'''
-        return (1/2)*math.log(((1+q)*((1-q)**-1)))
+        return (1/2)*(((1+q)*((1-q)**-1))).ln()
 
-    def __asech__(q, /):
+    def asech(q, /):
         '''return asech of self in radians'''
-        return (1/q).__acosh__()
+        return (1/q).acosh()
 
-    def __acsch__(q, /):
+    def acsch(q, /):
         '''return acsch of self in radians'''
-        return (1/q).__asin__()
+        return (1/q).asin()
 
-    def __acoth__(q, /):
+    def acoth(q, /):
         '''return acoth of self in radians'''
-        return (1/q).__atan__()
+        return (1/q).atan()
 
     ### ALGEBRAIC ###
 
@@ -312,20 +334,50 @@ quaternion'''
         phi = math.acos(q.real/abs(q))
         ñ = q.v()/abs(q.v())
         return (r, phi, ñ)
+    polar = __polar__
 
     def __phase__(self, /):
         '''returns the angle phase between (0, 1) and self'''
         return  math.acos(self.real/abs(self))
 
-    def __ln__(x, /):
+    def ln(x, /):
         '''return the natural logarithm of self'''
         return math.log(abs(x))+(x.v()/abs(x.v())*math.acos(x.real/abs(x)))
 
-    def __log__(self, other):
-        '''return the logarithm of self'''
-        return math.log(self)/math.log(other)
+    def log(self, other):
+        '''return the logarithm base other of self'''
+        def gln(n):
+            try: return math.log(n)
+            except: pass
+            try: return cmath.log(n)
+            except: pass
+            try: return n.ln()
+            except: pass
+            try: return n.log(e)
+            except: return NotImplemented
+        
+        try: return self.ln()/gln(other)
+        except: pass
+        try: return other.rlog(self)
+        except: pass
+        raise TypeError(f'log base of type {type(other).__name__} seems to be invalid')
 
-    def __exp__(q):
+    def rlog(self, other):
+        '''return the logarithm base self of other'''
+        def gln(n):
+            try: return math.log(n)
+            except: pass
+            try: return cmath.log(n)
+            except: pass
+            try: return n.ln()
+            except: pass
+            try: return n.log(e)
+            except: return NotImplemented
+        try: return gln(other)/self.ln()
+        except: pass
+        raise TypeError(f'log with quaternion base of type {type(other).__name__} cannot be found')
+
+    def exp(q):
         '''return e**self'''
         a = q.real
         v = q.v()
@@ -356,7 +408,7 @@ quaternion'''
         return '+'.join([(str(a if int(a) != float(a) else int(a))+b \
                           if a not in (1, -1) or b == '' else b) \
                          for a, b in zip(self.astuple(), ('', 'i', 'j', 'k')) \
-                         if a]).replace('+', '-')
+                         if a]).replace('+-', '-')
     __repr__=__str__
 
     def __bool__(self, /):
@@ -420,7 +472,7 @@ quaternion'''
 
     def __rmul__(self, other, /):
         '''return other*self'''
-        if type(other, (int, float)):
+        if isinstance(other, (int, float)):
             return quaternion(*map(lambda q: q*other, self.astuple()))
         if isinstance(other, complex): other = quaternion(other)
         if type(other) is quaternion:
@@ -435,12 +487,14 @@ quaternion'''
 
     def __truediv__(self, other, /):
         '''return self/other if other is real'''
-        if type(other, (int, float)):
+        if isinstance(other, (int, float)):
             return quaternion(*map(lambda q: q/other, self.astuple()))
         return NotImplemented
 
     def __rtruediv__(self, other, /):
         '''Not possible with quaternion'''
+        if isinstance(other, (int, float)):
+            return other*self**-1
         return NotImplemented
 
     def __pow__(self, other, /):
