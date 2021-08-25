@@ -27,11 +27,10 @@ RELEASE NOTES:
    Code cleanup.
 '''
 
-__author__ = 'Augustin Garcia'
-__version__ = '0.1.1'
+__author__:str = 'Augustin Garcia'
+__version__:str = '0.1.1'
 
 from collections import abc
-import sys
 import datetime
 
 _chastise = '''
