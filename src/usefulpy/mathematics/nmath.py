@@ -1,8 +1,7 @@
 '''
 nmath or 'new math'
 
-This file is essentially the importation of the math module, but a few small
-functions are added or changed.
+Access to basic mathematical functions
 
 LICENSE PLATAFORMS and INSTALLATION:
 This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
@@ -52,122 +51,152 @@ RELEASE NOTES:
    Downsized, most of its ability has been moved over to 'mathfunc.py'.
    Functionality from PrimeComposite 0.0.0 and triangles 0.1.0 has been moved
    here
+  Version 3.0.1
+   Improve functionality
+   Bugfixes
+   Documentation
+   Prime sieve implementation
 '''
 
-
-### DUNDERS ###
 __version__ ='3.0.0'
 __author__ = 'Augustin Garcia'
 
-##TEMP
-__package__ = 'usefulpy.mathematics'
-
-
-### IMPORTS ###
-from .mathfuncs import *
+from itertools import repeat as _repeat
 from functools import reduce as _reduce
 import math as _math
 import cmath as _cmath
 
-from math import comb, copysign, erf, erfc, fabs, factorial, fmod, fsum, gamma
-from math import lgamma, modf, nextafter, perm, prod, remainder, trunc, ulp
+from math import comb, copysign, erf, erfc, fabs, factorial, fmod, fsum, gamma, lgamma
+from math import modf, nextafter, perm, prod, remainder, trunc, ulp, ldexp, frexp
 
-### checks ###
-
-def odd(num, /):
+### simple checks with failsafe ###
+def odd(n:int, /) -> bool:
     '''Return True if num is odd'''
-    try: return num%2 == 1
+    try: return n%2 == 1
     except: return False
 
-def even(num, /):
+def even(n:int, /) -> bool:
     '''Return True if num is even'''
-    try: return num%2 == 0
+    try: return n%2 == 0
     except: return False
 
-def persistance(n):
-    if n >= 10: 
-        yield n
-        yield from persistance(prod([int(i) for i in str(n)]))
-    else: yield n
-
-def isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0):
+def isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0) -> bool:
     '''Return True if a is close to b'''
-    try: return _math.isclose(a, b) # Always try optimized c methods first
+    # Always try optimized c methods first
+    try: return _math.isclose(a, b) 
     except: pass
     try: return _cmath.isclose(a, b)
     except: pass
+
+    # If these fail
+    # case checks
     if isnan(a) or isnan(b): return False
     if isinf(a) or isinf(b): return a == b
+
+    # find tolerance for 'closeness' and the distance between the values
     tol, difference = max((abs(abs(b)*rel_tol)), abs(abs_tol)), abs(a-b)
+    
     return tol >= difference
 
 def isinf(x, /):
     '''Return True if x is inf in any direction'''
+    # C methods
     try: return _math.isinf(x)
     except: pass
     try: return _cmath.isinf(x)
     except: pass
-    if x in (inf, infj, neg_inf, neg_infj): return True
-    try:
-        if x.real in (inf, neg_inf): return True
-        else: return x.imag in (inf, neg_inf)
-    except: pass
-    try:
-        if x.real in (inf, neg_inf): return True
-        if x.i in (inf, neg_inf): return True
-        if x.j in (inf, neg_inf): return True
-        return x.k in (inf, neg_inf)
-    except: pass
+
+    #if these fail
+
+    # allow for customized types
     try: return x.isinf()
     except: pass
+
+    #otherwise
     raise TypeError(f'invalid type, type {type(x).__name__}')
 
 def isnan(x, /):
     '''Return True if x is nan in any way'''
+    # C methods
     try: return _math.isnan(x)
     except: pass
     try: return _cmath.isnan(x)
     except: pass
-    if x in (nan, nanj): return True
-    try:
-        if x.real == nan: return True
-        else: return x.imag == nan
-    except:pass
-    try:
-        if x.i == nan: return True
-        if x.j == nan: return True
-        return x.k == nan
-    except: pass
+
+    # allow for customized types
     try: return x.isnan()
     except: pass
     raise TypeError(f'invalid type, type {type(x).__name__}')
 
 def isfinite(x, /):
+    '''Return True if x is neither an infinity nor a NaN, and False otherwise'''
     try: return _math.isfinite(x)
     except: pass
     try: return _cmath.isfinite(x)
     except: pass
+
+    # allow for customized types
     try: return x.isfinite()
     except: pass
     try: return not (isnan(x) or isinf(x))
-    except: pass    
+    except: pass
     raise TypeError(f'invalid type, type {type(x).__name__}')
 
 
-### MISCILLANEOUS ###
-def summation(start, finish, function = lambda x: x):
+
+### persistance ###
+
+def _persistance_generator(n:int, /):
+    '''Generates numbers of product of digits in n'''
+    if n >= 10: 
+        yield n
+        #recursive call with digit prod of itself until
+        #the number is less than ten
+        # is called by `persistance_generator` which does a type check first.
+        yield from _persistance_generator(prod([int(i) for i in str(n)]))
+        
+    else: yield n
+
+def persistance_generator(n:int, /):
+    '''Generate numbers of product of digits in n'''
+    # uses _persitance_generator but checks type first
+    if type(n) is not int:
+        raise TypeError(f'Invalid type, type {type(n).__name__}')
+    return _persistance_generator(n)
+
+def persistance(n:int, /):
+    '''Find persistance of number n'''
+    if type(n) is not int:
+        raise TypeError(f'Invalid type, type {type(n).__name__}')
+    return len(tuple(_persistance_generator(n)))
+
+
+### Sum and prod ###
+def digit_prod(n:int, /):
+    '''Return the product of the digits of n'''
+    if type(n) is not int:
+        raise TypeError(f'Invalid type, type {type(n).__name__}')
+    return prod([int(i) for i in str(n)])
+
+def digit_sum(n:int, /):
+    '''Return the sum of the digits of n'''
+    if type(n) is not int:
+        raise TypeError(f'Invalid type, type {type(n).__name__}')
+    return sum([int(i) for i in str(n)])
+
+def summation(start:int, finish:int, function = lambda x: x):
     '''Σ'''
     return sum(map(function, range(start, finish+1)))
-    rangelist = list(range(start, finish+1))
-    rangelist[0] = function(rangelist[0])
-    return _reduce((lambda x, y: x+function(y)), rangelist)
 
-def product(start, finish, function = lambda x:x):
+def product(start:int, finish:int, function = lambda x:x):
     '''∏'''
     return prod(map(function, range(start, finish+1)))
 
+#
 def _taylor_summation(function):
     try:
+        # Not up to date.
+        # 
         # This is not true infinite summation, but it does give an
         # approximation, (this does mean that it can be stuck in an infinite
         # loop... not yet sure how to counter this accurately and efficiently.
@@ -192,21 +221,36 @@ def _taylor_summation(function):
         return sm
     except: return sm
 
+
+# Dist and hypot
+
 def dist(p, q, /):
+    '''returns the distance between the coordinates of iterables p and q'''
+    #begins by making padding with 0s if p and q are different length
+    if len(p) != len(q):
+        p, q = list(max(p, q, key = len)), list(min(p, q, key = len))
+        q[len(q):]=[0]*(len(p)-len(q))
+
+    #trys compiled method
     try: return _math.dist(p, q)
     except: pass
-    if len(p) != len(q):
-        raise ValueError('both points must have the same number of dimensions')
+
+    #otherwise does slow method
     args = [x-y for x, y in zip(p, q)]
     return hypot(*args)
 
 def hypot(*coordinates):
+    '''returns the distance between origin and the point with given coordinates'''
     try: return _math.hypot(*coordinates)
-    except: return sqrt(sum(map(square, coordinates)))
+    except: return _math.sqrt(sum(map(lambda x:x**2, coordinates)))
 
-### powers and exponents ###
-def rt(nth, of):
-    '''Find the nth root of (n must be an integer)'''
+# Powers and exponents
+def rt(nth:int, of):
+    '''Find the nth root of (n must be an integer).
+
+Programatically approximates nth root of n as an
+alternate method to built in systems in for the sake of
+a custom class'''
     assert type(nth) is int
     
     try: is_negative = of < 0
@@ -225,41 +269,22 @@ def rt(nth, of):
 
     return approx*final
 
-def irt(nth, num, /):
-    '''Return floor nth root of num'''
-    assert type(nth) is int
-    try: nth = int(nth)
-    except: nth = int(float(nth))
-    return floor(rt(nth, num))
-
-def ldexp(x, i, /):
-    '''The inverse of frexp().'''
-    try: return _math.ldexp(x, i)
-    except: pass
-    return x*(2**i)
-
-def frexp(x, /):
-    '''Return the mantissa and exponent of x, as pair (m, e).
-
-m is a float and e is an int, such that x = m * 2.**e.
-If x is 0, m and e are both 0.  Else 0.5 <= abs(m) < 1.0.'''
-    try: return _math.frexp(x) # Always try to use optimized method
-    except: pass
-    n = floor(log2(x)) + 1
-    n1 = x/(2**n)
-    return (n1, n)
-
 def phase(z, /):
     '''Return angle of number'''
     try: z = complex(z)
     except:
         try: z = complex(float(z))
         except: pass
+    #Attempting to make sure z will be a complex
+    
     try: return (_cmath.phase(z), 1j)        
     except: pass
+
+    # In case of custom class
     try: return z.__phase__()
     except:pass
-    raise TypeError('%s has no phase' % type(z))
+    
+    raise TypeError('%s has no phase' % type(z).__name__)
 
 def polar(z, /):
     '''Return a number in polar form'''
@@ -267,15 +292,19 @@ def polar(z, /):
     except:
         try: z = complex(float(z))
         except: pass
+    #Attempting to make sure z will be a complex
+    
     try: return (_cmath.polar(z), 1j)
     except: pass
+
+    #allowing for custom class
     try: return z.__polar__()
     except:pass
     raise TypeError('%s has no polar' % type(z))
 
 def rect(r, phi, n = 1j):
     '''Create complex back from polar form'''
-    return r*(cos(phi) + n*sin(phi))
+    return r*(_math.cos(phi) + n*_math.sin(phi))
 
 class t: #taylor series
     def cos(theta, /):
@@ -320,87 +349,116 @@ will return an incorrect value.'''
         x = 1-x
         return _taylor_summation(iteration)
 
-_primes = [2]
-_composites = []
-def PrimeOrComposite(num):
-    '''return 'prime' if prime and 'composite' if composite'''
-    Prime = 'prime'
-    Composite = 'composite'
-    if not isinstance(num, int): raise TypeError
-    num = int(num)
-    if num < 1: raise TypeError
-    if num == 1: return 'neither'
-    def upuntil(number):
-        for x in range(largestPrime + 1, number + 1):
-            PoC=PrimeOrComposite(x)
-            if PoC == Prime: _primes.append(x)
-            else: _composites.append(x)
-    primes = _primes
-    if num in primes: return Prime
-    if num in _composites: return Composite
-    largestPrime = primes[-1]
-    if largestPrime**2 < num: upuntil(isqrt(num))
-    for x in primes:
-        if num%x == 0:
-            return Composite
-        if x**2>num:
-            return Prime
-    return Prime
 
-def Prime(num):
-    '''return True if number is prime'''
-    try: return PrimeOrComposite(num) == 'prime'
-    except: return False
+def _lcm_ngem(n:int, m:int)->int:
+    return m+((n-(m%n)) %n)
 
-def Composite(num):
-    '''return True if number is composite'''
-    try: return PrimeOrComposite(num) == 'composite'
-    except: return False
+class segmented_sieve:
+    primes:list[int] = [2, 3, 5, 7]
+    end_segment: int = 1
+    searched_till: int=8
+    
 
-def factor(num):
-    '''return factors of a number'''
-    if num == 1: return [1]
-    PrimeOrComposite((num//2)**2)
-    num = int(num)
-    factors = []
-    while not Prime(num):
-        for prime in _primes:
-            if num%prime == 0:
-                factors.append(prime)
-                num = num//prime
-                break
-    factors.append(num)
-    return factors
+    @staticmethod
+    def extend() -> None:
+        k = segmented_sieve.end_segment
+        add = 1
+        p = segmented_sieve.primes[k]
+        while 2*p*add+add**2 < 1000 and k+add+1<len(segmented_sieve.primes): add += 1
+        p, q = segmented_sieve.primes[k], segmented_sieve.primes[k+add]
+        segment = range(p*p, q*q)
+        segment_min = min(segment)
+        segment_len = len(segment)
+        is_prime = [True]*segment_len
+        for i in range(k+add):
+            pk = segmented_sieve.primes[i]
+            start = _lcm_ngem(pk, segment_min)
+            is_prime[start-segment_min::pk] = _repeat(False, len(range(start-segment_min, segment_len, pk)))
+        segmented_sieve.primes.extend([a for a, b in zip(segment, is_prime) if b])
+        segmented_sieve.end_segment += add
+        segmented_sieve.searched_till =segmented_sieve.primes[k+add]**2-1
 
-def lcm(a, b):
-    '''Return least common multiple of a and b'''
+    @staticmethod
+    def is_prime(n:int) -> bool:
+        for l in segmented_sieve.Primes_till(_math.isqrt(n)+1):
+            if n%l == 0: return False
+        return True
+
+    @staticmethod
+    def is_composite(n:int)->bool:
+        for l in segmented_sieve.Primes_till(_math.isqrt(n)+1):
+            if n%l == 0: return True
+        return False
+
+    @staticmethod
+    def Primes_till(n:int)->None:
+        while n >=segmented_sieve.searched_till:
+            segmented_sieve.extend()
+        for p in segmented_sieve.primes:
+            if p >=n:return
+            yield p
+    
+
+sieve = segmented_sieve()
+def Prime(n):
+    if type(n) is not int:
+        raise TypeError('n must be an int')
+    if n<0:
+        raise ValueError('Only natural numbers can have properties as Prime or Composite')
+    return sieve.is_prime(n)
+
+def Composite(n):
+    if type(n) is not int:
+        raise TypeError('n must be an int')
+    if n<0:
+        raise ValueError('Only natural numbers can have properties as Prime or Composite')
+    return sieve.is_composite(n)
+
+def primes_till(n:int)->tuple[int]:
+    return tuple(sieve.Primes_till(n))
+
+def _factor_sub(n):
+    if not ((type(n) is int) and (n >= 0)):
+        raise ValueError('Only natural numbers can have properties as Prime or Composite')    
+    if n in (0, 1):
+        yield n; return
+    if Prime(n):
+        yield n; return [n]
+    
+    for p in sieve.primes:
+        while n%p==0:
+            yield p
+            n//=p
+        if p>_math.sqrt(n):
+            break
+    if n not in (0, 1):
+        yield n
+
+def Factor(n):
+    return tuple(_factor_sub(n))
+
+def _lcm1(a, b):
     ngcd = gcd(a, b)
     a, b = a//ngcd, b//ngcd
-    return a*b*ngcd
 
-def _gcd(a, b):
-    a, b = sorted((a, b), reverse = True)
-    while b != 0:
-        a, b = b, a%b
-    return a
+def lcm(*integers):
+    '''Return least common multiple of a and b'''
+    try:_math.lcm(*integers)
+    except:pass
+    return _reduce(_lcm1, integers)
 
-def _get_gcd(a, b):
-    if hasattr(a, '__gcd__'):
-        return a.__gcd__(b)
-    if hasattr(b, '__gcd__'):
-        return b.__gcd__(a)
-    return _gcd(a, b)
+def _get_gcd(n):
+    if type(n) is complex:
+        return _math.gcd(n.real, n.imag)
+    try: return n.gcd()
+    except: pass
+    return n
 
-def gcd(*args):
-    return _reduce(_get_gcd, args)
+def gcd(*integers):
+    return _math.gcd(map(_get_gcd, integers))
 
-def lmgm(n, m):
-    '''Return the smallest multiple of n greater than or equal to m'''
-    assert n>0
-    assert m>=0
-    return m + ((n - (m % n)) % n)
 
-### CHECKS ###
+### Triangle checks ###
 def isTriangle(a, b, c):
     '''Check if values can form a real triangle.'''
     a, b, c = abs(a), abs(b), abs(c)
