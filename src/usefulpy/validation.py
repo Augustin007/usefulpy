@@ -19,7 +19,7 @@ RELEASE NOTES:
  0.1
   Version 0.1.0
     ——Friday, the fifteenth day of the firstmonth Janurary, 2021——
-   Code is shorter by about fifty lines, and yet its functionality have
+   Code is shorter by about fifty lines, and yet its functionality has
    increased... Simplicity is better! Who knew?
   Version 0.1.1
    Small bugfixes
@@ -46,7 +46,7 @@ def is_function(s):
     return type(s) is function
 
 def is_integer(s):
-    '''Check if an object is an integer can be turned into an integer without
+    '''Check if an object is an integer or can be turned into an integer without
 losing any value'''
     try: return int(float(s)) == float(s)
     except: return False
