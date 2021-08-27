@@ -22,7 +22,9 @@ RELEASE NOTES:
    more versatility
    trig func and inverse trig func decorators
    functions moved here
-
+  Version 0.1.1
+   Small bugfixes. Changing small internal bits.
+   Documentation
 '''
 
 ### DUNDERS ###
@@ -55,6 +57,8 @@ def convert(value, frm, to):
     return (value/valuefrm)*valueto
 
 def _mathfunc_oper(function):
+    '''This is a wrapper for a mathfunc operations which allow for overiding by
+adding it into the mathfuncs dict.'''
     name = function.__name__
     @_wraps(function)
     def _call(self, *args, **kwargs):
@@ -65,6 +69,8 @@ def _mathfunc_oper(function):
 
 @cache
 def _simplified_tup_to_mfunc(comp):
+    '''Converts an expression tuple to a mathfunc. This assumes this is a
+simplified tuple'''
     if not isinstance(comp, (int, float)):
         callables = {n.__name__:n for n in set(_flatten(comp)) if callable(n)}
         function = mathfunc(eval('lambda x : '+view_string(comp), callables))
@@ -78,6 +84,7 @@ def _simplified_tup_to_mfunc(comp):
     return function
 
 def _tup_to_mfunc(comp):
+    '''Converts tuples into mathfuncs'''
     comp = _simplify(comp)
     if callable(comp):
         return mathfunc(comp)
@@ -158,8 +165,7 @@ differentiation'''
             except: pass
         try: return self.__data__['custom_data'][name]
         except: pass
-        raise AttributeError(f'\'{self.__class__.__name__}\' object has no attribute \'{name}\'')
-
+        raise AttributeError(f'{self.__class__.__name__!r} object has no attribute {name!r}')
     
     def __hash__(self):
         '''hash for mathfunc'''
@@ -350,8 +356,9 @@ x=identity
 @mathfunc
 def floor(x, /):
     '''Return the floor of x'''
-    try: return _math.floor(x)
+    try: return _math.floor(x) # math's floor already allows for custom types
     except: pass
+    # I feel that imaginary types should still work
     try: return _math.floor(x.real) + _math.floor(x.imag)*1j if type(x) is complex else x.__floor__()
     except: pass
     raise TypeError(f'invalid type, type {type(x).__name__}')
@@ -359,8 +366,9 @@ def floor(x, /):
 @mathfunc
 def ceil(x, /):
     '''Return the ceil of x'''
-    try: return _math.ceil(x)
+    try: return _math.ceil(x)# math's ceil already allows for custom types
     except: pass
+    # imaginary type is not build in.
     try: return ceil(x.real) + ceil(x.imag)*1j if type(x) is complex else x.__ceil__()
     except: pass
     raise TypeError(f'invalid type, type {type(x).__name__}')
@@ -378,7 +386,7 @@ def exp(x, /):
     except: pass
     try: return _cmath.exp(x)
     except: pass
-    try: return x.__exp__()
+    try: return x.exp()
     except: return e**x
     # this final section may cause a recursive loop if 
     # the method __pow__ or __rpow__ calls exp, but if it doesn't then this
@@ -446,7 +454,7 @@ def tesser(x, /):
 @mathfunc
 def ln(x, /):
     '''Return the natural logarithm of x
-    recources to x.__ln__() or x.__log__(e) if log cannot be found'''
+    recources to x.ln() or x.log(e) if ln cannot be found'''
     if x == 0:
         raise ValueError('math domain error')
     try: return _math.log(x)
@@ -455,9 +463,9 @@ def ln(x, /):
     except: pass    
     try: return x.ln()
     except: pass
-    try: return x.__log__(e)
+    try: return x.log(e)
     except: pass
-    raise TypeError('Natural logarithm cannot be found of a type %s.' % type(x))
+    raise TypeError('Natural logarithm cannot be found of a type %s.' % type(x).__name__)
 ln.prime1 = 1/x
 
 
@@ -465,7 +473,7 @@ ln.prime1 = 1/x
 def log(base, x):
     ''' log([base=10], x)
     Return the log base 'base' of x
-    recources to x.__log__(base) if log cannot be found'''
+    recources to x.log(base) if log cannot be found'''
     if x == base: return 1
     if 0 in (x, base):
         raise ValueError('math domain error')
@@ -475,7 +483,9 @@ def log(base, x):
     except: pass
     try: return _cmath.log(x, base)
     except: pass
-    try: return x.__log__(base)
+    try: return x.log(base)
+    except: pass
+    try: return base.rlog(x)
     except: pass
     raise TypeError('Logarithm cannot be found of a type %s.' % type(x))
 
@@ -549,65 +559,65 @@ def inverse_trig_func(function):
 @inverse_trig_func
 def acos(x):
     '''Return the arc cosine of x,
-recources to x.__acos__ if cos cannot be found'''
+recources to x.acos if cos cannot be found'''
     if _validation.is_float(x) and (x<=1 and x>=-1):
         return _math.acos(x)
     elif _validation.is_complex(x):
         return _cmath.acos(x)
     else:
-        try: return x.__acos__()
+        try: return x.acos()
         except: pass
     raise TypeError('acos cannot be found of a type %s' % (type(x)))
 
 @inverse_trig_func
 def acosh(x):
     '''Return the inverse hyperbolic cosine of x
-recources to x.__acos__ if cosh cannot be found'''
+recources to x.acosh if cosh cannot be found'''
     if _validation.is_float(x):
         return _math.acosh(x)
     elif _validation.is_complex(x):
         return _cmath.acosh(x)
     else:
-        try: return x.__acosh__()
+        try: return x.acosh()
         except: pass
     raise TypeError('acos cannot be found of a type %s' % (type(x)))
 
 @inverse_trig_func
 def asin(x):
     '''Return the arc sine of x,
-recources to x.__asin__ if sin cannot be found'''
+recources to x.asin if sin cannot be found'''
     if _validation.is_float(x)  and (x<=1 and x>=-1):
         return _math.asin(x)
     elif _validation.is_complex(x):
         return _cmath.asin(x)
     else:
-        try: return x.__asin__()
+        try: return x.asin()
         except: pass
     raise TypeError('asin cannot be found of a type %s' % (type(x)))
 
 @inverse_trig_func
 def asinh(x):
     '''Return the inverse hyperbolic sine of x
-recources to x.__asin__ if sinh cannot be found'''
+recources to x.asinh if sinh cannot be found'''
     if _validation.is_float(x):
         return _math.asinh(x)
     elif _validation.is_complex(x):
         return _cmath.asinh(x)
     else:
-        try: return x.__asinh__()
+        try: return x.asinh()
         except: pass
     raise TypeError('asin cannot be found of a type %s' % (type(x)))
 
 @inverse_trig_func
 def atan(x):
     '''Return the arc tangent of x,
-recources to x.__atan__ if tan cannot be found'''
+recources to x.atan if tan cannot be found'''
     if _validation.is_float(x):
         return _math.atan(x)
     elif _validation.is_complex(x):
         return _cmath.atan(x)
     else:
-        try: return x.__atan__()
+        try: return x.atan()
         except: pass
     raise TypeError('atan cannot be found of a type %s' % (type(x)))
 
@@ -619,20 +629,20 @@ def atan2(y, x, setting = None):
 @inverse_trig_func
 def atanh(x):
     '''Return the inverse hyperbolic tangent of x
-recources to x.__atan__ if tanh cannot be found'''
+recources to x.atanh if tanh cannot be found'''
     if _validation.is_float(x):
         return _math.atanh(x)
     elif _validation.is_complex(x):
         return _cmath.atanh(x)
     else:
-        try: return x.__atanh__()
+        try: return x.atanh()
         except: pass
     raise TypeError('atan cannot be found of a type %s' % (type(x)))
 
 @inverse_trig_func
 def asec(x):
     '''Return the arc secant of x
-recources to x.__asec__ if sec cannot be found'''
+recources to x.asec if sec cannot be found'''
     zde = False
     if _validation.is_float(x):
         try: return (1/_math.acos(x))
@@ -642,7 +652,7 @@ recources to x.__asec__ if sec cannot be found'''
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: return x.__asec__()
+            try: return x.asec()
             except ZeroDivisionError: zde = True
         except:pass
     if zde:
@@ -652,7 +662,7 @@ recources to x.__asec__ if sec cannot be found'''
 @inverse_trig_func
 def asech(x):
     '''Return the inverse hyperbolic secant of x
-recources to x.__asech__ if sech cannot be found'''
+recources to x.asech if sech cannot be found'''
     zde = False
     if _validation.is_float(x):
         try: return (1/_math.acosh(x))
@@ -662,7 +672,7 @@ recources to x.__asech__ if sech cannot be found'''
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: return x.__asech__()
+            try: return x.asech()
             except ZeroDivisionError: zde = True
         except:pass
     if zde:
@@ -672,7 +682,7 @@ recources to x.__asech__ if sech cannot be found'''
 @inverse_trig_func
 def acsc(x):
     '''Return the arc cosecant of x
-recources to x.__acsc__ if csc cannot be found'''
+recources to x.acsc if csc cannot be found'''
     zde = False
     if _validation.is_float(x):
         try: return (1/_math.asin(x))
@@ -682,7 +692,7 @@ recources to x.__acsc__ if csc cannot be found'''
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: return x.__acsc__()
+            try: return x.acsc()
             except ZeroDivisionError: zde = True
         except:pass
     if zde:
@@ -692,7 +702,7 @@ recources to x.__acsc__ if csc cannot be found'''
 @inverse_trig_func
 def acsch(x, /):
     '''Return the inverse hyperbolic cosecant of x
-recources to x.__acsch__ if csch cannot be found'''
+recources to x.acsch if csch cannot be found'''
     zde = False
     if _validation.is_float(x):
         try: return (1/_math.asinh(x))
@@ -702,7 +712,7 @@ recources to x.__acsch__ if csch cannot be found'''
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: return x.__acsch__()
+            try: return x.acsch()
             except ZeroDivisionError: zde = True
         except:pass
     if zde:
@@ -712,7 +722,7 @@ recources to x.__acsch__ if csch cannot be found'''
 @inverse_trig_func
 def acot(x, /, setting = None):
     '''Return the arc cotangent of x
-recources to x.__acot__ if cot cannot be found'''
+recources to x.acot if cot cannot be found'''
     zde = False
     if _validation.is_float(x):
         try: return (1/_math.atan(x))
@@ -722,7 +732,7 @@ recources to x.__acot__ if cot cannot be found'''
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: return x.__acot__()
+            try: return x.acot()
             except ZeroDivisionError: zde = True
         except: pass
     if zde:
@@ -732,7 +742,7 @@ recources to x.__acot__ if cot cannot be found'''
 @inverse_trig_func
 def acoth(x, /):
     '''Return the inverse hyperbolic cotangent of x
-recources to x.__acoth__ if coth cannot be found'''
+recources to x.acoth if coth cannot be found'''
     zde = False
     if _validation.is_float(x):
         try: return (1/_math.atanh(x))
@@ -742,7 +752,7 @@ recources to x.__acoth__ if coth cannot be found'''
         except ZeroDivisionError: zde = True
     else:
         try:
-            try: return x.__acoth__()
+            try: return x.acoth()
             except ZeroDivisionError: zde = True
         except:pass
     if zde:
@@ -752,85 +762,85 @@ recources to x.__acoth__ if coth cannot be found'''
 @trig_func
 def cos(θ):
     '''Return the cosine of θ,
-recources to θ.__cos__ if cos cannot be found'''
+recources to θ.cos if cos cannot be found'''
     if _validation.is_float(θ):
         return _math.cos(θ)
     elif _validation.is_complex(θ):
         return _cmath.cos(θ)
     else:
-        try: return θ.__cos__()
+        try: return θ.cos()
         except: pass
     raise TypeError('cos cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def cosh(θ):
     '''Return the hyperbolic cosine of θ,
-recources to θ.__cosh__ if cosh cannot be found'''
+recources to θ.cosh if cosh cannot be found'''
     if _validation.is_float(θ):
         return _math.cosh(θ)
     elif _validation.is_complex(θ):
         return _cmath.cosh(θ)
     else:
-        try: return θ.__cosh__()
+        try: return θ.cosh()
         except: pass
     raise TypeError('cosh cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def sin(θ):
     '''Return the sine of θ,
-recources to θ.__sin__ if sin cannot be found'''
+recources to θ.sin if sin cannot be found'''
     if _validation.is_float(θ):
         return _math.sin(θ)
     elif _validation.is_complex(θ):
         return _cmath.sin(θ)
     else:
-        try: return θ.__sin__()
+        try: return θ.sin()
         except: pass
     raise TypeError('sin cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def sinh(θ):
     '''Return the hyperbolic sine of θ,
-recources to θ.__sinh__ if sinh cannot be found'''
+recources to θ.sinh if sinh cannot be found'''
     if _validation.is_float(θ):
         return _math.sinh(θ)
     elif _validation.is_complex(θ):
         return _cmath.sinh(θ)
     else:
-        try: return θ.__sinh__()
+        try: return θ.sinh()
         except: pass
     raise TypeError('sinh cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def tan(θ):
     '''Return the tangent of θ,
-recources to θ.__tan__ if tan cannot be found'''
+recources to θ.tan if tan cannot be found'''
     if _validation.is_float(θ):
         return _math.tan(θ)
     elif _validation.is_complex(θ):
         return _cmath.tan(θ)
     else:
-        try: return θ.__tan__()
+        try: return θ.tan()
         except: pass
     raise TypeError('tan cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def tanh(θ):
     '''Return the hyperbolic tangent of θ,
-recources to θ.__tanh__ if tanh cannot be found'''
+recources to θ.tanh if tanh cannot be found'''
     if _validation.is_float(θ):
         return _math.tanh(θ)
     elif _validation.is_complex(θ):
         return _cmath.tanh(θ)
     else:
-        try: return θ.__tanh__()
+        try: return θ.tanh()
         except: pass
     raise TypeError('tanh cannot be found of a type %s' % (type(θ)))
 
 @trig_func
 def sec(θ):
     '''Return the secant of θ,
-recources to θ.__sec__ if sec cannot be found'''
+recources to θ.sec if sec cannot be found'''
     if _validation.is_float(θ):
         try: return _math.cos(1/θ)
         except ZeroDivisionError: pass
@@ -842,7 +852,7 @@ recources to θ.__sec__ if sec cannot be found'''
     else:
         zde = False
         try:
-            try: return θ.__sec__()
+            try: return θ.sec()
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
@@ -851,7 +861,7 @@ recources to θ.__sec__ if sec cannot be found'''
 @trig_func
 def sech(θ):
     '''Return the hyperbolic secant of θ
-recources to θ.__sech__ if sech cannot be found'''
+recources to θ.sech if sech cannot be found'''
     if _validation.is_float(θ):
         try: return _math.cosh(1/θ)
         except ZeroDivisionError: pass
@@ -863,7 +873,7 @@ recources to θ.__sech__ if sech cannot be found'''
     else:
         zde = False
         try:
-            try: return θ.__sech__()
+            try: return θ.sech()
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
@@ -872,7 +882,7 @@ recources to θ.__sech__ if sech cannot be found'''
 @trig_func
 def csc(θ):
     '''Return the cosecant of θ,
-recources to θ.__csc__ if csc cannot be found'''
+recources to θ.csc if csc cannot be found'''
     if _validation.is_float(θ):
         try: return _math.sin(1/θ)
         except ZeroDivisionError: pass
@@ -883,7 +893,7 @@ recources to θ.__csc__ if csc cannot be found'''
     else:
         zde = False
         try:
-            try: return θ.__csc__()
+            try: return θ.csc()
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
@@ -892,7 +902,7 @@ recources to θ.__csc__ if csc cannot be found'''
 @trig_func
 def csch(θ):
     '''Return the hyperbolic cosecant of θ
-recources to θ.__csch__ if csch cannot be found'''
+recources to θ.csch if csch cannot be found'''
     if _validation.is_float(θ):
         try: return _math.sinh(1/θ)
         except ZeroDivisionError: pass
@@ -904,7 +914,7 @@ recources to θ.__csch__ if csch cannot be found'''
     else:
         zde = False
         try:
-            try: return θ.__csch__()
+            try: return θ.csch()
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
@@ -913,7 +923,7 @@ recources to θ.__csch__ if csch cannot be found'''
 @trig_func
 def cot(θ):
     '''Return the cotangent of θ,
-recources to θ.__cot__ if cot cannot be found'''
+recources to θ.cot if cot cannot be found'''
     if _validation.is_float(θ):
         try: return _math.tan(1/θ)
         except ZeroDivisionError: pass
@@ -925,7 +935,7 @@ recources to θ.__cot__ if cot cannot be found'''
     else:
         zde = False
         try:
-            try: return θ.__cot__()
+            try: return θ.cot()
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
@@ -934,7 +944,7 @@ recources to θ.__cot__ if cot cannot be found'''
 @trig_func
 def coth(θ):
     '''Return the hyperbolic cotangent of θ
-recources to θ.__coth__ if coth cannot be found'''
+recources to θ.coth if coth cannot be found'''
     
     if _validation.is_float(θ):
         try: return _math.tanh(1/θ)
@@ -947,7 +957,7 @@ recources to θ.__coth__ if coth cannot be found'''
     else:
         zde = False
         try:
-            try: return θ.__coth__()
+            try: return θ.coth()
             except ZeroDivisionError: zde = True
         except: pass
         if zde: raise ValueError ('math domain error')
