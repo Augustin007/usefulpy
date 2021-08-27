@@ -22,7 +22,7 @@ __author__ = 'Augustin Garcia'
 __version__ = '0.0.0'
 
 ### IMPORTS ###
-from .Cam import cam_base, #cam_shape_method
+from .Cam import cam_base#, cam_shape_method
 from ...mathematics import nmath as _m
 from ...mathematics import quaternion, i, j, k
 from .shapes import polyhedron, pane, darken
