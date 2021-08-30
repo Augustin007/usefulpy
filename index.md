@@ -247,11 +247,12 @@ In [18]: quit()
 ## gui
 
 Includes a wrapper around tkinter, which can be frustrating to work with, to make it simpler and a set of programs called py3d, for a 3d space in the built-in tkinter canvas.
-![Rotating Cube](https://github.com/Augustin007/Augustin007/blob/main/Cube_rot.gif)
 
 #### py3d
 
 A pure-python 3d system... I'd like to shift some of this into C or C++
+
+![Rotating Cube](https://github.com/Augustin007/Augustin007/blob/main/Cube_rot.gif)
 
 ## Versions
 Versions include 0.0.0, 0.0.1, 0.1.0, 0.1.1, 0.1.2, 0.1.3, 0.1.4, 0.1.5, 0.2.0
