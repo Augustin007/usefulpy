@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="usefulpython",
-    version="0.1.5",
+    version="0.2.0",
     author="Augustin Garcia",
     author_email="albusdumbledore101123@gmail.com",
     description="tools for a cleaner python experience",
