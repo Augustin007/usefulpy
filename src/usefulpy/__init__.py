@@ -35,6 +35,11 @@ RELEASE NOTES:
    More bugfixes!
   Version 0.1.5:
    Succesfully restructured to be a package. Also bugfixes.
+ 0.2
+  Version 0.2.0
+   Mathfunc class capabilities expanded with a simple algebraic simplifier
+   system. Math sections improved for faster and better capabilities.
+   Newer, faster prime sieve.
 
 SECTIONS:
 validation
