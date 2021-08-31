@@ -1,6 +1,6 @@
 # Usefulpy
 
-![Usefulpy Logo](https://github.com/Augustin007/Augustin007/blob/main/UsefulPY_with_quote.png)
+![Usefulpy Logo](https://github.com/Augustin007/Augustin007/raw/main/UsefulPY_with_quote.png)
 
 Filled with simple resources and modules for a cleaner looking program, Usefulpy is a module filled with many useful functions and modules in various subjects geared to cut down and simplify some little bits of code that can become messy or repetitive.
 
@@ -252,10 +252,10 @@ Includes a wrapper around tkinter, which can be frustrating to work with, to mak
 
 A pure-python 3d system... I'd like to shift some of this into C or C++
 
-![Rotating Cube](https://github.com/Augustin007/Augustin007/blob/main/Cube_rot.gif)
+![Rotating Cube](https://github.com/Augustin007/Augustin007/raw/main/Cube_rot.gif)
 
 ## Versions
 Versions include 0.0.0, 0.0.1, 0.1.0, 0.1.1, 0.1.2, 0.1.3, 0.1.4, 0.1.5, 0.2.0
 ###### [Usefulpy 0.2.0](https://github.com/Augustin007/usefulpy/releases/tag/v0.2.0):
 
-![mini_usefulpy_logo](https://github.com/Augustin007/Augustin007/blob/main/Mini_usefulpy.png)
+![mini_usefulpy_logo](https://github.com/Augustin007/Augustin007/raw/main/Mini_usefulpy.png)
