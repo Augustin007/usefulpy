@@ -1,6 +1,6 @@
 # Usefulpy
 
-![Usefulpy Logo](https://github.com/Augustin007/Augustin007/blob/main/UsefulPY_with_quote.png)
+![Usefulpy Logo](https://github.com/Augustin007/Augustin007/raw/main/UsefulPY_with_quote.png)
 
 [Check out the Usefulpy site](https://augustin007.github.io/usefulpy/)
 
@@ -83,10 +83,10 @@ True
 
 3d projection systems
 
-![Rotating Cube](https://github.com/Augustin007/Augustin007/blob/main/Cube_rot.gif)
+![Rotating Cube](https://github.com/Augustin007/Augustin007/raw/main/Cube_rot.gif)
 
 \
 Essentially, usefulpy is a large library of functions that improve the quality of python programming. One catch, it can't use any sort of third party libraries... so no numpy, scipy, manim, or any others... 
 
 
-![mini_usefulpy_logo](https://github.com/Augustin007/Augustin007/blob/main/Mini_usefulpy.png)
+![mini_usefulpy_logo](https://github.com/Augustin007/Augustin007/raw/main/Mini_usefulpy.png)
