@@ -256,6 +256,6 @@ A pure-python 3d system... I'd like to shift some of this into C or C++
 
 ## Versions
 Versions include 0.0.0, 0.0.1, 0.1.0, 0.1.1, 0.1.2, 0.1.3, 0.1.4, 0.1.5, 0.2.0
-###### [Usefulpy 0.0.0](https://github.com/Augustin007/usefulpy/releases/tag/v0.2.0):
+###### [Usefulpy 0.2.0](https://github.com/Augustin007/usefulpy/releases/tag/v0.2.0):
 
 ![mini_usefulpy_logo](https://github.com/Augustin007/Augustin007/blob/main/Mini_usefulpy.png)
