@@ -41,7 +41,7 @@ losing any value'''
     except: return False
 ```
 
-Other parts of the project are a little more complecated, including 
+Other parts of the project are a little more complicated, including 
 
 quaternions
 ```python
