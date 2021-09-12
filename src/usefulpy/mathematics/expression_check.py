@@ -20,6 +20,7 @@ RELEASE NOTES:
 '''
 
 import math as _math
+import types
 
 ### DUNDERS ###
 __author__ = 'Augustin Garcia'
@@ -49,7 +50,7 @@ def _expand(composition:tuple, oper:str)->tuple:
     return tuple(run) if not checked else _expand(tuple(run), oper)
 
 valid_operation = []
-operations = {}
+operations:dict[str, types.FunctionType] = {}
 verbose = False
 
 def _lookup_alias(dictionary, name):
@@ -75,8 +76,8 @@ def _are_equal(c1:tuple, c2:tuple)->bool:
     for c, n in enumerate(c1):
         if n not in lc2:
             return False
-        c2 = lc2.index(n)
-        lc2.pop(c2)
+        c2i:int = lc2.index(n)
+        lc2.pop(c2i)
     if lc2: return False
     return True
 
@@ -88,7 +89,7 @@ def _ueq(a, b):
     return a==b
 
 ### DATA EXTRACTORS ###
-def _add_extract_mul(composition:tuple)->tuple[float, any, bool]:
+def _add_extract_mul(composition:tuple):
     lc:list = list(composition[1])
     for c, n in enumerate(composition[1]):
         if isinstance(n, (int, float)):
@@ -98,7 +99,7 @@ def _add_extract_mul(composition:tuple)->tuple[float, any, bool]:
             return n, ('mul', tuple(lc)), False
     return 1, composition, False
 
-def _add_extract(value)->tuple[float, any, bool]:
+def _add_extract(value):
     value = _simplify(value)
     if type(value) is tuple:
         if value[0] == 'mul':
@@ -122,7 +123,7 @@ def _mul_distribute(composition, mult):
         lcomposition[count] = ('mul', tuple(lst))
     return _simplify(('add', tuple(lcomposition)))
 
-def _mul_add_expand(composition:tuple)->tuple:
+def _mul_add_expand(composition:tuple):
     lcomposition=list(composition[1])
     for count, value in enumerate(composition[1]):
         if isinstance(value, tuple):
@@ -311,6 +312,7 @@ def tup_to_str(composition:tuple) -> str:
         return p_expression_str(data[0])+'**'+p_expression_str(data[1])
     if data_type == 'nest':
         return expression_str(data[0]).replace('<x>', expression_str(data[1]))
+    raise ValueError('Some Error Occured, this code ought to be unreachable')
 
 def expression_str(comp)->str:
     if isinstance(comp, (int, float)):
@@ -343,9 +345,4 @@ def tup_to_func(comp):
 
 def binomial_coeficient(k, n):
     return _math.factorial(n)/(_math.factorial(n-k)*_math.factorial(k))
-
-if __name__ == '__main__':
-    verbose = True
-    identity = lambda x:x
-    identity.function = '<x>'
-    test1 = ('mul', (('add', (identity, 3)), ('add', (identity, 3))))
+    

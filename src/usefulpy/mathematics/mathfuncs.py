@@ -38,6 +38,7 @@ from .. import validation as _validation
 from .. import decorators as _decorators
 from functools import cache, wraps as _wraps
 from .expression_check import *
+import types
 
 
 import cmath as _cmath
@@ -97,16 +98,16 @@ differentiation'''
     ### ANNOTATIONS ###
     __data__:dict
     __doc__:str
-    func:callable
+    func:types.FunctionType
     composition:tuple
     function:str
     __name__:str
-    inverse:callable
+    inverse:types.FunctionType
     interval = None
     __is_frozen:bool = False
 
     @cache
-    def __new__(cls, func:callable):
+    def __new__(cls, func:types.FunctionType):
         '''__new__ for mathfunc class, wraps function 'func'.'''
         assert callable(func)
         if type(func) == mathfunc: return mathfunc

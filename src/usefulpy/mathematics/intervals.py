@@ -19,6 +19,8 @@ RELEASE NOTES:
 __author__ = 'Augustin Garcia'
 __version__ = '0.0.0'
 
+import types
+
 class Interval:
     def __new__(cls, *args):
         '''Interval(start, stop, mode) -> interval
@@ -32,11 +34,11 @@ Interval(*intervals) -> unified_interval'''
         if len(args) in (2, 3):
             return interval(*args)
         raise TypeError('Interval error')
-_func = type(lambda:None)
+
 class interval:
     start:float
     stop:float
-    _check:_func
+    _check:types.FunctionType
     _repstr:str
     mode: int
     def __init__(self, start:float, stop:float, mode = 'open'):

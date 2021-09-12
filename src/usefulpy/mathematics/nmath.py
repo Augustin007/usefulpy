@@ -65,6 +65,7 @@ from itertools import repeat as _repeat
 from functools import reduce as _reduce
 import math as _math
 import cmath as _cmath
+import types
 
 from math import comb, copysign, erf, erfc, fabs, factorial, fmod, fsum, gamma, lgamma
 from math import modf, nextafter, perm, prod, remainder, trunc, ulp, ldexp, frexp
@@ -391,7 +392,7 @@ class segmented_sieve:
         return False
 
     @staticmethod
-    def Primes_till(n:int)->None:
+    def Primes_till(n:int)->types.GeneratorType:
         while n >=segmented_sieve.searched_till:
             segmented_sieve.extend()
         for p in segmented_sieve.primes:

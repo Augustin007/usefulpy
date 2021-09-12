@@ -205,7 +205,7 @@ written-out greek-letters or numbers. Et cetera'''
     furtherplaces=_furtherplaces
     text = text.lower()
     punct = endingpuncuation+phrasepuncuation
-    listtext = text.split()
+    listtext:list = text.split()
     loop = text.split()
     index = 0
     for word in loop:

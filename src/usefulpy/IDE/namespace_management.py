@@ -29,7 +29,7 @@ del blank_namespace_globals['__loader__']
 del blank_namespace_globals['__file__']
 blank_namespace_globals['__defaults__'] = {'#':int, '.':float, '#a': tuple()}
 
-built_in_namespace = {}
+built_in_namespace = {'globals':globals}
 exec('print(end = \'\')', built_in_namespace)
 
 from ..mathematics import *
