@@ -353,7 +353,7 @@ quaternion'''
             except: pass
             try: return n.ln()
             except: pass
-            try: return n.log(e)
+            try: return n.log(math.e)
             except: return NotImplemented
         
         try: return self.ln()/gln(other)
@@ -371,7 +371,7 @@ quaternion'''
             except: pass
             try: return n.ln()
             except: pass
-            try: return n.log(e)
+            try: return n.log(math.e)
             except: return NotImplemented
         try: return gln(other)/self.ln()
         except: pass
