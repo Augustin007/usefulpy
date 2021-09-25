@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: usefulpython
+Version: 0.0.0
+Summary: tools for a cleaner πthon experience
+Home-page: UNKNOWN
+Author: Augustin Garcia
+License: GNU AFFERO GENERAL PUBLIC LICENSE
+Platform: unix
+Platform: linux
+Platform: osx
+Platform: cygwin
+Platform: win32
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Provides-Extra: testing
+License-File: LICENSE
+
+UNKNOWN
+

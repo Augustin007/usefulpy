@@ -1,0 +1,16 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+setup.py
+src/usefulpy/__init__.py
+src/usefulpy/decorators.py
+src/usefulpy/formatting.py
+src/usefulpy/py.typed
+src/usefulpy/validation.py
+src/usefulpython.egg-info/PKG-INFO
+src/usefulpython.egg-info/SOURCES.txt
+src/usefulpython.egg-info/dependency_links.txt
+src/usefulpython.egg-info/not-zip-safe
+src/usefulpython.egg-info/requires.txt
+src/usefulpython.egg-info/top_level.txt
