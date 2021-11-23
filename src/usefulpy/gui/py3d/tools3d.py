@@ -47,7 +47,7 @@ def shift_plane(plane):
 
 def versor_from_points(plane):
     a, b = shift_plane(plane)
-    return a.cross(b).normal()
+    return a.cross(i, b).normal()
 
 def points_6(plane):
     d, f = shift_plane(plane)
@@ -56,7 +56,7 @@ def points_6(plane):
     q2 = -q1
     q3 = versor_from_points(plane)
     q4 = -q3
-    q5 = q1.cross(q3).normal()
+    q5 = q1.cross(q1, q3).normal()
     q6 = -q5
     return q1, q2, q3, q4, q5, q6
 
@@ -102,8 +102,9 @@ def is_on_plane(plane, point):
     return isclose(point, new_point)
 
 def _same_side(p1, p2, a, b):
-    cp1 = (b-a).cross(p1-a)
-    cp2 = (b-a).cross(p2-a)
+    c = b-a
+    cp1 = c.cross(c, p1-a)
+    cp2 = c.cross(c, p2-a)
     return cp1.dot(cp2) >= 0
 
 def PointInTriangle(p, a, b, c):
