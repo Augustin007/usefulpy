@@ -1,6 +1,5 @@
 #minecraft-like 20 by 20 block generation
 from usefulpy.gui.py3d import Simple_camera as _c
-import usefulpy.data as _r1
 from usefulpy.gui.py3d import tools3d as _t
 from usefulpy.gui import Frame as _frame
 Space = _c.space()
@@ -18,7 +17,7 @@ brown = (177, 124, 83)
 green = (133, 183, 98)
 height = 2
 world = []
-f = lambda x, y: int(_c._m.cos(abs(complex(x, y)), setting = 'rad')+_c._m.cos(_c._m.cos(x, setting = 'rad')+_c._m.sin(y, setting = 'rad'))+2)
+f = lambda x, y: int(_c._m.cos(abs(complex(x, y)))+_c._m.cos(_c._m.cos(x)+_c._m.sin(y))+2)
 count = 0
 for x in range(-10, 10):
     for y in range(-10, 10):
