@@ -1007,4 +1007,12 @@ sec.prime1 = ('mul', (sec, tan))
 cot.prime1 = 'mul', (('pow', (csc, 2)), -1)
 csc.prime1 = 'mul', (('mul', (csc, cot)), -1)
 
+def polynomial(*terms):
+    runfunc = trivial
+    for power, coefficient in enumerate(terms):
+        runfunc += coefficient*x**power
+    return runfunc
+
+
+
 #eof
