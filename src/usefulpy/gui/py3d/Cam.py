@@ -24,7 +24,7 @@ __author__ = 'Augustin Garcia'
 __version__ = '0.0.0'
 
 ### IMPORTS ###
-from ...mathematics import nmath as _m
+from ... import mathematics as _m
 from ...mathematics.quaternion import quaternion, i, j, k
 import time
 import functools
