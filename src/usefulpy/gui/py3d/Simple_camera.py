@@ -23,9 +23,8 @@ __version__ = '0.0.0'
 
 ### IMPORTS ###
 from .Cam import cam_base#, cam_shape_method
-from ...mathematics import nmath as _m
-from ...mathematics import mathfunc as _mfunc
-from ...mathematics import quaternion, i, j, k
+from ... import mathematics as _m
+from ...mathematics import quaternion, i, j, k, polynomial as _polynomial
 from .shapes import polyhedron, pane, darken
 from .Space import space
 #import time
@@ -46,7 +45,7 @@ def rgb2hex(r, g, b):
     return '#'+r+g+b
 
 # Temporary shader
-light_scalar = _mfunc.polynomial(1.4834383937541313, -74.97492931129165, 264.354983605755, -249.77887679968808, 90.73400104839939, -10.067233808282387)
+light_scalar = _polynomial(1.4834383937541313, -74.97492931129165, 264.354983605755, -249.77887679968808, 90.73400104839939, -10.067233808282387)
 
 def light(object):
     a1 = get_light(object.normal)
