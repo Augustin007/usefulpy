@@ -71,7 +71,7 @@ import cmath as _cmath
 import types
 
 from math import comb, copysign, erf, erfc, fabs, factorial, fmod, fsum, gamma, lgamma
-from math import modf, nextafter, perm, prod, remainder, trunc, ulp, ldexp, frexp
+from math import modf, nextafter, perm, prod, remainder, trunc, ulp, ldexp, frexp, atan2
 
 ### simple checks with failsafe ###
 def odd(n:int, /) -> bool:
