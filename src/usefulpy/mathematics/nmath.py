@@ -56,12 +56,15 @@ RELEASE NOTES:
    Bugfixes
    Documentation
    Prime sieve implementation
+  Version 3.0.2
+   Prime sieve bugfixes
+   Faster prime sieve
 '''
 
 __version__ ='3.0.0'
 __author__ = 'Augustin Garcia'
 
-from itertools import repeat as _repeat
+from itertools import repeat as _repeat, compress as _compress
 from functools import reduce as _reduce
 import math as _math
 import cmath as _cmath
@@ -354,6 +357,18 @@ will return an incorrect value.'''
 def _lcm_ngem(n:int, m:int)->int:
     return m+((n-(m%n)) %n)
 
+def _custom_bin_search(sorted_, i):
+    low = 0
+    high = len(sorted_)-1
+    mid = 0
+
+    while low <= high:
+        mid = (high + low) // 2
+        if sorted_[mid]==i: return mid
+        elif sorted_[mid] < i: low = mid + 1
+        else: high = mid - 1
+    return mid
+
 class segmented_sieve:
     primes:list[int] = [2, 3, 5, 7]
     end_segment: int = 1
@@ -365,28 +380,31 @@ class segmented_sieve:
         k = segmented_sieve.end_segment
         add = 1
         p = segmented_sieve.primes[k]
-        while 2*p*add+add**2 < 1000 and k+add+1<len(segmented_sieve.primes): add += 1
+        length = len(segmented_sieve.primes)
+        while 2*p*add+add**2 < 1000 and k+add+1<length: add += 1
         p, q = segmented_sieve.primes[k], segmented_sieve.primes[k+add]
-        segment = range(p*p, q*q)
-        segment_min = min(segment)
-        segment_len = len(segment)
+        segment_min = p*p
+        segment_len = q*q-segment_min
         is_prime = [True]*segment_len
-        for i in range(k+add):
-            pk = segmented_sieve.primes[i]
+        for pk in segmented_sieve.primes[:k+add]:
             start = _lcm_ngem(pk, segment_min)
-            is_prime[start-segment_min::pk] = _repeat(False, len(range(start-segment_min, segment_len, pk)))
-        segmented_sieve.primes.extend([a for a, b in zip(segment, is_prime) if b])
+            is_prime[start-segment_min::pk] = _repeat(False, _math.ceil((segment_len-(start-segment_min))/pk))
+        segmented_sieve.primes.extend(_compress(range(segment_min, q*q), is_prime))
         segmented_sieve.end_segment += add
         segmented_sieve.searched_till =segmented_sieve.primes[k+add]**2-1
 
     @staticmethod
     def is_prime(n:int) -> bool:
+        if n <= segmented_sieve.searched_till:
+            return n in segmented_sieve.primes
         for l in segmented_sieve.Primes_till(_math.isqrt(n)+1):
             if n%l == 0: return False
         return True
 
     @staticmethod
     def is_composite(n:int)->bool:
+        if n <= segmented_sieve.searched_till:
+            return n not in segmented_sieve.primes
         for l in segmented_sieve.Primes_till(_math.isqrt(n)+1):
             if n%l == 0: return True
         return False
@@ -395,10 +413,9 @@ class segmented_sieve:
     def Primes_till(n:int)->types.GeneratorType:
         while n >=segmented_sieve.searched_till:
             segmented_sieve.extend()
-        for p in segmented_sieve.primes:
-            if p >=n:return
-            yield p
-    
+        index=_custom_bin_search(segmented_sieve.primes, n)
+        if segmented_sieve.primes[index] >= n: index -= 1
+        return segmented_sieve.primes[:index]
 
 sieve = segmented_sieve()
 def Prime(n):
