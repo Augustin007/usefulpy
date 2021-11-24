@@ -66,6 +66,8 @@ Pre releases
    Bugfixes
   Version 1.0.2 
    Bugfixes, efficiency improvements
+  Version 1.0.3
+   Some more effiency improvements. Mostly improved the projection.
 '''
 
 ### DUNDERS ###
