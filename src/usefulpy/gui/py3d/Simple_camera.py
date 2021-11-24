@@ -81,12 +81,8 @@ def rescale(point, to):
     w = int(to.getWidth())
     x, y = point
     scale = max(h, w)//2
-    xadj = w//2
-    yadj = h//2
-    x *= scale
-    y *= scale
-    x += xadj
-    y += yadj
+    x = x*scale+w//2
+    y = y*scale+h//2
     return x, y
 
 def add_polygon(points, hex, canvas):
@@ -153,14 +149,9 @@ class simple_camera(cam_base):
         if isinstance(object, (polyhedron, cam_base)):
             if isinstance(object, cam_base):
                 if object.shape is None: return
-            fig_list = list(object)
-            distances = [abs(self.position-p.pos) for p in fig_list] 
-            while distances:
-                distance = max(distances)
-                index = distances.index(distance)
-                distances.pop(index)
-                plane = fig_list.pop(index)
-                self.project(plane)
+            distance_sort = sorted(iter(object), key = lambda p: abs(self.position-p.pos), reverse=True)
+            for n in distance_sort:
+                self.project(n)
             return
         if isinstance(object, pane):
             npoints = [self._project(point) for point in object]
@@ -265,25 +256,26 @@ class simple_camera(cam_base):
 
     def _project(self, p):
         x, y, z = p.vtuple()
+        zrot = self._zr(x, y, z)
+        if zrot<=0: return
         xrot = self._xr(x, y)
         yrot = self._yr(x, y, z)
-        zrot = self._zr(x, y, z)
-        if zrot > 0: return (xrot/zrot, -yrot/zrot)
+        return (xrot/zrot, -yrot/zrot)
 
     def _project1(self, point):
         x, y, z = point.vtuple()
+        zrot = self._zr1(x, y, z)
+        if zrot <= 0: return
         xrot = self._xr1(x, y)
         yrot = self._yr1(x, y, z)
-        zrot = self._zr1(x, y, z)
-        if zrot > 0: return (xrot/zrot, -yrot/zrot)
+        return (xrot/zrot, -yrot/zrot)
+        
+        
 
 if __name__ == '__main__':
-    import tkinter
     from ...gui import Frame
     Space = space()
     cube = make_rectangular_prism(Space, -i-j-k, i+j+k, (255, 0, 0))
-#    Pane = pane(i+j, i-j, -i-j, -i+j)
-#    Space.addfigure(Pane)
     canv = Frame(width = 800, height =800).addCanvas(width = 800, height =800)
     cam = simple_camera(Space, quaternion(), i)
     cam.add_canvas(canv)
