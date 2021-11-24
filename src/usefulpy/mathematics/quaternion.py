@@ -80,7 +80,7 @@ class quaternion:
     def __new__(cls, a = 0, b = 0, c = 0, d = 0):
         '''__new__ for quaternion class'''
         self = super(quaternion, cls).__new__(cls)
-        
+
         # If there is a single argument input
         if all(map(lambda x:not x, (b, c, d))):
             if type(a) in (int, float):
@@ -101,7 +101,7 @@ class quaternion:
             raise TypeError('A quaternion could not be made from a type {type(a)}')
         
         # If all arguments are real numbers
-        if all(map(lambda x:isinstance(x, (int, float)), (a, b, c, d))):
+        if all(map(lambda x:type(x) in (int, float), (a, b, c, d))):
             super.__setattr__(self, 'real', float(a))
             super.__setattr__(self, 'i', float(b))
             super.__setattr__(self, 'j', float(c))
@@ -436,7 +436,7 @@ quaternion'''
 
     def __sub__(self, other, /):
         '''return self-other'''
-        if isinstance(other, (int, float, complex)):
+        if type(other) in (int, float, complex):
             return quaternion(self.real-other.real, self.i,
                               self.j-other.imag, self.k)
         elif type(other) is quaternion:
