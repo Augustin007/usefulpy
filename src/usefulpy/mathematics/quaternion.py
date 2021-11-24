@@ -74,26 +74,25 @@ class quaternion:
 (1+3i)
 >>> 
 '''
-    real:float =0
-    i:float =0
-    j:float =0
-    k:float =0
-
+    __slots__=('real', 'i', 'j', 'k')
+    
     @functools.cache
     def __new__(cls, a = 0, b = 0, c = 0, d = 0):
         '''__new__ for quaternion class'''
         self = super(quaternion, cls).__new__(cls)
-
-
+        
         # If there is a single argument input
         if all(map(lambda x:not x, (b, c, d))):
-            if type(a) is quaternion:
-                return a
-            elif isinstance(a, complex):
-                return quaternion(a.real, 0, a.imag, 0)
-            elif isinstance(a, (int, float)):
+            if type(a) in (int, float):
                 super.__setattr__(self, 'real', a)
+                super.__setattr__(self, 'i', 0)
+                super.__setattr__(self, 'j', 0)
+                super.__setattr__(self, 'k', 0)
                 return self
+            elif type(a) is quaternion:
+                return a
+            elif type(a) is complex:
+                return quaternion(a.real, 0, a.imag, 0)
             try:
                 q = a.__quaternion__()
                 if type(q) is quaternion: return q
