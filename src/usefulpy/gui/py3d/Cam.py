@@ -92,23 +92,19 @@ class cam_base:
 
     def _update_view(self):
         if self.is_frozen: return
-        tempspace = self.universe.space.copy()
-        distances = [abs(self.position-fig.pos) for fig in tempspace]
         if not self.running_canvases: return
+        distance_sort = sorted(iter(self.universe.space), key = lambda fig:abs(self.position-fig.pos), reverse = True)
         for canvas in self.running_canvases:
             canvas.delete('all')
-        while tempspace:
-            distance = max(distances)
-            figindex = distances.index(distance)
-            fig = tempspace.pop(figindex)
-            distances.pop(figindex)
-            if distance < self.renderdistance:
-                if fig is not self:
-                    self.project(fig)
-        ##if self.personal_objects: pass 
-        ##TODO: Personal objects not yet implimented
+        for figure in distance_sort:
+            if abs(self.position-figure.pos)>self.renderdistance:
+                continue
+            if figure is not self:
+                self.project(figure)
         for canvas in self.running_canvases:
             canvas.update()
+        ##if self.personal_objects: pass 
+        ##TODO: Personal objects not yet implimented
 
     def add_canvas(self, canvas):
         state = 'running'
