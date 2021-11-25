@@ -148,9 +148,9 @@ class cam_base:
 
     @cam_shape_method
     def rotate(self, rad, normal, point = None):
-        self.heading = self.heading.rotate(rad, normal, quaternion())
+        self.heading = quaternion.rotate(self.heading, rad, normal, quaternion())
         if point is not None:
-            self.position = self.position.rotate(rad, normal, point)
+            self.position = quaternion.rotate(self.position, rad, normal, point)
 
     @cam_shape_method
     def shift(self, by):
