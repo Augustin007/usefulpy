@@ -2,6 +2,9 @@
 from usefulpy.gui.py3d import Simple_camera as _c
 from usefulpy.gui.py3d import tools3d as _t
 from usefulpy.gui import Frame as _frame
+import logging as log
+import cProfile
+import pstats
 Space = _c.space()
 canv = _frame(width = 800, height =800).addCanvas(width = 800, height =800)
 cam = _c.simple_camera(Space, _c.quaternion(), _c.i)
@@ -28,4 +31,14 @@ for x in range(-10, 10):
             if height == z+1:
                 color = green
             world.append(make_block(x, y, z, color))
+
+with cProfile.Profile() as pr:
+    cam.up(4, smooth=False)
+    cam.spin_dn(_c._m.tau/3, smooth=False)
+
+
+stats = pstats.Stats(pr)
+stats.sort_stats(pstats.SortKey.TIME)
+stats.print_stats()
+
 print(count)
