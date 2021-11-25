@@ -21,6 +21,9 @@ RELEASE NOTES:
 __author__ = 'Augustin Garcia'
 __version__ = '0.0.0'
 
+if __name__=='__main__':
+    __package__='usefulpy.gui.py3d'
+
 ### IMPORTS ###
 from .Cam import cam_base#, cam_shape_method
 from ... import mathematics as _m
