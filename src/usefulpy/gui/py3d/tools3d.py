@@ -21,26 +21,8 @@ __version__ = '0.0.0'
 
 ### IMPORTS ###
 from ...mathematics import quaternion, i, j, k, isclose
-import random
 
 ### TOOLS ###
-test_pane = ((-3*i-2j-1*k), (-i+2j+1*k), (i-j-2*k))
-
-def random_plane():
-    points = []
-    for n in range(3):
-        a = [0]
-        for k in range(3):
-            a.append(random.randint(-3, 3))
-        points.append(quaternion(*a))
-    return tuple(points)
-
-def random_point():
-    a = [0]
-    for k in range(3):
-        a.append(random.randint(-3, 3))
-    return quaternion(*a)
-
 def shift_plane(plane):
     a, b, c = plane
     return (a-b).normal(), (a-c).normal()
