@@ -413,24 +413,45 @@ class segmented_sieve:
     def Primes_till(n:int)->types.GeneratorType:
         while n >=segmented_sieve.searched_till:
             segmented_sieve.extend()
+        
         index=_custom_bin_search(segmented_sieve.primes, n)
-        if segmented_sieve.primes[index] >= n: index -= 1
-        return segmented_sieve.primes[:index]
+        if segmented_sieve.primes[index] > n: index -= 1
+        return segmented_sieve.primes[:index+1]
 
 sieve = segmented_sieve()
+
+def _Prime_test(n):
+    if n in (2, 3): return True
+    if n%2==0: return False
+    d = (n-1)//2
+    
+    r = 1
+    while d%2==0:
+        r += 1
+        d //= 2
+    for a in sieve.Primes_till(min(n-2, _math.floor(2*_math.log(n)**2))):
+        print(a)
+        x = pow(a, d, n)
+        if x in (1, n-1): continue
+        for t in range(r):
+            x = pow(x, 2, n)
+            if x in (1, n-1): break
+        else: return False
+    return True
+
 def Prime(n):
     if type(n) is not int:
         raise TypeError('n must be an int')
     if n<0:
         raise ValueError('Only natural numbers can have properties as Prime or Composite')
-    return sieve.is_prime(n)
+    return _Prime_test(n)
 
 def Composite(n):
     if type(n) is not int:
         raise TypeError('n must be an int')
     if n<0:
         raise ValueError('Only natural numbers can have properties as Prime or Composite')
-    return sieve.is_composite(n)
+    return not _Prime_test(n)
 
 def primes_till(n:int)->tuple[int]:
     return tuple(sieve.Primes_till(n))
