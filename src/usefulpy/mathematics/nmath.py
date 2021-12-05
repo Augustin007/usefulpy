@@ -430,7 +430,6 @@ def _Prime_test(n):
         r += 1
         d //= 2
     for a in sieve.Primes_till(min(n-2, _math.floor(2*_math.log(n)**2))):
-        print(a)
         x = pow(a, d, n)
         if x in (1, n-1): continue
         for t in range(r):
