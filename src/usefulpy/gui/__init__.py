@@ -62,6 +62,10 @@ class strField(BasicField):
 
     def __init__(self, parent, value, width, state):
         BasicField.__init__(self, parent, value, width, state)
+    
+    def getText(self):
+        """Returns the string contained in the field."""
+        return self.getValue()
 
 class graphFrame(Tkinter.Canvas):
     # Definitely 'in progress'
