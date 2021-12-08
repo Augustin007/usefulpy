@@ -83,6 +83,8 @@ True
 
 3d projection systems
 
+(This does break about five times a day, still in it's early stages)
+
 ![Rotating Cube](https://github.com/Augustin007/Augustin007/raw/main/Cube_rot.gif)
 
 \
