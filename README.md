@@ -59,9 +59,11 @@ Prime sieves
 ```python
 >>> from usefulpy.mathematics import Prime
 >>> import timeit
->>> timeit.timeit('Prime(99999989)', number = 1000, globals = globals())
-0.34076689999999843
->>> Prime(99999989)
+>>> timeit.timeit('Prime(9999999999998999999999)', number = 1000, globals=globals())/1000
+0.02101861490000738
+timeit.timeit('Prime(9999999999998999999999)', number = 1, globals=globals())
+0.020142099994700402
+>>> Prime(9999999999998999999999)
 True
 ```
 
