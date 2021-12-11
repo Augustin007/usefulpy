@@ -2,9 +2,11 @@ from usefulpy import *
 import pytest
 
 
-def test_basenum_init():
-    ...
+### VALIDATION TEST ###
 
+### MATHEMATICS TEST ###
+
+## Basenum ##
 def test_basenumlessthanten():
     test = mathematics.basenum('---1010', 2)
     assert test.base == 2
@@ -19,4 +21,14 @@ def test_basenumlessthanten1():
     assert test.floatpart == '1'
     assert test.Negative == False
 
+## Mathfuncs ##
+
+## nmath ##
+
+## vector ##
+
+
+### FORMATTING TEST ###
+
+### PY3d TEST ###
 
