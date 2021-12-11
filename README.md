@@ -4,12 +4,13 @@
 
 [Check out the Usefulpy site](https://augustin007.github.io/usefulpy/)
 
-_Usefulpy site is not always up to date_
+(Usefulpy site is not always up to date)
 
 ## Download and Import
 
-download and install with with 
-```
+download and install with with
+
+```console
 pip download usefulpython
 pip install usefulpython
 ```
@@ -23,16 +24,19 @@ Filled with simple resources and modules for a cleaner looking program, Usefulpy
 Some are simple - like input validation and versatile type checking.
 
 So instead of checking, say
+
 ```python
 float(x) == int(float(x))
 ```
 
 You can check it as
+
 ```python
 is_integer(x)
 ```
 
-Which calls 
+Which calls
+
 ```python
 def is_integer(s):
     '''Check if an object is an integer can be turned into an integer without
@@ -41,13 +45,15 @@ losing any value'''
     except: return False
 ```
 
-Other parts of the project are a little more complicated, including 
+Other parts of the project are a little more complicated, including
 
 quaternions
+
 ```python
 >>> from usefulpy.mathematics import quaternions
 ```
-```
+
+```python
 >>> quaternion(1, 2, 2, 2)
 1+2i+2j+2k
 >>> _*quaternion(2, 1, 1, 1)
@@ -56,6 +62,7 @@ quaternions
 ```
 
 Prime sieves
+
 ```python
 >>> from usefulpy.mathematics import Prime
 >>> import timeit
@@ -68,6 +75,7 @@ True
 ```
 
 Basic algebraic simplifier and derivative finder
+
 ```python
 >>> from usefulpy.mathematics import cos, x
 >>> x+x
@@ -90,7 +98,6 @@ True
 ![Rotating Cube](https://github.com/Augustin007/Augustin007/raw/main/Cube_rot.gif)
 
 \
-Essentially, usefulpy is a large library of functions that improve the quality of python programming. One catch, it can't use any sort of third party libraries... so no numpy, scipy, manim, or any others... 
-
+Essentially, usefulpy is a large library of functions that improve the quality of python programming. One catch, it can't use any sort of third party libraries... so no numpy, scipy, manim, or any others...
 
 ![mini_usefulpy_logo](https://github.com/Augustin007/Augustin007/raw/main/Mini_usefulpy.png)
