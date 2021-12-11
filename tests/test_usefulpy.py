@@ -12,7 +12,7 @@ def test_basenumlessthanten():
     assert test.floatpart == ''
     assert test.pos == False
 
-def test_basenumlessthanten():
+def test_basenumlessthanten1():
     test = mathematics.basenum('1010.1', 3)
     assert test.base == 3
     assert test.num == '1010'
