@@ -170,7 +170,7 @@ differentiation'''
     
     def __eq__(self, other):
         if type(other) is mathfunc: 
-            return other.composition == self.composition
+            return _expression_check._are_equal(other.composition, self.composition)
         return self.composition == other
     
     def __hash__(self):
@@ -337,10 +337,12 @@ def _comp_derive(c, k=1):
         return _comp_derive(_simplify(('add', (('mul', (_comp_derive(f), g)), ('mul', (_comp_derive(g), f))))), k-1)
     if c[0] == 'pow':
         if isinstance(c[1][0], (int, float)):
-            return _comp_derive(_simplify(('mul', (c, ln(c[1][0]), _comp_derive(c[1][0])))), k-1)
+            return _comp_derive(_simplify(('mul', (c, ln.func(c[1][0]), _comp_derive(c[1][0])))), k-1)
         if isinstance(c[1][1], (int, float)):
             return _comp_derive(_simplify(('mul', (c[1][1], ('pow', (c[1][0], c[1][1]-1)), (_comp_derive(c[1][0]))))), k-1)
-        return _comp_derive(('mul', (c, ('add', (('mul', (ln(c[1][0]), _comp_derive(c[1][1]))),('mul', (_comp_derive(c[1][0]), ('pow', (c[1][0], -1)), c[1][1])))))), k-1)
+        if c[1][0] == identity:
+            return _comp_derive(('mul', (c, ('add', (('mul', (ln.func, _comp_derive(c[1][1]))),('mul', (_comp_derive(c[1][0]), ('pow', (c[1][0], -1)), c[1][1])))))), k-1)
+        return _comp_derive(('mul', (c, ('add', (('mul', ( ('nest', (ln.func, c[1][0])), _comp_derive(c[1][1]))),('mul', (_comp_derive(c[1][0]), ('pow', (c[1][0], -1)), c[1][1])))))), k-1)
 
 @mathfunc
 def identity(x):return x
