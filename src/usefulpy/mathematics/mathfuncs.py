@@ -168,6 +168,11 @@ differentiation'''
         except: pass
         raise AttributeError(f'{self.__class__.__name__!r} object has no attribute {name!r}')
     
+    def __eq__(self, other):
+        if type(other) is mathfunc: 
+            return other.composition == self.composition
+        return self.composition == other
+    
     def __hash__(self):
         '''hash for mathfunc'''
         return hash(self.func)
