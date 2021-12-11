@@ -359,6 +359,7 @@ def floor(x, /):
     try: return _math.floor(x) # math's floor already allows for custom types
     except: pass
     # I feel that imaginary types should still work
+    # They bring it to the closest gaussian number
     try: return _math.floor(x.real) + _math.floor(x.imag)*1j if type(x) is complex else x.__floor__()
     except: pass
     raise TypeError(f'invalid type, type {type(x).__name__}')
