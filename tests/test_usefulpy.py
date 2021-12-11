@@ -29,13 +29,18 @@ def test_mathfunc_add():
 
 def test_mathfunc_sub():
     x = mathematics.x
-    assert x-x == mathematics.trivial
+    assert x-x == 0
 
 def test_mathfunc_mul():
     x = mathematics.x
     cos = mathematics.cos
     assert x*x==x**2
     assert (x+cos)*x==x**2+x*cos
+
+def test_mathfunc_derivative():
+    x = mathematics.x
+    tetra = x**x
+    assert tetra.derivative()==(x**x+mathematics.ln(x)*(x**x))
 
 ## nmath ##
 def test_primality():
@@ -49,5 +54,5 @@ def test_vector():
 ### FORMATTING TEST ###
 ...
 
-### PY3d TEST ###
+### PY3D TEST ###
 ...
