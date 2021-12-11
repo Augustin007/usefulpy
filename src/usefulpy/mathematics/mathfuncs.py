@@ -338,21 +338,20 @@ def _comp_derive(c, k=1):
         return _comp_derive(('mul', (c, ('add', (('mul', (ln(c[1][0]), _comp_derive(c[1][1]))),('mul', (_comp_derive(c[1][0]), ('pow', (c[1][0], -1)), c[1][1])))))), k-1)
 
 @mathfunc
-def trivial(x): return 0
+def identity(x):return x
+
+x=identity
+
+trivial = x-x
 
 trivial.composition = 0
 trivial.function = '0'
 trivial.prime1 = trivial
 trivial.prime_cycle = 1
 
-@mathfunc
-def identity(x):return x
-
 identity.function = '<x>'
 identity.prime1 = trivial+1
 identity.prime2 = trivial
-
-x=identity
 
 @mathfunc
 def floor(x, /):
