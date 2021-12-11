@@ -1,7 +1,8 @@
 # Contributing
+
 ## A note on documentation
 
-Since this is meant to be the kind of code that you can just "dive into" usefulpy has to be well documented. 
+Since this is meant to be the kind of code that you can just "dive into" usefulpy has to be well documented.
 
 I'm not the best at this, though, and there is a long way to go. A couple notes on the documentation
 
@@ -29,7 +30,6 @@ from (an older version of) 'quaternion.py'
 ##TODO: I need to get log/ln for these first...
 raise NotImplementedError('Raising quaternions to non-real powers has not been implemented yet')
 ```
-
 
 Triple `###` on each side of the name of a segment of code; these serve to partition the code into several parts. Search for the `###` to find the headers of these sections.
 
