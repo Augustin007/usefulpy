@@ -110,7 +110,7 @@ differentiation'''
     def __new__(cls, func:types.FunctionType):
         '''__new__ for mathfunc class, wraps function 'func'.'''
         assert callable(func)
-        if type(func) == mathfunc: return mathfunc
+        if type(func) == mathfunc: return func
         self = super(mathfunc, cls).__new__(cls)
         self.func = func
         self.__doc__ = func.__doc__
@@ -382,10 +382,11 @@ def ceil(x, /):
     raise TypeError(f'invalid type, type {type(x).__name__}')
 
 @mathfunc
-def sigmoid(x, /):
+def S(x, /):
     '''Sigmoid function'''
     epow = exp(-x)
     return 1/(1+epow)
+sigmoid = S
 
 @mathfunc
 def exp(x, /):
