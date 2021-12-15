@@ -783,11 +783,9 @@ def from_str(string):
 
 def binomial_coeficient(k, n):
     return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
-
 class mathfunc:
     '''This class works as a wrapper for functions to support function
 differentiation'''
-    
     ### ANNOTATIONS ###
     __data:dict
     __doc__:str
@@ -962,8 +960,7 @@ differentiation'''
 
     def partial(self, var):
         return self.differentiate(var, 1)
-    
-    
+
 def mathfunc_process(arg):
         if type(arg) is mathfunc:
             return arg.composition
@@ -1097,8 +1094,6 @@ def ln(x, /):
     except Exception: pass
     raise TypeError('Natural logarithm cannot be found of a type %s.' % type(x).__name__)
 ln.prime[0] = x**-1, (0,)
-
-
 
 @mathfunction
 def log(base, x):
