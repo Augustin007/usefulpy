@@ -38,7 +38,7 @@ Interval(*intervals) -> unified_interval'''
 class interval:
     start:float
     stop:float
-    _check:types.FunctionType
+    __slots__ = ('_check')
     _repstr:str
     mode: int
     def __init__(self, start:float, stop:float, mode = 'open'):

@@ -43,9 +43,9 @@ __all__ = ('S', 'acos', 'acosh', 'acot', 'acoth', 'acsc', 'acsch', 'asec',
            'binomial_coeficient', 'cas_variable', 'cbrt', 'ceil', 'cis',
            'cos', 'cosh', 'cot', 'coth', 'csc', 'csch', 'cube', 'exp',
            'expm1', 'floor', 'from_str', 'icbrt', 'is_constant', 'isqrt',
-           'ln', 'log', 'log1p', 'log2', 'mathfunc', 'mathfunction', 'sec',
-           'sech', 'sigmoid', 'sin', 'sinh', 'sqrt', 'square', 'tan', 'tanh',
-           'tesser', 'x', 'y', 'z')
+           'ln', 'log', 'log1p', 'log2', 'mathfunc', 'mathfunction', 'polynomial', 
+           'sec', 'sech', 'sigmoid', 'sin', 'sinh', 'sqrt', 'square', 'tan', 
+           'tanh', 'tesser', 'x', 'y', 'z')
 
 ### IMPORTS ###
 # Utilities
@@ -158,6 +158,8 @@ class cas_variable:
     ### ARITHMETIC ###
     def _math_return(self, return_val):
         if is_constant(return_val):
+            return return_val
+        if isinstance(return_val, cas_variable):
             return return_val
         try: return mathfunc(return_val)
         except Exception as error:
@@ -311,7 +313,10 @@ Return self converted into a string'''
         '''Return ide representation of self'''
         return f'<{self.__class__.__name__[:-11]} {self} at {hex(id(self))}>'
 
-comp_extract = lambda x: x.composition if type(x) is mathfunc else x
+def comp_extract(x):
+    if type(x) is mathfunc:
+        return x.composition
+    return x
 #removes mathfunc classes in favor of their cas composition
 
 class commutative_expression(cas_expression, tuple):
@@ -796,9 +801,10 @@ differentiation'''
     inverse:types.FunctionType
     interval = None
     __is_frozen:bool = False
+    __slots__:tuple = ('composition',)
 
     ### INITIALIZATION ###
-    def __new__(cls, func:types.FunctionType):
+    def __new__(cls, func):
         '''__new__ for mathfunc class, wraps function 'func'.'''
         if type(func) == mathfunc: return func
         assert callable(func)
@@ -856,6 +862,8 @@ differentiation'''
 
     def _math_return(self, return_val):
         if is_constant(return_val):
+            return return_val
+        if isinstance(return_val, cas_variable):
             return return_val
         try: return mathfunc(return_val)
         except Exception as error:
@@ -1595,5 +1603,11 @@ cis.prime[0] = -sin(x)+y*cos(x), (0, 1)
 cis.prime[1] = sin(x), (0,)
 
 variable = cas_variable
+
+def polynomial(*terms):
+    runfunc = 0
+    for power, coefficient in enumerate(terms):
+        runfunc += coefficient*x**power
+    return runfunc
 
 #eof

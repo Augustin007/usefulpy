@@ -76,7 +76,6 @@ class quaternion:
 '''
     __slots__=('real', 'i', 'j', 'k')
     
-    @functools.cache
     def __new__(cls, a = 0, b = 0, c = 0, d = 0):
         '''__new__ for quaternion class'''
         self = super(quaternion, cls).__new__(cls)

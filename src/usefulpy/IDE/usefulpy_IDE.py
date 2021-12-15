@@ -117,7 +117,7 @@ def ide(namespace = None):
     del namespace['quit']
     return namespace
 
-ide.quit = False
+ide.__dict__['quit'] = False
 
 if __name__ == '__main__':
     ide()

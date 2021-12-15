@@ -235,11 +235,11 @@ written-out greek-letters or numbers. Et cetera'''
                     runcount += hundredsgroup
                     runcount = _validation.trynumber(str(runcount) + str(word))
                 else:
-                    hundredsgroup += word
+                    hundredsgroup += int(word)
             else:
                 is_prevnum = True
-                hundredsgroup = word
-            prevnum = word
+                hundredsgroup = int(word)
+            prevnum = int(word)
         elif word == hundred:
             hundredfactor = 100
             if is_postpoint:
@@ -666,7 +666,6 @@ class multline(object):
                 except: second = ' '*other.width
                 new.append(first+second)
             return multline(*new)
-        return NotImplemented
         '''
         if __name__ !='__main__': return NotImplemented
         ##print(height1)
@@ -706,6 +705,7 @@ class multline(object):
             except: second = ' '*self.width
             new.append(first+second)
         return multline(*new)'''
+        return NotImplemented
 
     def __contains__(self, value):
         if type(value) is not self.__class__:

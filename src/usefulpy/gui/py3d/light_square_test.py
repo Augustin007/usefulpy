@@ -1,7 +1,9 @@
 '''
 preparing for new lighting system
 '''
-from .. import mathematics as math
+from ... import mathematics as math
+
+testing = False
 
 def light(L, p, n, t):
     h_raw = L-p

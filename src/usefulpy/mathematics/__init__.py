@@ -49,6 +49,7 @@ __version__ = '1.0.0'
 __author__ = 'Augustin Garcia'
 
 ### IMPORTS ###
+from .constants import *
 from .mathfuncs import *
 from .nmath import *
 from .basenum import *

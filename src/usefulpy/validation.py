@@ -81,14 +81,14 @@ def makelist(*s):
     '''Makes a list out of nearly any input of any type'''
     if len(s) == 0: return []
     if len(s) > 1: return [makelist(n) for n in s]
-    s = s[0]
-    if type(s) is list: return s
-    if type(s) in (tuple, set): return list(s)
-    if type(s) is str:
-        try: return makelist(eval(s))
-        except: return s.split()
-    try: return [x for x in s]
-    except: return [s]
+    s1 = s[0]
+    if type(s1) is list: return s
+    if type(s1) in (tuple, set): return list(s)
+    if type(s1) is str:
+        try: return makelist(eval(s1))
+        except: return s1.split()
+    try: return [x for x in s1]
+    except: return [s1]
 
 def is_intlist(s):
     '''Check if a list is composed solely of integers'''

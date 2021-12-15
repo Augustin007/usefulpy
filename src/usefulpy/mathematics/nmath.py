@@ -95,14 +95,14 @@ def isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0) -> bool:
     # If these fail
     # case checks
     if isnan(a) or isnan(b): return False
-    if isinf(a) or isinf(b): return a == b
+    if isinf(a) or isinf(b): return bool(a == b)
 
     # find tolerance for 'closeness' and the distance between the values
     tol, difference = max((abs(abs(b)*rel_tol)), abs(abs_tol)), abs(a-b)
     
-    return tol >= difference
+    return bool(tol >= difference)
 
-def isinf(x, /):
+def isinf(x, /) -> bool:
     '''Return True if x is inf in any direction'''
     # C methods
     try: return _math.isinf(x)
@@ -113,13 +113,13 @@ def isinf(x, /):
     #if these fail
 
     # allow for customized types
-    try: return x.isinf()
+    try: return bool(x.isinf())
     except: pass
 
     #otherwise
     raise TypeError(f'invalid type, type {type(x).__name__}')
 
-def isnan(x, /):
+def isnan(x, /)->bool:
     '''Return True if x is nan in any way'''
     # C methods
     try: return _math.isnan(x)
@@ -128,7 +128,7 @@ def isnan(x, /):
     except: pass
 
     # allow for customized types
-    try: return x.isnan()
+    try: return bool(x.isnan())
     except: pass
     raise TypeError(f'invalid type, type {type(x).__name__}')
 
@@ -410,7 +410,7 @@ class segmented_sieve:
         return False
 
     @staticmethod
-    def Primes_till(n:int)->types.GeneratorType:
+    def Primes_till(n:int)->list[int]:
         while n >=segmented_sieve.searched_till:
             segmented_sieve.extend()
         
@@ -452,7 +452,7 @@ def Composite(n):
         raise ValueError('Only natural numbers can have properties as Prime or Composite')
     return not _Prime_test(n)
 
-def primes_till(n:int)->tuple[int]:
+def primes_till(n:int):
     return tuple(sieve.Primes_till(n))
 
 def _factor_sub(n):
