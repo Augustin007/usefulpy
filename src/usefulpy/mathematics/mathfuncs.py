@@ -795,13 +795,12 @@ differentiation'''
     __data:dict
     __doc__:str
     shortcut_function:types.FunctionType
-    variables:set
     function:str
     __name__:str
     inverse:types.FunctionType
     interval = None
     __is_frozen:bool = False
-    __slots__:tuple = ('composition',)
+    variables:any
 
     ### INITIALIZATION ###
     def __new__(cls, func):
