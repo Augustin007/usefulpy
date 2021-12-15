@@ -1,9 +1,5 @@
-from usefulpy import *
 import pytest
-
-
-### VALIDATION TEST ###
-...
+from usefulpy import mathematics
 
 ### MATHEMATICS TEST ###
 
@@ -51,9 +47,3 @@ def test_primality():
 ## vector ##
 def test_vector():
     ...
-
-### FORMATTING TEST ###
-...
-
-### PY3D TEST ###
-...
