@@ -25,7 +25,8 @@ def test_basenumlessthanten1():
 ## Mathfuncs ##
 def test_mathfunc_add():
     cos=mathematics.cos
-    assert cos+cos == 2*cos
+    x = mathematics.x
+    assert cos(x)+cos(x) == 2*cos(x)
 
 def test_mathfunc_sub():
     x = mathematics.x
@@ -35,12 +36,12 @@ def test_mathfunc_mul():
     x = mathematics.x
     cos = mathematics.cos
     assert x*x==x**2
-    assert (x+cos)*x==x**2+x*cos
+    assert (x+cos(x))*x==x**2+x*cos(x)
 
 def test_mathfunc_derivative():
     x = mathematics.x
     tetra = x**x
-    assert tetra.derivative()==(x**x+mathematics.ln(x)*(x**x))
+    assert tetra.partial(x)==(x**x+mathematics.ln(x)*(x**x))
 
 ## nmath ##
 def test_primality():

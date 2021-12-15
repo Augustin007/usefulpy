@@ -67,6 +67,7 @@ if __name__ == '__main__':
     level = validation.intinput('enter logging level: ')
     fmt = '[%(levelname)s] %(name)s - %(message)s'
     logging.basicConfig(level=level, format=fmt)
+    logging.root.setLevel(level)
 
 constants = (int, float, complex, Decimal, Fraction)
 def is_constant(n):
@@ -156,6 +157,8 @@ class cas_variable:
 
     ### ARITHMETIC ###
     def _math_return(self, return_val):
+        if is_constant(return_val):
+            return return_val
         try: return mathfunc(return_val)
         except Exception as error:
             logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
@@ -830,7 +833,7 @@ differentiation'''
 
     def __eq__(self, other, /):
         '''return self == other'''
-        try: return self.composition == other.composition
+        try: return self-other ==0
         except AttributeError: return False
 
     def __hash__(self, /):
@@ -854,6 +857,8 @@ differentiation'''
     ### ARITHMETIC ###
 
     def _math_return(self, return_val):
+        if is_constant(return_val):
+            return return_val
         try: return mathfunc(return_val)
         except Exception as error:
             logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
