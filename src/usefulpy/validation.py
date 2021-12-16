@@ -17,20 +17,29 @@ RELEASE NOTES:
    An updated description and various bug fixes. Cleaner looking code with more
    comments. Addition of several different biases, now imports random.
  0.1
-  Version 0.1.0
+  Version 0.1.0:
     ——Friday, the fifteenth day of the firstmonth Janurary, 2021——
    Code is shorter by about fifty lines, and yet its functionality has
    increased... Simplicity is better! Who knew?
-  Version 0.1.1
+  Version 0.1.1:
    Small bugfixes
-  Version 0.1.2
+  Version 0.1.2:
    Code cleanup.
+  Version 0.1.3:
+   Bugfixes, conforming to PEP
 '''
 
 if __name__ == '__main__':
     __package__ = 'usefulpy'
 __author__ = 'Augustin Garcia'
-__version__ = '0.1.1'
+__version__ = '0.1.3'
+__all__ = ('YesOrNo', 'are_floats', 'are_integers', 'bool_', 'boolinput',
+'floatinput', 'floatlistinput', 'fromdatainput', 'getYesOrNo', 'intinput',
+'intlistinput', 'is_complex', 'is_float', 'is_floatlist', 'is_integer',
+'is_intlist', 'isbool', 'makelist', 'merge_dicts', 'multi_in', 'multicheck',
+'trycomplex', 'tryfloat', 'tryint', 'trynumber', 'trytype', 'validdate',
+'validinput', 'validquery')
+
 
 from collections import abc
 import datetime
