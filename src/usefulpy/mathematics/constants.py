@@ -32,10 +32,10 @@ nan = float('nan')
 # was more efficient and more accurate (I kept on adjusting the numbers to get
 # a bit more accuracy, but I still wasn't quite happy with it.
 
-#e, number where f(x)=e^x, its derivative, f'(x) also equals e^x
-e = 2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274#...
+# e, number where f(x)=e^x, its derivative, f'(x) also equals e^x
+e = 2.71828182845904523536028747135266249775724709369995957496  # ...
 # π, ratio of diameter to circumference in circle
-π = pi =  3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421#...
+π = pi = 3.141592653589793238462643383279502884197169399375105  # ...
 # τ, ratio of diameter to circumference in circle
 τ = tau = 2*pi
 
@@ -96,22 +96,22 @@ e = 2.71828182845904523536028747135266249775724709369995957496696762772407663035
 
 _radical = 5**(1/2)
 φ = phi = (1+_radical)/2
-#radical conjugate of φ, same properties
-φ_ = phi_ = (1-_radical)/2 
+# radical conjugate of φ, same properties
+φ_ = phi_ = (1-_radical)/2
 
 
-#Bronze ratio, 3+1/(3+1/(3+1/(3+1/(3+1/(...)))))
+# Bronze ratio, 3+1/(3+1/(3+1/(3+1/(3+1/(...)))))
 _radical = 13**(1/2)
 κ = kappa = (3+_radical)/2
 
-#ρ**3 = ρ+1
+# ρ**3 = ρ+1
 _radical = 69**(1/2)
 _a = (9+_radical)/18
 _b = (9-_radical)/18
 ρ = rho = _a**(1/3)+_b**(1/3)
 
-#ψ, supergolden ratio x**3 = x**2+1
-_radical =93**(1/2)
+# ψ, supergolden ratio x**3 = x**2+1
+_radical = 93**(1/2)
 _a = ((29+3*_radical)/2)**(1/3)
 _b = ((29-3*_radical)/2)**(1/3)
 _sum = (1+_a+_b)
@@ -121,7 +121,8 @@ del _radical
 del _sum
 
 # Its a bit of a tongue twister, but: the number nicknamed monster is the
-# Number of sets of symmetries in the largest finite group of sets of symmetries
+# Number of sets of symmetries in the largest finite group of sets of
+# symmetries
 monster = 808017424794512875886459904961710757005754368000000000
 
 
@@ -274,124 +275,3 @@ zebi = 1180591620717411303424
 zepto = 1e-21
 zero_Celsius = 273.15
 zetta = 1e+21
-
-
-### CONVERSIONS ###
-##TODO: Add more values to conversions
-conversions = {'rad':
-  {'type': 'angle',
-   'value': tau
-  },
- 'deg':
-  {'type': 'angle',
-   'value': 360
-  },
- 'grad':
-  {'type': 'angle',
-   'value': 400
-  },
- 'meter':
-  {'type': 'length',
-   'value': 1
-  },
- 'decameter':
-  {'type': 'length',
-   'value': 1/10
-  },
- 'hectometer':
-  {'type': 'length',
-   'value': 1/100
-  },
- 'kilometer':
-  {'type': 'length',
-   'value': 1/1000
-  },
- 'megameter':
-  {'type': 'length',
-   'value': 1/1000000
-  },
- 'gigameter':
-  {'type': 'length',
-   'value': 1/1000000000
-  },
- 'terrameter':
-  {'type': 'length',
-   'value': 1/1000000000
-  },
- 'petameter':
-  {'type': 'length',
-   'value': 1/1000000000000000
-  },
- 'exameter':
-  {'type': 'length',
-   'value': 1/1000000000000000000
-  },
- 'zettameter':
-  {'type': 'length',
-   'value': 1/1000000000000000000000
-  },
- 'yottameter':
-  {'type': 'length',
-   'value': 1/1000000000000000000000000
-  },
- 'decimeter':
-  {'type': 'length',
-   'value': 10
-  },
- 'centimeter':
-  {'type': 'length',
-   'value': 100
-  },
- 'millimeter':
-  {'type': 'length',
-   'value': 1000
-  },
- 'micrometer':
-  {'type': 'length',
-   'value': 1000000
-  },
- 'nanometer':
-  {'type': 'length',
-   'value': 1000000000
-  },
- 'picometer':
-  {'type': 'length',
-   'value': 1000000000000
-  },
- 'femtometer':
-  {'type': 'length',
-   'value': 1000000000000000
-  },
- 'attometer':
-  {'type': 'length',
-   'value': 1000000000000000000
-  },
- 'zeptometer':
-  {'type': 'length',
-   'value': 1000000000000000000000
-  },
- 'yoctometer':
-  {'type': 'length',
-   'value': 1000000000000000000000000
-  },
- 'foot':
-  {'type': 'length',
-   'value': 3.2808398949899997
-  },
- 'inches':
-  {'type': 'length',
-   'value': 39.37007873988
-  },
- 'yard':
-  {'type': 'length',
-   'value': 1.09361329833
-  },
- 'mile':
-  {'type': 'length',
-   'value': 0.0006213711922329545
-  },
- 'nautical_mile':
-  {'type': 'length',
-   'value': 0.0005399670663248847
-  }
-}
