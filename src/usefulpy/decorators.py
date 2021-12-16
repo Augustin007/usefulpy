@@ -13,15 +13,18 @@ RELEASE NOTES:
   Version 0.0.0:
    Decorators.py contains a few decorators
   Version 0.0.1:
-   Maybe I shouold have looked through the functools module better
+   Maybe I should have looked through the functools module better
 '''
 
+if __name__ == '__main__':
+    __package__ = 'usefulpy'
 __version__ = '0.0.1'
 __author__ = 'Augustin Garcia'
 
 import functools
 import time
 import random
+
 
 def debug(func):
     '''Print the function signature and return value'''
@@ -36,6 +39,7 @@ def debug(func):
         return value
     return wrapper_debug
 
+
 @functools.cache
 def repeat(n):
     '''Make a function repeat 'n' times'''
@@ -48,9 +52,11 @@ def repeat(n):
         return wrapper_repeat
     return decorator_repeat
 
+
 @functools.cache
 def timed_repeat(n, t):
-    '''Make a function repeat 'n' times, with a 't' time inbetween a return and a call'''
+    '''Make a function repeat 'n' times, with a 't' time in the interval
+between a return and a call'''
     def decorator_repeat(func):
         @functools.wraps(func)
         def wrapper_repeat(*args, **kwargs):
@@ -69,9 +75,9 @@ def shift_args(dict_):
 example:
 @shift_args({2:(0, 1), 1:((10,), 0)})
 def log(base, x):
-	\'''log(x) -> log(10, x)\'''
-	print(f'log base {base} of {x}')
-	
+    \'''log(x) -> log(10, x)\'''
+    print(f'log base {base} of {x}')
+
 >>> log(2)
 log base 10 of 2
 >>> log(1)
@@ -90,6 +96,7 @@ log base 1 of 2
             if type(z) is int:
                 assert z < x
                 assert z >= 0
+
     def decorator_shift_args(func):
         @functools.wraps(func)
         def wrapper_shift_args(*args, **kwargs):
@@ -108,16 +115,21 @@ log base 1 of 2
         return wrapper_shift_args
     return decorator_shift_args
 
+
 def _getstr(fn, *args):
     '''Generates a string representation for pipeline'''
     if len(args) != 0:
         args = list(args)
         args[0:1] = [fn, args[0]]
         return tuple([_getstr(a) for a in args])
-    if type(fn) is str: return fn
-    if hasattr(fn, '__name__'): return fn.__name__
-    if hasattr(fn, '__str__'): return str(fn)
+    if type(fn) is str:
+        return fn
+    if hasattr(fn, '__name__'):
+        return fn.__name__
+    if hasattr(fn, '__str__'):
+        return str(fn)
     return repr(fn)
+
 
 @functools.cache
 def pipeline(b):
@@ -133,13 +145,14 @@ def pipeline(b):
         def __str__(self):
             a, b = _getstr(self.a, self.b)
             return a+'———'+b
-        
+
         def __repr__(self):
             return f'<Pipeline[{str(self)}] at {hex(id(self))}>'
-    
+
     def pipe_dec(a): return _pipeline(a, b)
 
     return pipe_dec
+
 
 @functools.cache
 def default_setter(func):
@@ -147,49 +160,60 @@ def default_setter(func):
     def wrapper_func(arg):
         @functools.wraps(func)
         def nfunc(*args, **kwargs):
-            nfunc.__doc__ = func.__doc__.replace('\\FIRSTARG', str(arg))
+            nfunc.__doc__ = func.__doc__.replace(
+                '\\FIRSTARG', str(arg))
             return func(arg, *args, **kwargs)
         return nfunc
-    wrapper_func.__doc__ = f'Makes a {func.__name__} function with arg\nas a default first argument'
+    wrapper_func.__doc__ = f'Makes a {func.__name__} function\
+ with arg\nas a default first argument'
     wrapper_func.__name__ = func.__name__
     return wrapper_func
 
-@functools.cache # minimize exact returns
-def default_with_decorator(*decorators, check = None):
+
+@functools.cache  # minimize exact returns
+def default_with_decorator(*decorators, check=None):
     '''Make a function with a forced first argument.
      Apply decorators to the returning function function
      Check that the first argument is valid'''
     def default_setter(func):
-        @functools.cache #io_opt minimizes duplicate functions in this case
+        @functools.cache  # minimizes duplicate functions in this case
         def wrapper_func(arg):
             if check:
                 if not check(arg):
-                    raise ValueError(f'{arg} is an inapropriate value for {func.__name__}')
+                    raise ValueError(f'{arg} is an inapropriate value\
+ for {func.__name__}')
+
             @functools.wraps(func)
             def nfunc(*args, **kwargs):
                 return func(arg, *args, **kwargs)
             nfunc.__doc__ = func.__doc__.replace('\\FIRSTARG', str(arg))
-            try: nfunc.__call__.__func__.__doc__ = func.__doc__.replace('\\FIRSTARG', str(arg))
-            except: pass
+            try:
+                nfunc.__call__.__func__.__doc__ = func.__doc__.replace(
+                    '\\FIRSTARG', str(arg))
+            except Exception:
+                pass
             for decorator in decorators:
                 nfunc = decorator(nfunc)
             return nfunc
-        wrapper_func.__doc__ = f'Makes a {func.__name__} function with arg\nas a default first argument'
+        wrapper_func.__doc__ = f'Makes a {func.__name__} function\
+ with arg\nas a default first argument'
         wrapper_func.__name__ = func.__name__
-        
+
         return wrapper_func
     return default_setter
+
 
 def arg_modifier(modify):
     def wrapper_creator(func):
         @functools.wraps(func)
         def wrapper_modifier(*args, **kwargs):
-            args = [modify(a) for a  in args]
+            args = [modify(a) for a in args]
             for a, b in kwargs.items():
                 new_kwarg = modify(b)
-                if new_kwarg != b: kwargs[a] = b
+                if new_kwarg != b:
+                    kwargs[a] = b
             return func(*args, **kwargs)
         return wrapper_modifier
     return wrapper_creator
 
-
+# eof
