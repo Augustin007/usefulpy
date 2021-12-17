@@ -49,6 +49,8 @@ __version__ = '1.0.0'
 __author__ = 'Augustin Garcia'
 
 ### IMPORTS ###
+from math import comb, copysign, erf, erfc, fabs, fmod, fsum, gamma, lgamma
+from math import modf, nextafter, perm, remainder, trunc, ulp, ldexp, frexp, atan2
 from .constants import *
 from .mathfuncs import *
 from .nmath import *
