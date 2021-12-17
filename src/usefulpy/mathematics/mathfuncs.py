@@ -402,7 +402,7 @@ class commutative_expression(cas_expression, tuple):
 
     def __hash__(self, /):
         '''hash for communative expression '''
-        return hash((self.oper, set(self)))
+        return hash((self.oper, tuple(self)))
 
     def __str__(self, /):
         '''string for communative expression'''
@@ -567,9 +567,10 @@ class mul_expression(commutative_expression):
             if type(value) == add_expression:
 
                 def distributor(x):
-                    return (x, *self[: count], *self[count+1:])
+                    data = (x, *self[: count], *self[count+1:])
+                    return mul_expression(data)
 
-                run = map(distributor, value)
+                run = tuple(map(distributor, value))
                 return add_expression(run)
 
         # extracts constants
