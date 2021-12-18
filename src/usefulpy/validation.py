@@ -31,7 +31,7 @@ RELEASE NOTES:
 
 if __name__ == '__main__':
     __package__ = 'usefulpy'
-__author__ = 'Augustin Garcia'
+__author__ = 'Austin Garcia'
 __version__ = '0.1.3'
 __all__ = ('YesOrNo', 'are_floats', 'are_integers', 'bool_', 'boolinput',
 'floatinput', 'floatlistinput', 'fromdatainput', 'getYesOrNo', 'intinput',
