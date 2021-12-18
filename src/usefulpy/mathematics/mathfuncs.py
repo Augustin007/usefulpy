@@ -72,12 +72,12 @@ if __name__ == '__main__':
 constants = (int, float, complex, Decimal, Fraction)
 
 
-def is_constant(n):
+def is_constant(n) -> bool:
     '''Checks whether n is constant for cas engine'''
     if type(n) in constants:
         return True
     try:
-        return n.is_constant()
+        return bool(n.is_constant())
     except Exception:
         return False
 

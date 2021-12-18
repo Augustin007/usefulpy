@@ -39,11 +39,7 @@ Interval(*intervals) -> unified_interval'''
 
 
 class interval:
-    start: float
-    stop: float
-    __slots__ = ('_check')
-    _repstr: str
-    mode: int
+    __slots__ = ('_check', 'start', 'stop', '_repstr', 'mode')
 
     def __init__(self, start: float, stop: float, mode='open'):
         modes = ('open', 'left', 'right', 'close')
@@ -163,6 +159,7 @@ class interval:
             if self.stop in other:
                 return other | self
             return None
+        return NotImplemented
 
     def __rand__(self, other):
         return NotImplemented
