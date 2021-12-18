@@ -46,4 +46,40 @@ def test_primality():
 
 ## vector ##
 def test_vector():
+    v = mathematics.vector
+    v1 = v(1, 2)
+    assert tuple(2*v1) == (2, 4)
+    m = mathematics.matrix
+    m1 = m(v(0, -1), v(1, 0))
+    assert tuple(m1*v1) == (2, -1)
+
+## Interval ##
+def test_interval():
+    interval = mathematics.interval
+    i1 = interval(0, 1, 2)
+    i2 = interval(1, 2, 2)
+    assert 1 in i2
+    assert 1.1 in i2
+    assert 2 not in i2
+    assert 0.9 not in i2
+    assert 2.1 not in i2
+    i3 = i1 | i2
+    assert 0 in i3
+    assert 1 in i3
+    assert 2 not in i3
+    assert -1 not in i3
+    assert 2.1 not in i3
+    i4 = i3 ^ interval(-1, 0, 1)
+    assert 0 not in i4
+    assert -0.5 in i4
+    assert -1 not in i4
+    assert -1.1 not in i4
+    assert 1 in i4
+    assert 2 not in i4
+    assert 2.1 not in i4
+
+## Quaternion ##
+def test_quaternion():
     ...
+
+# eof
