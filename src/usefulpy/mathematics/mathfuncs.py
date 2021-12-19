@@ -859,7 +859,7 @@ differentiation'''
     inverse: types.FunctionType
     interval = None
     __is_frozen: bool = False
-    variables: any
+    variables: set
 
     # INITIALIZATION #
     def __new__(cls, func):

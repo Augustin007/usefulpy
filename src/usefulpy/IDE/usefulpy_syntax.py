@@ -23,6 +23,7 @@ RELEASE NOTES:
 __version__ = '0.0.0'
 __author__ = 'Augustin Garcia'
 
+from . import namespace_management
 from .partitions import _partition_triple_quote, _partition_single_quote
 from .partitions import _partition_comments
 from .. import formatting as _formatting, validation as _validation

@@ -5,5 +5,7 @@
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "cornflakes.linter.executablePath": "C:\\Users\\WilliamGarcia\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\flake8",
-    "cornflakes.linter.run": "onType"
+    "cornflakes.linter.run": "onType",
+    "python.linting.mypyPath": "C:\\Users\\WilliamGarcia\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\mypy",
+    "mypy.dmypyExecutable": "C:\\Users\\WilliamGarcia\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\dmypy.exe"
 }

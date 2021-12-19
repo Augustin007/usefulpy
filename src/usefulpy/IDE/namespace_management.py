@@ -29,16 +29,14 @@ del blank_namespace_globals['__loader__']
 del blank_namespace_globals['__file__']
 blank_namespace_globals['__defaults__'] = {'#': int, '.': float, '#a': tuple()}
 
-built_in_namespace = {'globals': globals}
+built_in_namespace = {'globals': globals, '__name__': '', __package__: 'usefulpy.IDE'}
 exec('print(end = \'\')', built_in_namespace)
 
-usefulpy_namespace_globals = built_in_namespace.copy()
-exec('from ..mathematics import *',
-     usefulpy_namespace_globals, usefulpy_namespace_globals)
-exec('from ..validation import *',
-     usefulpy_namespace_globals, usefulpy_namespace_globals)
-exec('from ..formatting import *',
-     usefulpy_namespace_globals, usefulpy_namespace_globals)
+
+from ..mathematics import *
+from ..validation import *
+from ..formatting import *
+usefulpy_namespace_globals = {**built_in_namespace, **globals().copy()}
 
 del usefulpy_namespace_globals['blank_namespace_globals']
 del usefulpy_namespace_globals['__name__']
