@@ -5,7 +5,7 @@ Base class for cameras in py3d
 
 Most important functions:
    cam_base: base for cam classes
-   cam_shape_method: decorator for cam methods that also need updates to 
+   cam_shape_method: decorator for cam methods that also need updates to
    shape
 
 LICENSE PLATAFORMS and INSTALLATION:
@@ -19,35 +19,39 @@ RELEASE NOTES:
    Cam_base class allows for camera classes to be created.
 '''
 
-### DUNDERS ###
+# DUNDERS #
 __author__ = 'Augustin Garcia'
 __version__ = '0.0.0'
 
-### IMPORTS ###
+# IMPORTS #
 from ... import mathematics as _m
 from ...mathematics.quaternion import quaternion, i, j, k
 import time
 import functools
 
-### CAMERA ###
+
+# CAMERA #
 def cam_shape_method(func):
     @functools.wraps(func)
     def cam_method_wrapper(cam, *args, **kwargs):
         rval = func(cam, *args, **kwargs)
-        if cam.shape is not None: exec('cam.shape.{func.__name__}(*args, **kwargs)')
+        if cam.shape is not None:
+            exec('cam.shape.{func.__name__}(*args, **kwargs)')
         cam._update()
         return rval
     return cam_method_wrapper
 
+
 class cam_base:
-    #this is base class for a camera
-    def __init__(self, universe, position, heading, renderdistance = 12, personal_objects = None):
+    ''' this is base class for a camera '''
+
+    def __init__(self, universe, position, heading, renderdistance=12, personal_objects=None):
         if not type(position) is quaternion:
             raise TypeError('argument \'position\' should be a quaternion type')
         if not type(heading) is quaternion:
             raise TypeError('argument \'heading\' should be a quaternion type')
         if position.real:
-            raise ValueError('argument \'position\' should not have a real part')        
+            raise ValueError('argument \'position\' should not have a real part')
         if heading.real:
             raise ValueError('argument \'heading\' should not have a real part')
         self.Canvases = []
@@ -56,8 +60,8 @@ class cam_base:
         self.universe = universe
         self.personal_objects = personal_objects
         self.renderdistance = float(renderdistance)
-        self.spnspeed = (1, 0.0025) #(radians, seconds) = radians per seconds
-        self.movspeed = (0.1, 0.01) #(grid_coordinates, seconds) = grid_coordinates per seconds
+        self.spnspeed = (1, 0.0025)  # (radians, seconds) = radians per seconds
+        self.movspeed = (0.1, 0.01)  # (grid_coordinates, seconds) = grid_coordinates per seconds
         self.is_visible = False
         self.shape = None
         self.running_canvases = []
@@ -65,7 +69,7 @@ class cam_base:
         self.is_frozen = False
         self.universe.addcamera(self)
         self._compute
-        self.lighting_dict={}
+        self.lighting_dict = {}
 
     def freeze(self):
         self.is_frozen = True
@@ -73,17 +77,19 @@ class cam_base:
     def unfreeze(self):
         self.is_frozen = False
         self._update()
-    
+
     def _compute(self):
         pass
 
     def _update(self):
-        if self.is_frozen: return
+        if self.is_frozen:
+            return
         self._update_msg()
         self.universe._recieve_update_msg(self)
 
     def _update_msg(self):
-        if self.is_frozen: return
+        if self.is_frozen:
+            return
         self._compute()
         self._update_view()
 
@@ -91,20 +97,24 @@ class cam_base:
         pass
 
     def _update_view(self):
-        if self.is_frozen: return
-        if not self.running_canvases: return
-        distance_sort = sorted(iter(self.universe.space), key = lambda fig:abs(self.position-fig.pos), reverse = True)
+        if self.is_frozen:
+            return
+        if not self.running_canvases:
+            return
+        distance_sort = sorted(iter(self.universe.space),
+                               key=lambda fig: abs(self.position-fig.pos),
+                               reverse=True)
         for canvas in self.running_canvases:
             canvas.delete('all')
         for figure in distance_sort:
-            if abs(self.position-figure.pos)>self.renderdistance:
+            if abs(self.position-figure.pos) > self.renderdistance:
                 continue
             if figure is not self:
                 self.project(figure)
         for canvas in self.running_canvases:
             canvas.update()
-        ##if self.personal_objects: pass 
-        ##TODO: Personal objects not yet implimented
+        # if self.personal_objects: pass
+        # TODO: Personal objects not yet implimented
 
     def add_canvas(self, canvas):
         state = 'running'
@@ -114,8 +124,8 @@ class cam_base:
         self.running_canvases.append(canvas)
         canvas.linked = self
         self._update()
-        if state != 'running': self.freezecanvas(canvas)
-        
+        if state != 'running':
+            self.freezecanvas(canvas)
 
     def freezecanvas(self, canvas):
         '''freezes 3d updates to a canvas'''
@@ -147,7 +157,7 @@ class cam_base:
         raise ValueError(f'canvas {canvas} is not displaying this camera.')
 
     @cam_shape_method
-    def rotate(self, rad, normal, point = None):
+    def rotate(self, rad, normal, point=None):
         self.heading = quaternion.rotate(self.heading, rad, normal, quaternion())
         if point is not None:
             self.position = quaternion.rotate(self.position, rad, normal, point)
@@ -325,34 +335,43 @@ class cam_base:
             time.sleep(b)
         self._tilt_dn(final)
 
-    def spin_up(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._tilt_up(m)
-        if speed is None: speed = self.spnspeed
+    def spin_up(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._tilt_up(m)
+        if speed is None:
+            speed = self.spnspeed
         return self._spin_up(m, speed)
 
-    def spin_dn(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._tilt_dn(m)
-        if speed is None: speed = self.spnspeed
+    def spin_dn(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._tilt_dn(m)
+        if speed is None:
+            speed = self.spnspeed
         return self._spin_dn(m, speed)
 
-    def spin_rt(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._tilt_rt(m)
-        if speed is None: speed = self.spnspeed
+    def spin_rt(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._tilt_rt(m)
+        if speed is None:
+            speed = self.spnspeed
         return self._spin_rt(m, speed)
 
-    def spin_lt(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._tilt_lt(m)
-        if speed is None: speed = self.spnspeed
+    def spin_lt(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._tilt_lt(m)
+        if speed is None:
+            speed = self.spnspeed
         return self._spin_lt(m, speed)
 
-    ### USE ###
+    # USE #
     def __repr__(self):
         '''__repr__ for cam'''
-        return f'<py3d._camera at {self.pos}, facing: ({self.thetax}, {self.thetaz}), field of vision (fov): {self.fov}, render distance: {self.renderdistance}>'
+        return f'<py3d._camera at {self.pos}, facing: ({self.thetax}, {self.thetaz})>'
 
     def __iter__(self):
         '''__iter__ for cam'''
-        if self.shape: return self.shape.__iter__()
+        if self.shape:
+            return self.shape.__iter__()
         return ().__iter__()
 
     def _mvfd(self, m, speed):
@@ -458,7 +477,7 @@ class cam_base:
             self._fdyz(a)
             time.sleep(b)
         self._fdyz(fm)
-        
+
     def _mvup(self, m, speed):
         a, b = speed
         mm, fm = divmod(m, a)
@@ -466,7 +485,7 @@ class cam_base:
             self._up(a)
             time.sleep(b)
         self._up(fm)
-        
+
     def _mvbkzx(self, m, speed):
         a, b = speed
         mm, fm = divmod(m, a)
@@ -474,7 +493,7 @@ class cam_base:
             self._bkzx(a)
             time.sleep(b)
         self._bkzx(fm)
-        
+
     def _mvrt(self, m, speed):
         a, b = speed
         mm, fm = divmod(m, a)
@@ -482,7 +501,7 @@ class cam_base:
             self._rt(a)
             time.sleep(b)
         self._rt(fm)
-        
+
     def _mvfdx(self, m, speed):
         a, b = speed
         mm, fm = divmod(m, a)
@@ -499,101 +518,151 @@ class cam_base:
             time.sleep(b)
         self._bkx(fm)
 
-    def fd(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._fd(m)
-        if speed is None: speed = self.movspeed
+    def fd(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._fd(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvfd(m, speed)
 
-    def dn(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._dn(m)
-        if speed is None: speed = self.movspeed
+    def dn(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._dn(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvdn(m, speed)
-        
-    def fdz(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._fdz(m)
-        if speed is None: speed = self.movspeed
+
+    def fdz(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._fdz(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvfdz(m, speed)
-        
-    def bkxy(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._bkxy(m)
-        if speed is None: speed = self.movspeed
+
+    def bkxy(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._bkxy(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvbkxy(m, speed)
-        
-    def bkyz(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._bkyz(m)
-        if speed is None: speed = self.movspeed
+
+    def bkyz(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._bkyz(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvbkyz(m, speed)
-        
-    def fdy(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._fdy(m)
-        if speed is None: speed = self.movspeed
+
+    def fdy(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._fdy(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvfdy(m, speed)
-        
-    def fdxy(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._fdxy(m)
-        if speed is None: speed = self.movspeed
+
+    def fdxy(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._fdxy(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvfdxy(m, speed)
-        
-    def bkz(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._bkz(m)
-        if speed is None: speed = self.movspeed
+
+    def bkz(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._bkz(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvbkz(m, speed)
-        
-    def fdzx(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._fdzx(m)
-        if speed is None: speed = self.movspeed
+
+    def fdzx(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._fdzx(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvfdzx(m, speed)
-        
-    def lt(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._lt(m)
-        if speed is None: speed = self.movspeed
+
+    def lt(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._lt(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvlt(m, speed)
-        
-    def bk(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._bk(m)
-        if speed is None: speed = self.movspeed
+
+    def bk(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._bk(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvbk(m, speed)
-        
-    def bky(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._bky(m)
-        if speed is None: speed = self.movspeed
+
+    def bky(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._bky(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvbky(m, speed)
-        
-    def fdyz(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._fdyz(m)
-        if speed is None: speed = self.movspeed
+
+    def fdyz(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._fdyz(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvfdyz(m, speed)
-        
-    def up(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._up(m)
-        if speed is None: speed = self.movspeed
+
+    def up(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._up(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvup(m, speed)
-        
-    def bkzx(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._bkzx(m)
-        if speed is None: speed = self.movspeed
+
+    def bkzx(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._bkzx(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvbkzx(m, speed)
-        
-    def rt(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._rt(m)
-        if speed is None: speed = self.movspeed
+
+    def rt(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._rt(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvrt(m, speed)
-        
-    def fdx(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._fdx(m)
-        if speed is None: speed = self.movspeed
+
+    def fdx(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._fdx(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvfdx(m, speed)
-        
-    def bkx(self, m, *, speed = None, smooth = True):
-        if not smooth: return self._bkx(m)
-        if speed is None: speed = self.movspeed
+
+    def bkx(self, m, *, speed=None, smooth=True):
+        if not smooth:
+            return self._bkx(m)
+        if speed is None:
+            speed = self.movspeed
         return self._mvbkx(m, speed)
 
-    def spinto(self, to): return NotImplemented #spin to face an angle
-    def spin(self, amount): return NotImplemented #spin in multiple directions at once
-    def goto(self, to): return NotImplemented 
-    def gotowards(self, towards): return NotImplemented 
-    def followpath(self, towards): return NotImplemented 
-    def slidefov(self, to): return NotImplemented #slides fov
-    def spintoface(self, point): return NotImplemented #spin to face a point
-        
+    def spinto(self, to):
+        return NotImplemented  # spin to face an angle
+
+    def spin(self, amount):
+        return NotImplemented  # spin in multiple directions at once
+
+    def goto(self, to):
+        return NotImplemented
+
+    def gotowards(self, towards):
+        return NotImplemented
+
+    def followpath(self, towards):
+        return NotImplemented
+
+    def slidefov(self, to):
+        return NotImplemented  # slides fov
+
+    def spintoface(self, point):
+        return NotImplemented  # spin to face a point
+
+# eof

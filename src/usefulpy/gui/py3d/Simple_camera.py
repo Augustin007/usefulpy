@@ -17,15 +17,14 @@ RELEASE NOTES:
    Simple camera type.
 '''
 
-### DUNDERS ###
+# DUNDERS #
 __author__ = 'Augustin Garcia'
 __version__ = '0.0.0'
+if __name__ == '__main__':
+    __package__ = 'usefulpy.gui.py3d'
 
-if __name__=='__main__':
-    __package__='usefulpy.gui.py3d'
-
-### IMPORTS ###
-from .Cam import cam_base#, cam_shape_method
+# IMPORTS #
+from .Cam import cam_base  # , cam_shape_method
 from ... import mathematics as _m
 from ...mathematics import quaternion, i, j, k, polynomial as _polynomial
 from .shapes import polyhedron, pane, darken
@@ -33,22 +32,27 @@ from .Space import space
 #import time
 
 
-### INITIALIZATIONS ###
+# INITIALIZATIONS #
 light_scource = k
 old_light = light_scource
 
-### UTILITIES ###
+
+# UTILITIES #
 def rgb2hex(r, g, b):
     r = hex(r)[2:]
-    if len(r) == 1: r = '0'+r
+    if len(r) == 1:
+        r = '0'+r
     g = hex(g)[2:]
-    if len(g) == 1: g = '0'+g
+    if len(g) == 1:
+        g = '0'+g
     b = hex(b)[2:]
-    if len(b) == 1: b = '0'+b
+    if len(b) == 1:
+        b = '0'+b
     return '#'+r+g+b
 
 # Temporary shader
 light_scalar = _polynomial(1.4834383937541313, -74.97492931129165, 264.354983605755, -249.77887679968808, 90.73400104839939, -10.067233808282387)
+
 
 def light(object):
     a1 = get_light(object.normal)
@@ -58,10 +62,12 @@ def light(object):
     r2, g2, b2 = darken(r, g, b, a2)
     return (r1, g1, b1), (r2, g2, b2)
 
+
 def get_light(normal):
     a = abs(light_scource - normal)
     a = scale_light(a)
     return a
+
 
 def scale_light(a):
     if a < 0:
@@ -70,14 +76,18 @@ def scale_light(a):
         a = 2
     return int(light_scalar(a))
 
+
 def get_thetax(q):
-    return (_m.atan2(q.k, _m.hypot(q.i, q.j)) + 90)%360
+    return (_m.atan2(q.k, _m.hypot(q.i, q.j)) + 90) % 360
+
 
 def get_thetaz(q):
-    return (_m.atan2(q.j, q.i) - 90)%360
+    return (_m.atan2(q.j, q.i) - 90) % 360
+
 
 def euler_angle(q):
     return get_thetax(q), get_thetaz(q)
+
 
 def rescale(point, to):
     h = int(to.getHeight())
@@ -88,28 +98,33 @@ def rescale(point, to):
     y = y*scale+h//2
     return x, y
 
+
 def add_polygon(points, hex, canvas):
     args = []
-    for point in points: args.extend(point)
-    canvas.create_polygon(*args, fill = hex, outline = hex)
+    for point in points:
+        args.extend(point)
+    canvas.create_polygon(*args, fill=hex, outline=hex)
+
 
 def point(x, y, z):
     return quaternion(0, x, y, z)
+
 
 def make_rectangular_prism(universe, point1, point2, color):
     x1, y1, z1 = point1.vtuple()
     x2, y2, z2 = point2.vtuple()
     rectangular_prism = polyhedron(
         universe,
-        cpane(universe, point(x1, y2, z2), point(x2, y2, z2), point(x2, y1, z2), point(x1, y1, z2), color = color),
-        cpane(universe, point(x1, y2, z1), point(x1, y2, z2), point(x2, y2, z2), point(x2, y2, z1), color = color),
-        cpane(universe, point(x2, y1, z1), point(x2, y2, z1), point(x2, y2, z2), point(x2, y1, z2), color = color),
-        cpane(universe, point(x1, y1, z1), point(x2, y1, z1), point(x2, y1, z2), point(x1, y1, z2), color = color),
-        cpane(universe, point(x1, y1, z1), point(x1, y2, z1), point(x1, y2, z2), point(x1, y1, z2), color = color),
-        cpane(universe, point(x1, y1, z1), point(x1, y2, z1), point(x2, y2, z1), point(x2, y1, z1), color = color)
+        cpane(universe, point(x1, y2, z2), point(x2, y2, z2), point(x2, y1, z2), point(x1, y1, z2), color=color),
+        cpane(universe, point(x1, y2, z1), point(x1, y2, z2), point(x2, y2, z2), point(x2, y2, z1), color=color),
+        cpane(universe, point(x2, y1, z1), point(x2, y2, z1), point(x2, y2, z2), point(x2, y1, z2), color=color),
+        cpane(universe, point(x1, y1, z1), point(x2, y1, z1), point(x2, y1, z2), point(x1, y1, z2), color=color),
+        cpane(universe, point(x1, y1, z1), point(x1, y2, z1), point(x1, y2, z2), point(x1, y1, z2), color=color),
+        cpane(universe, point(x1, y1, z1), point(x1, y2, z1), point(x2, y2, z1), point(x2, y1, z1), color=color)
         )
-    
+
     return rectangular_prism
+
 
 def cpane(universe, *points, color):
     npane = pane(universe, *points)
@@ -117,9 +132,9 @@ def cpane(universe, *points, color):
     return npane
 
 
-### SIMPLE CAMERA ###
+# SIMPLE CAMERA #
 class simple_camera(cam_base):
-    def __init__(self, universe, position, heading, fov = 0.5, renderdistance = 12, personal_objects = None, shape = None):
+    def __init__(self, universe, position, heading, fov=0.5, renderdistance=12, personal_objects=None, shape=None):
         self.shape = shape
         self.fov = fov
         cam_base.__init__(self, universe, position, heading, renderdistance, personal_objects)
@@ -146,26 +161,32 @@ class simple_camera(cam_base):
         self.y31 = -10*self.pre7
         self.z31 = -10*self.pre3
         self.plane_pos = quaternion(0, self.x, self.y, self.z)
-        self.lighting_dict={}
-    
+        self.lighting_dict = {}
+
     def project(self, object):
         if isinstance(object, (polyhedron, cam_base)):
             if isinstance(object, cam_base):
-                if object.shape is None: return
-            distance_sort = sorted(iter(object), key = lambda p: abs(self.position-p.pos), reverse=True)
+                if object.shape is None:
+                    return
+            distance_sort = sorted(iter(object), key=lambda p: abs(self.position-p.pos), reverse=True)
             for n in distance_sort:
                 self.project(n)
             return
         if isinstance(object, pane):
             npoints = [self._project(point) for point in object]
-            if None in npoints: return
-            if (object._updated) or (id(object) not in self.lighting_dict) or (old_light != light_scource):
+            if None in npoints:
+                return
+            if (object._updated) or \
+                (id(object) not in self.lighting_dict) or \
+                    (old_light != light_scource):
                 self.lighting_dict[id(object)] = light(object)
                 object._updated = False
             heading = (self.position - object.pos).normal()
             tup = abs(heading - object.normal), abs(object.normal + heading)
-            if tup[0] >= tup[1]: r, g, b = self.lighting_dict[id(object)][1]
-            else: r, g, b = self.lighting_dict[id(object)][0]
+            if tup[0] >= tup[1]:
+                r, g, b = self.lighting_dict[id(object)][1]
+            else:
+                r, g, b = self.lighting_dict[id(object)][0]
             for canvas in self.running_canvases:
                 nnpoints = [rescale(point, canvas) for point in npoints]
                 hex = rgb2hex(r, g, b)
@@ -217,25 +238,29 @@ class simple_camera(cam_base):
         '''projection to x of point'''
         xrot = self._xr(x, y)
         zrot = self._zr(x, y, z)
-        if zrot > 0: return xrot/zrot #zrot > 0 means object is behind
+        if zrot > 0:
+            return xrot/zrot  # zrot > 0 means object is behind
 
     def _project_to_y(self, x, y, z):
         '''projection to y of point'''
         yrot = self._yr(x, y, z)
         zrot = self._zr(x, y, z)
-        if zrot > 0: return -yrot/zrot #zrot > 0 means object is behind
+        if zrot > 0:
+            return -yrot/zrot  # zrot > 0 means object is behind
 
     def _project_to_x1(self, x, y, z):
         '''projection to x of point (ignores position and fov)'''
         xrot = self._xr1(x, y)
         zrot = self._zr1(x, y, z)
-        if zrot != 0: return xrot/zrot
+        if zrot != 0:
+            return xrot/zrot
 
     def _project_to_y1(self, x, y, z):
         '''projection to y of point (ignores position and fov)'''
         yrot = self._yr1(x, y, z)
         zrot = self._zr1(x, y, z)
-        if zrot != 0: return -yrot/zrot
+        if zrot != 0:
+            return -yrot/zrot
 
     def projectx(self, point):
         '''projection to x of point'''
@@ -260,7 +285,8 @@ class simple_camera(cam_base):
     def _project(self, p):
         x, y, z = p.vtuple()
         zrot = self._zr(x, y, z)
-        if zrot<=0: return
+        if zrot <= 0:
+            return
         xrot = self._xr(x, y)
         yrot = self._yr(x, y, z)
         return (xrot/zrot, -yrot/zrot)
@@ -268,17 +294,17 @@ class simple_camera(cam_base):
     def _project1(self, point):
         x, y, z = point.vtuple()
         zrot = self._zr1(x, y, z)
-        if zrot <= 0: return
+        if zrot <= 0:
+            return
         xrot = self._xr1(x, y)
         yrot = self._yr1(x, y, z)
         return (xrot/zrot, -yrot/zrot)
-        
-        
+
 
 if __name__ == '__main__':
     from ...gui import Frame
     Space = space()
     cube = make_rectangular_prism(Space, -i-j-k, i+j+k, (255, 0, 0))
-    canv = Frame(width = 800, height =800).addCanvas(width = 800, height =800)
+    canv = Frame(width=800, height=800).addCanvas(width=800, height=800)
     cam = simple_camera(Space, quaternion(), i)
     cam.add_canvas(canv)

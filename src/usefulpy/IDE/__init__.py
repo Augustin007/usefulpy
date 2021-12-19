@@ -1,7 +1,7 @@
 '''
 IDE
 
-Customized IDE and interpreter, this ide lets you change default types. 
+Customized IDE and interpreter, this ide lets you change default types.
 This IDE allows you to access previous inputs and outputs easily.
 This IDE also gives access to entire usefulpy library.
 
@@ -35,5 +35,7 @@ __package__ = 'usefulpy.IDE'
 from .run_code import run_path
 from .usefulpy_IDE import ide
 
-def startup(with_, init_globals = None, run_name= '__umain__', usefulpy = True, launch_with =run_path, environment = ide):
+
+def startup(with_, init_globals=None, run_name='__umain__', usefulpy=True,
+            launch_with=run_path, environment=ide):
     environment(launch_with(with_, init_globals, run_name, usefulpy))

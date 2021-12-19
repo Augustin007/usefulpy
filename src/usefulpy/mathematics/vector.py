@@ -271,7 +271,7 @@ class matrix:
                 sum += num*m_sub.det()
             else:
                 sum -= num*m_sub.det()
-    
+
     def is_constant(self):
         return True
 

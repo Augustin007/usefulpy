@@ -24,13 +24,15 @@ __author__ = 'Augustin Garcia'
 
 from . import usefulpy_syntax
 from .namespace_management import usefulpy_namespace_globals
-#import time
 import traceback
 
+
 def _output(object, count):
-    if object is None: return
-    print(f'Out[{count}] : ', repr(object), sep = '')
+    if object is None:
+        return
+    print(f'Out[{count}] : {object!r}')
     print()
+
 
 def _input(count):
     input_ = input(f'In [{count}] : ').rstrip()
@@ -41,40 +43,49 @@ def _input(count):
         empty = ' '*(len(str(count))+3)+'-- : '
         next_line = input(empty).rstrip()
         while next_line:
-            input_+= '\n'+next_line
+            input_ += '\n'+next_line
             next_line = input(empty).rstrip()
     return input_
-    
+
 
 def _quit():
     ide.quit = True
 
-def ide(namespace = None):
+
+def ide(namespace=None):
     ide.quit = False
-    if namespace is None: namespace = {}
+    if namespace is None:
+        namespace = {}
     namespace = {**namespace, **usefulpy_namespace_globals}
     original = namespace.copy()
     In = []
     Out = {}
     addedOuts = {}
-    if 'In' not in namespace: namespace['In'] = In
-    if 'Out' not in namespace: namespace['Out'] = Out
+    if 'In' not in namespace:
+        namespace['In'] = In
+    if 'Out' not in namespace:
+        namespace['Out'] = Out
     namespace['quit'] = _quit
     count = 0
     while not ide.quit:
         try:
             input_ = _input(count)
-            
-            corrected_input = usefulpy_syntax._usefulpy_correct_syntax(input_, namespace['__defaults__']['#a'])
+
+            corrected_input = usefulpy_syntax._usefulpy_correct_syntax(
+                input_, namespace['__defaults__']['#a'])
             try:
                 try:
                     old_1 = namespace['_']
                     old__1 = namespace['__']
-                except: pass
+                except Exception:
+                    pass
 
                 output = eval(corrected_input, namespace)
                 print()
-                if output is None: count += 1; In.append(input_); continue
+                if output is None:
+                    count += 1
+                    In.append(input_)
+                    continue
                 _output(output, count)
                 Out[count] = output
                 namespace[f'_{count}'] = output
@@ -83,17 +94,19 @@ def ide(namespace = None):
                     namespace['_'] = output
                     namespace['__'] = old_1
                     namespace['___'] = old__1
-                except: pass
+                except Exception:
+                    pass
                 In.append(input_)
                 count += 1
                 continue
-            except: pass
+            except Exception:
+                pass
             try:
                 exec(corrected_input, namespace)
                 print()
             except BaseException as err:
                 print()
-                traceback.print_exc() ##raise seperately later
+                traceback.print_exc()  # raise seperately later
                 Out[count] = err
                 namespace[f'_{count}'] = err
                 addedOuts[f'_{count}'] = err
@@ -101,7 +114,7 @@ def ide(namespace = None):
             In.append(input_)
             count += 1
             continue
-        except:
+        except Exception:
             print()
             traceback.print_exc()
             print()
@@ -111,11 +124,13 @@ def ide(namespace = None):
         del namespace['_']
         del namespace['__']
         del namespace['___']
-    except: pass
+    except Exception:
+        pass
     del namespace['In']
     del namespace['Out']
     del namespace['quit']
     return namespace
+
 
 ide.__dict__['quit'] = False
 

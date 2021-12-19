@@ -20,17 +20,15 @@ RELEASE NOTES:
 __author__ = 'Augustin Garcia'
 __version__ = '0.0.0'
 
-### IMPORTS ###
-import time
-from ...mathematics import nmath as _m
-from ... import validation as _validation
+# IMPORTS #
 from .Cam import cam_base
-import tkinter
 
-### SPACE ###
+
+# SPACE #
 class space:
     '''Spaces store information about canvases, cameras, and figures'''
-    cam_bases  = [cam_base]
+    cam_bases = [cam_base]
+
     def __init__(self):
         '''init for space class, a space's data is added separately.'''
         self.space = []
@@ -52,14 +50,16 @@ class space:
     def setview(self, to):
         '''set a default view for the space'''
         if isinstance(to, tuple(self.cam_bases)):
-            if to.universe != self: raise ValueError(f'{to} not in this universe')
+            if to.universe != self:
+                raise ValueError(f'{to} not in this universe')
             self.view = to
             return
         raise TypeError(f'{to} should be a valid camera type')
 
     def view_in_canvas(self, at):
         '''view from default view at a canvas 'at' '''
-        if self.view is None: raise NameError('self.view is not defined')
+        if self.view is None:
+            raise NameError('self.view is not defined')
         self.view.add_canvas(at)
 
     def _recieve_update_msg(self, from_):
@@ -80,7 +80,8 @@ class space:
     def view_from(self, cam, at):
         '''view from cam at a canvas 'at' '''
         if isinstance(cam, tuple(self.cam_bases)):
-            if cam.universe != self: raise ValueError(f'{cam} not in this universe')
+            if cam.universe != self:
+                raise ValueError(f'{cam} not in this universe')
             cam.add_canvas(at)
             return
         raise TypeError(f'{cam} should be a valid camera type')
