@@ -65,7 +65,11 @@ __version__ = '3.0.0'
 __author__ = 'Augustin Garcia'
 if __name__ == '__main__':
     __package__ = 'usefulpy.mathematics'
-
+__all__ = ('AngleType', 'Composite', 'Factor', 'Heron', 'LawofCos', 'LawofSin', 'Prime', 'TriangleType', 'acute',
+           'circle', 'digit_prod', 'digit_sum', 'dist', 'equilateral', 'even', 'factorial', 'gcd', 'hypot', 'isTriangle',
+           'isclose', 'isfinite', 'isinf', 'isnan', 'isosceles', 'lcm', 'obtuse', 'odd', 'persistance',
+           'persistance_generator', 'phase', 'polar', 'primes_till', 'prod', 'product', 'rect', 'right', 'rt', 'scalene',
+           'segmented_sieve', 'sieve', 'straight', 'summation', 't', 'triangle')
 
 from itertools import repeat as _repeat, compress as _compress
 from functools import reduce as _reduce

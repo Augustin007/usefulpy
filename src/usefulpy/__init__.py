@@ -23,7 +23,7 @@ RELEASE NOTES:
    Bugfixes and improvements throughout.
  0.1
   Version 0.1.0:
-   Addition of more programs that contain more functions. Addition of 
+   Addition of more programs that contain more functions. Addition of
    usefulpy IDE. Improvement of functions.
   Version 0.1.1:
    Restructured to be supported as a package
@@ -36,34 +36,37 @@ RELEASE NOTES:
   Version 0.1.5:
    Succesfully restructured to be a package. Also bugfixes.
  0.2
-  Version 0.2.0
+  Version 0.2.0:
    Mathfunc class capabilities expanded with a simple algebraic simplifier
    system. Math sections improved for faster and better capabilities.
    Newer, faster prime sieve.
 
 SECTIONS:
 validation
- This program contains many useful functions for validation of input and output.
+This program contains many useful functions for validation of input and output.
 formatting
- This program contains several useful functions for formatting output.
+This program contains several useful functions for formatting output.
 mathematics
- Several mathematical functions plopped together.
+Several mathematical functions plopped together.
 gui
- Functions to help create a gui
+Functions to help create a gui
 decorators
- A small group of decorators
+A small group of decorators
 IDE
- Usefulpy IDE and interpreter
+Usefulpy IDE and interpreter
 
 '''
 
-### INFO ###
+# INFO #
 __author__ = 'Austin Garcia'
 __version__ = '0.2.0'
-__package__ = 'usefulpy'
+if __name__ != '__main__':
+    __package__ = 'usefulpy'
+__all__ = ('validation', 'formatting', 'mathematics', 'decorators')
 
-### IMPORT ###
+# IMPORT #
 from . import validation, formatting, mathematics, decorators
-from .IDE import ide, run_path, startup
+from .IDE import ide
 
-if __name__ == '__main__': ide()
+if __name__ == '__main__':
+    ide()

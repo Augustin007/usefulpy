@@ -18,6 +18,9 @@ RELEASE NOTES:
 # DUNDERS #
 __author__ = 'Augustin Garcia'
 __version__ = '0.0.0'
+if __name__ == '__main__':
+    __package__ = 'usefulpy.mathematics'
+__all__ = ('Interval', 'interval', 'unified_interval', 'is_interval')
 
 
 def is_interval(x):

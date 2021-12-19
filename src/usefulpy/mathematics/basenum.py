@@ -26,6 +26,7 @@ if __name__ == '__main__':
     __package__ = 'usefulpy.mathematics'
 __version__ = '0.1.1'
 __author__ = 'Augustin Garcia'
+__all__ = ('fromNumBaseFormat', 'basenum')
 
 # IMPORTS #
 import math
