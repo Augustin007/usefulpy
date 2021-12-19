@@ -21,17 +21,17 @@ RELEASE NOTES:
    Fixing some bugs, particularily regarding arithmetic operations.
 '''
 
-### INFO ###
+# INFO #
 if __name__ == '__main__':
     __package__ = 'usefulpy.mathematics'
 __version__ = '0.1.1'
 __author__ = 'Augustin Garcia'
 
-### IMPORTS ###
+# IMPORTS #
 import math
 
 
-### BASENUM ###
+# BASENUM #
 def fromNumBaseFormat(text):
     '''return a basenum from text:
 >>> fromNumBaseFormat('14_5')
@@ -61,7 +61,7 @@ class basenum(object):
     floatpart: str
     Negative: bool
 
-    ### INITIALIZING ###
+    # INITIALIZING #
     def __new__(cls, strint, base=10):
         '''__new__ for basenum class:
 >>> x = basenum('3a2', 16)
@@ -136,7 +136,7 @@ class basenum(object):
         self.num = strint
         return self
 
-    ### Conversions ###
+    # Conversions #
     def __float__(self):
         '''return float(self)'''
         decimal, num, base, floatpart = 0, self.num, self.base, self.floatpart
@@ -204,7 +204,7 @@ class basenum(object):
             strint = '-'+strint
         return basenum(strint, base)
 
-    ### ARITHMETIC OPERATIONS ###
+    # ARITHMETIC OPERATIONS #
     def __add__(self, other):
         '''return self+other'''
         try:
@@ -335,7 +335,7 @@ class basenum(object):
     def __rgcd__(self, other, /):
         return self.__gcd__(other)
 
-    ### COMPARISON OPERATOR ###
+    # COMPARISON OPERATOR #
     def __lt__(self, other):
         '''return self<other'''
         try:

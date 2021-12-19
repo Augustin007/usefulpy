@@ -20,7 +20,8 @@ if __name__ == '__main__':
     __package__ = 'usefulpy'
 __version__ = '0.0.1'
 __author__ = 'Augustin Garcia'
-__all__ = ('debug', 'repeat', 'timed_repeat', 'shift_args', 'default_setter', 'default_with_decorator', 'arg_modifier')
+__all__ = ('debug', 'repeat', 'timed_repeat', 'shift_args', 'default_setter',
+           'default_with_decorator', 'arg_modifier')
 
 import functools
 import time

@@ -738,7 +738,8 @@ def expression_function(func):
 
         var_names = ', '.join(map(lambda x: x.name, var))
         if func.__doc__:
-            exec(f'def {func.__name__}({var_names}): \t\n    """{func.__doc__}"""\n    pass ')
+            exec(f'def {func.__name__}({var_names}): \
+                  \t\n    """{func.__doc__}"""\n    pass ')
         else:
             exec(f'def {func.__name__}({var_names}): pass')
 

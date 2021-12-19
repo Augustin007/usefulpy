@@ -24,7 +24,7 @@ nanj = complex('nanj')
 nan = float('nan')
 
 
-### Non-Algebraic Numbers ###
+# Non-Algebraic Numbers #
 
 # way more digits than it will store... so the most accurate possible
 # I originially had it be calculated with formulae, (averaging the leibniz
@@ -39,7 +39,7 @@ e = 2.71828182845904523536028747135266249775724709369995957496  # ...
 # τ, ratio of diameter to circumference in circle
 τ = tau = 2*pi
 
-### Algebraic numbers ###
+# Algebraic numbers #
 
 # φ
 #

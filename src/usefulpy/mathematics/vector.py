@@ -152,7 +152,7 @@ class vector:
 
     def __getitem__(v, i):
         return v.scalars[i]
-    
+
     def is_constant(self):
         return True
 

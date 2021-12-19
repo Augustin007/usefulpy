@@ -228,13 +228,13 @@ class quaternion:
     def cos(q, /):
         '''return mcos of self in radians'''
         r, p, n = q.__polar__()
-        return math.cos(q.real)*math.cosh(r*math.sin(p))- \
+        return math.cos(q.real)*math.cosh(r*math.sin(p)) - \
             n*math.sin(q.real)*math.sinh(r*math.sin(p))
 
     def sin(q, /):
         '''return sin of self in radians'''
         r, p, n = q.__polar__()
-        return math.sin(q.real)*math.cosh(r*math.sin(p))+ \
+        return math.sin(q.real)*math.cosh(r*math.sin(p)) + \
             n*math.cos(q.real)*math.sinh(r*math.sin(p))
 
     def tan(q, /):
@@ -282,13 +282,13 @@ class quaternion:
     def cosh(q, /):
         '''return cosh of self in radians'''
         r, p, n = q.__polar__()
-        return math.cosh(q.real)*math.cos(r*math.sin(p))+ \
+        return math.cosh(q.real)*math.cos(r*math.sin(p)) + \
             n*math.sinh(q.real)*math.sin(r*math.sin(p))
 
     def sinh(q, /):
         '''return sinh of self in radians'''
         r, p, n = q.__polar__()
-        return math.sinh(q.real)*math.cos(r*math.sin(p))+ \
+        return math.sinh(q.real)*math.cos(r*math.sin(p)) + \
             n*math.cosh(q.real)*math.sin(r*math.sin(p))
 
     def tanh(q, /):

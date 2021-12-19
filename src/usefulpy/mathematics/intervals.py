@@ -15,7 +15,7 @@ RELEASE NOTES:
    Simple interval class
 '''
 
-### DUNDERS ###
+# DUNDERS #
 __author__ = 'Augustin Garcia'
 __version__ = '0.0.0'
 
