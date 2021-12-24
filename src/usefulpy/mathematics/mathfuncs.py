@@ -812,6 +812,7 @@ def expression_function(func):
         _internal_exchange.derive = derive
         _internal_exchange.old_exchange = exchange
         _internal_exchange.fn = fn
+        _internal_exchange.arg_data_func_wrap = eval(func.__name__)
 
         return mathfunc(_internal_exchange)
 
@@ -875,18 +876,19 @@ differentiation'''
         self.composition = func
         if isinstance(func, cas_expression):
             self.variables = func.vars
-            self.__doc__ = None
             self.function = func.view_string()
             self.__name__ = None
         else:
             self.variables = func.info
-            self.__doc__ = func.__doc__
             self.function = func.view_str
             self.__name__ = func.__name__
+        self.__doc__ = self.function
         var_list_str = ', '.join(map(safe_str, self.variables))
         space = {fn.__name__: fn for fn in func.fn}
         _short = eval(f'lambda {var_list_str}: {self.function}', None, space)
         self.shortcut_function = _short
+        _get = eval(f'lambda self, {var_list_str}: {self.function}', None, space)
+        self.__call__ = _get.__get__(self)
 
         self.__data = {'composition': func, 'oper': {}, 'custom_data': {}}
         return self
