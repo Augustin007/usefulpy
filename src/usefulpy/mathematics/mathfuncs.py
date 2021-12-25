@@ -829,6 +829,8 @@ def get_args(args, selector):
 
 def safe_str(expression):
     '''Return a 'safe' string for evaluation'''
+    if isinstance(expression, mathfunc):
+        expression = expression.composition
     if isinstance(expression, cas_expression):
         return expression.view_string()
     if isinstance(expression, cas_variable):
@@ -875,14 +877,14 @@ differentiation'''
         self = super(mathfunc, cls).__new__(cls)
         self.composition = func
         if isinstance(func, cas_expression):
-            self.variables = func.vars
+            self.variables = tuple(func.vars)
             self.function = func.view_string()
             self.__name__ = None
         else:
             self.variables = func.info
             self.function = func.view_str
             self.__name__ = func.__name__
-        self.__doc__ = self.function
+        self.__doc__ = 'Return '+self.function
         var_list_str = ', '.join(map(safe_str, self.variables))
         space = {fn.__name__: fn for fn in func.fn}
         _short = eval(f'lambda {var_list_str}: {self.function}', None, space)

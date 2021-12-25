@@ -25,21 +25,21 @@ if __name__ == '__main__':
     __package__ = 'usefulpy.mathematics'
 __all__ = ('vector', 'matrix')
 
-from .. import validation as _validation
-from .. import formatting as _formatting
+from .. import validation
+from .. import formatting
+from .mathfuncs import is_constant, mathfunc, cas_expression, safe_str, cas_variable, _comp_derive
+import itertools
 import functools
 import math
 
 
-class vector:
-    repr_mode: int = 0
-    scalars: tuple[float]
+class vector(tuple):
+    str_mode: int = 0
+    scalars: tuple
     dims: int
     magnitude: float
 
     def __new__(cls, *scalars, dims=None):
-        v = super(vector, cls).__new__(cls)
-        scalars = tuple(map(float, scalars))
         if dims is None:
             dims = len(scalars)
         else:
@@ -47,91 +47,107 @@ class vector:
             if dims < len(scalars):
                 raise ValueError('Too many scalars for number of dimensions')
             if dims > len(scalars):
-                scalars = tuple(list(scalars)+[0]*(dims-len(scalars)))
-        v.scalars = scalars
+                scalars = (*scalars, *itertools.repeat(0, dims-len(scalars)))
+        if not validation.are_floats(*scalars):
+            type_map = tuple(map(type, scalars))
+            assert str not in type_map
+            nscalars = []
+            fn = []
+            var = []
+            for n in scalars:
+                if is_constant(n):
+                    nscalars.append(n)
+                    continue
+                if callable(n):
+                    if type(n) is mathfunc:
+                        nscalars.append(n)
+                        fn.extend(n.composition.fn)
+                        var.extend(n.variables)
+                        continue
+                    if isinstance(n, cas_expression):
+                        nscalars.append(mathfunc(n))
+                        fn.extend(n.fn)
+                        var.extend(n.var)
+                        continue
+                    if hasattr(n, 'expressionable') and n.expressionable:
+                        nscalars.append(mathfunc(n))
+                        fn.extend(n.fn)
+                        var.extend(n.info)
+                        continue
+                    raise ValueError('function is not expressionable')
+                if type(n) is cas_variable:
+                    nscalars.append(n)
+                    var.append(n)
+                    continue
+                raise TypeError(f'Invalid type, {type(n)}')
+            return _mathfunc_vector(tuple(nscalars), set(fn), set(var))
+        v = tuple.__new__(cls, scalars)
         v.dims = dims
         v.magnitude = math.hypot(*scalars)
         return v
 
     def __add__(v1, v2):
         if not isinstance(v2, vector):
-            if _validation.is_float(v2):
-                return vector(*([v1.scalars[0]+float(v2)] +
-                                list(v1.scalars[1:])))
+            if is_constant(v2) or isinstance(v2, cas_variable, cas_expression):
+                return vector(v1[0]+v2, *v1[1:])
             return NotImplemented
         if v1.dims == v2.dims:
-            return vector(*[a+b for a, b in zip(v1.scalars, v2.scalars)])
+            return vector(*(a+b for a, b in zip(v1, v2)))
         if v1.dims < v2.dims:
-            end = list(v2.scalars[v1.dims:])
-            start = [a+b for a, b in zip(v1.scalars, v2.scalars)]
-            return vector(*(start + end))
-        end = list(v1.scalars[v2.dims:])
-        start = [a+b for a, b in zip(v1.scalars, v2.scalars)]
-        return vector(*(start+end))
+            end = v2[v1.dims:]
+            start = (a+b for a, b in zip(v1, v2))
+            return vector(*start, *end)
+        end = v1[v2.dims:]
+        start = (a+b for a, b in zip(v1, v2))
+        return vector(*start, *end)
 
     __radd__ = __add__
 
-    def __mulstr__(v):
-        return _formatting.multline(*v.scalars)
-
-    def __repr__(v):
-        if v.repr_mode == 0:
-            return 'vector'+str(v.scalars)
-        mstr = _formatting.multline(*v.scalars)
-        h = mstr.getheight()
-        w = mstr.getwidth()
-        side = _formatting.multline(*tuple('|'*h))
-        mstr = str(side + mstr + side)
-        top = '_'+w*' '+'_'
-        bottom = '‾' + w*' '+'‾'
-        return '\n'.join((top, mstr, bottom))
-
     def __sub__(v1, v2):
         if not isinstance(v2, vector):
-            if _validation.is_float(v2):
-                return vector(*([v1.scalars[0]-v2]+list(v1.scalars[1:])))
-            tname = type(v2).__name__
-            raise TypeError(f'cannot subtract a {tname} from a vector')
+            if is_constant(v2) or isinstance(v2, cas_variable, cas_expression):
+                return vector(v1[0]-v2, *v1[1:])
+            return NotImplemented
         if v1.dims == v2.dims:
-            return vector(*[a-b for a, b in zip(v1.scalars, v2.scalars)])
+            return vector(*(a-b for a, b in zip(v1, v2)))
         if v1.dims < v2.dims:
-            end = [-n for n in v2.scalars[v1.dims:]]
-            start = [a-b for a, b in zip(v1.scalars, v2.scalars)]
-            return vector(*(start + end))
-        end = list(v1.scalars[v2.dims:])
-        start = [a-b for a, b in zip(v1.scalars, v2.scalars)]
-        return vector(*(start+end))
+            end = (-s for s in v2[v1.dims:])
+            start = (a+b for a, b in zip(v1, v2))
+            return vector(*start, *end)
+        end = v1[v2.dims:]
+        start = (a-b for a, b in zip(v1, v2))
+        return vector(*start, *end)
 
     def __rsub__(v1, v2):
-        if _validation.is_float(v2):
-            return vector(*([v2-v1.scalars[0]]+[-n for n in v1.scalars[1:]]))
+        if is_constant(v2) or isinstance(v2, cas_variable, cas_expression):
+            if isinstance(v2, vector):
+                return NotImplemented
+            return vector(v2-v1[0], *(-n for n in v1[1:]))
         return NotImplemented
-
-    __str__ = __repr__
 
     def __pos__(v):
         return v
 
     def __neg__(v):
-        return vector(*[-n for n in v.scalars])
+        return vector(*(-n for n in v))
 
     def __mul__(v, s):
-        s = float(s)
+        if isinstance(s, vector):
+            return NotImplemented
         try:
-            return vector(*[n*s for n in v.scalars])
+            return vector(*(n*s for n in v))
         except Exception:
             return NotImplemented
 
-    __rmul__ = __mul__
-
-    def __div__(v, s):
-        s = float(s)
+    def __truediv__(v, s):
+        if isinstance(s, vector):
+            return NotImplemented
         try:
-            return vector(*[n/s for n in v.scalars])
+            return vector(*[n/s for n in v])
         except Exception:
             return NotImplemented
 
-    def __rdiv__(v, s):
+    def __rtruediv__(v, s):
         return NotImplemented
 
     def __pow__(v, m):
@@ -140,21 +156,88 @@ class vector:
     def __rpow__(v, m):
         return NotImplemented
 
-    def __iter__(v):
-        return v.scalars.__iter__()
-
     def dot(v1, v2):
         if v1.dims < v2.dims:
-            v1 = vector(*v1.scalars, v2.dims)
+            v1 = vector(*v1, v2.dims)
         if v2.dims < v1.dims:
-            v2 = vector(*v2.scalars, v1.dims)
-        return sum(map(lambda a, b: a*b, zip(v1, v2)))
-
-    def __getitem__(v, i):
-        return v.scalars[i]
+            v2 = vector(*v2, v1.dims)
+        return sum((a*b for a, b in zip(v1, v2)))
 
     def is_constant(self):
         return True
+
+    __rmul__ = __mul__
+
+    def __str__(v):
+        scalars = map(safe_str, v)
+        if v.str_mode == 0:
+            tup = ', '.join(scalars)
+            return f'vector({tup})'
+        mstr = formatting.multline(*scalars)
+        h = mstr.getheight()
+        w = mstr.getwidth()
+        side = formatting.multline(*tuple('|'*h))
+        mstr = str(side + mstr + side)
+        top = '_'+w*' '+'_'
+        bottom = '‾' + w*' '+'‾'
+        return '\n'.join((top, mstr, bottom))
+
+    def __repr__(v):
+        scalars = map(safe_str, v)
+        tup = ', '.join(scalars)
+        return f'vector({tup})'
+
+    def differentiate(self, var, k):
+        return vector(*map(lambda x: var._math_return(_comp_derive(x, var, k)), self))
+
+    def partial(self, var):
+        return self.differentiate(var, 1)
+
+
+def _get_name(x):
+    if is_constant(x):
+        return str(x)
+    if isinstance(x, cas_variable):
+        return x.name
+    return x.function
+
+
+class _mathfunc_vector(vector):
+    def __new__(cls, scalars, fn, var):
+        v = tuple.__new__(cls, scalars)
+        v.dims = len(scalars)
+        v.variables = tuple(var)
+        v.magnitude = sum(map(lambda x: x**2, scalars))**(1/2)
+        var_list_str = ', '.join(map(safe_str, v.variables))
+        space = {func.__name__: func for func in fn}
+        v.fn = fn
+        _function_names = map(_get_name, scalars)
+        _func_list_str = ', '.join(_function_names)
+        v.function = f'vector({_func_list_str})'
+        v.__doc__ = 'Return '+v.function
+        _short = eval(f'lambda {var_list_str}: {v.function}', None, space)
+        v.shortcut_function = _short
+        _get = eval(f'lambda v, {var_list_str}: {v.function}', None, space)
+        v.__call__ = _get.__get__(v)
+        return v
+
+    def __call__(self, *args):
+        if all(map(is_constant, args)):
+            return self.shortcut_function(*args)
+        d = {var: value for value, var in zip(args, self.variables, strict=True)}
+        new_scalars = []
+        for n in self:
+            if is_constant(n):
+                new_scalars.append(n)
+            if type(n) is mathfunc:
+                new_scalars.append(n(*map(d.__getitem__, n.variables)))
+            if type(n) is cas_variable:
+                new_scalars.append(d[n])
+        return vector(*new_scalars)
+
+    def is_constant(self):
+        return False
+
 
 
 class matrix:
@@ -168,10 +251,44 @@ class matrix:
             m.vectors = m._vectors = ()
 
         vectors = tuple([vector(*v) for v in vectors])
+        ivectors = iter(vectors)
         a = max([v.dims for v in vectors])
         b = len(vectors)
-        vectors1 = tuple([vector(*v.scalars, dims=a) for v in vectors])
-        vectors2 = tuple([vector(*v.scalars, dims=max(a, b)) for v in vectors])
+        vectors1 = tuple([vector(*v, dims=a) for v in vectors])
+        vectors2 = tuple([vector(*v, dims=max(a, b)) for v in vectors])
+        function_list=[]
+        for n in ivectors:
+            if type(n) is _mathfunc_vector:
+                m = super(matrix, cls).__new__(_mathfunc_matrix)
+                vars = list(n.variables)
+                fn = list(n.fn)
+                m.out_dim = a
+                m.in_dim = b
+                m.vectors = tuple(vectors1)
+                m._vectors = tuple(vectors2)
+                function_list.append(n.function)
+                for n in ivectors:
+                    if type(n) is _mathfunc_vector:
+                        vars.extend(n.variables)
+                        fn.extend(n.fn)
+                        function_list.append(n.function)
+                    else:
+                        function_list.append(repr(n))
+                m.variables = tuple(set(vars))
+                m.fn = tuple(set(fn))
+                var_list_str = ', '.join(map(safe_str, m.variables))
+                space = {func.__name__: func for func in fn}
+                _func_list_str = ', '.join(function_list)
+                m.function = f'matrix({_func_list_str})'
+                m.__doc__ = 'Return '+m.function
+                _short = eval(f'lambda {var_list_str}: {m.function}', None, space)
+                m.shortcut_function = _short
+                _get = eval(f'lambda m, {var_list_str}: {m.function}', None, space)
+                m.__call__ = _get.__get__(m)
+                return m
+            else:
+                function_list.append(repr(n))
+
         m = super(matrix, cls).__new__(cls)
         m.out_dim = a
         m.in_dim = b
@@ -182,11 +299,11 @@ class matrix:
     def _mul_vector(m, v):
         if m.in_dim <= v.dims:
             nvectors = []
-            for s, v1 in zip(m.vectors, v.scalars):
+            for s, v1 in zip(m.vectors, v):
                 nvectors.append(s*v1)
             return sum(nvectors)
         elif m.in_dim > v.dims:
-            nv = vector(*(list(v.scalars)), dims=m.in_dim)
+            nv = vector(*(list(v)), dims=m.in_dim)
             return m*nv
 
     def _mul_matrix(m, m1):
@@ -212,19 +329,21 @@ class matrix:
         mstr = m.__mulstr__()
         h = mstr.getheight()
         w = mstr.getwidth()
-        side = _formatting.multline(*('|'*h))
+        side = formatting.multline(*('|'*h))
         mstr = str(side + mstr + side)
         top = '_'+w*' '+'_'
         bottom = '‾' + w*' '+'‾'
         return '\n'.join((top, mstr, bottom))
+
+    __str__ = __repr__
 
     def __iter__(m):
         return m.vectors.__iter__()
 
     def __float__(m):
         if len(m.vectors) == 1:
-            if len(m.vectors[0].scalars) == 1:
-                return m.vectors[0].scalars[0]
+            if len(m.vectors[0]) == 1:
+                return m.vectors[0][0]
         return NotImplemented
 
     def get_column(m, i, zeros=False):
@@ -275,4 +394,24 @@ class matrix:
     def is_constant(self):
         return True
 
-# eof
+    def differentiate(self, var, k):
+        return matrix(*(vector.differentiate(var, k) for vector in self.vectors))
+
+    def partial(self, var):
+        return self.differentiate(var, 1)
+
+
+class _mathfunc_matrix(matrix):
+
+    def __call__(self, *args):
+        d = {var: value for value, var in zip(args, self.variables, strict=True)}
+        new_vectors = []
+        for v in self:
+            if is_constant(v):
+                new_vectors.append(v)
+            if type(v) is _mathfunc_vector:
+                new_vectors.append(v(*map(d.__getitem__, v.variables)))
+        return matrix(*new_vectors)
+
+    def is_constant(self):
+        return False
