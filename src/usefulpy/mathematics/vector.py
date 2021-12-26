@@ -239,7 +239,6 @@ class _mathfunc_vector(vector):
         return False
 
 
-
 class matrix:
     repr_mode = 0
 
@@ -256,7 +255,7 @@ class matrix:
         b = len(vectors)
         vectors1 = tuple([vector(*v, dims=a) for v in vectors])
         vectors2 = tuple([vector(*v, dims=max(a, b)) for v in vectors])
-        function_list=[]
+        function_list = []
         for n in ivectors:
             if type(n) is _mathfunc_vector:
                 m = super(matrix, cls).__new__(_mathfunc_matrix)
