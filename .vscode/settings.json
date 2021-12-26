@@ -7,5 +7,7 @@
     "cornflakes.linter.executablePath": "C:\\Users\\WilliamGarcia\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\flake8",
     "cornflakes.linter.run": "onType",
     "python.linting.mypyPath": "C:\\Users\\WilliamGarcia\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\mypy",
-    "mypy.dmypyExecutable": "C:\\Users\\WilliamGarcia\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\dmypy.exe"
+    "mypy.dmypyExecutable": "C:\\Users\\WilliamGarcia\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\dmypy.exe",
+    "autoDocstring.docstringFormat": "numpy",
+    "autoDocstring.quoteStyle": "'''"
 }

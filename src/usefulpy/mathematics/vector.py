@@ -39,8 +39,31 @@ class vector(tuple):
     dims: int
     magnitude: float
 
-    def __new__(cls, *scalars, dims=None):
-        if dims is None:
+    def __new__(cls, *scalars, dims: int = 0):
+        '''__new__ for vector class
+
+        Parameters
+        ----------
+        dims : int, optional
+            Number of dimensions of vector, filling extra space with 0s
+            If default number 0 is entered, dimensions are calculated automatically.
+
+        Returns
+        -------
+        [type]
+            [description]
+
+        Raises
+        ------
+        ValueError
+            Raised if dimensions is smaller than length of scalars
+        ValueError
+            Raised if a function that has not been marked as expressionable by mathfunc_decorator
+            is in scalars.
+        TypeError
+            Raised if an invalid type is encountered.
+        '''
+        if dims == 0:
             dims = len(scalars)
         else:
             dims = int(dims)

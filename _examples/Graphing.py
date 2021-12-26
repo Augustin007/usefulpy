@@ -73,7 +73,6 @@ import time
 
 ###  Part 3  ###
 ###   Math   ###
-from usefulpy.mathematics.eq import *
 
 def makegraph(t):
     tracer(False)
@@ -157,14 +156,15 @@ def graph(t, neq):
     started = False
     for x in range(-400, 400):
         try:
-            newheight = round(scale*neq.solve(x/scale), 15)
+            newheight = round(scale*neq(x/scale), 15)
             t.goto(x, newheight)
             if frozen:
                 t.pendown()
                 frozen = False
                 if not started:
                     started = True
-        except:
+        except Exception as e:
+            print(repr(e))
             t.penup()
             t.goto(x, 0)
             if not frozen:
@@ -172,6 +172,9 @@ def graph(t, neq):
     tracer(True)
     if not started:
         raise ValueError
+
+def create(string):
+    return eval('lambda x: ' + string)
 
 class replacer(Thread):
     def __init__(self, field):
@@ -280,7 +283,8 @@ and returns the text field."""
     def calculate(self):
         original = self.get()
         try: neq = create(original)
-        except:
+        except Exception as e:
+            print(repr(e))
             if original.endswith(self.errortext): return
             self.input.set(original + self.errortext)
             return
@@ -289,7 +293,8 @@ and returns the text field."""
         if neq in self.rungraphs: return
 
         try: graph(t, neq)
-        except:
+        except Exception as e:
+            print(repr(e))
             if original.endswith(self.errortext): return
             self.input.set(original + self.errortext)
             return
