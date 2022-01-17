@@ -52,7 +52,7 @@ function = type(lambda: None)
 
 
 def is_function(s):
-    '''Check whether variable s points to a function'''
+    '''Check whether variable s points to a function, not the same as callable'''
     return type(s) is function
 
 
