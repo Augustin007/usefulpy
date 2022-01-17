@@ -32,7 +32,7 @@ nan = float('nan')
 # was more efficient and more accurate (I kept on adjusting the numbers to get
 # a bit more accuracy, but I still wasn't quite happy with it.
 
-# e, number where f(x)=e^x, its derivative, f'(x) also equals e^x
+# e, number where (d/dx)[e^x] = e^x
 e = 2.71828182845904523536028747135266249775724709369995957496  # ...
 # π, ratio of diameter to circumference in circle
 π = pi = 3.141592653589793238462643383279502884197169399375105  # ...

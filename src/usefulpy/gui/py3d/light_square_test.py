@@ -1,6 +1,7 @@
 '''
 preparing for new lighting system
 '''
+__package__ = 'usefulpy.gui.py3d'
 from ... import mathematics as math
 
 testing = False

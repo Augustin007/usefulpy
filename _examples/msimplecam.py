@@ -33,7 +33,7 @@ for x in range(-10, 10):
             world.append(make_block(x, y, z, color))
 
 with cProfile.Profile() as pr:
-    cam.up(4, smooth=False)
+    cam.up(4)
     cam.spin_dn(_c._m.tau/3, smooth=False)
 
 
