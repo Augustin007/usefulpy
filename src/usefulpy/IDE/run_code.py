@@ -51,7 +51,7 @@ def _get_doc(filename):
         return eval(trydoc)
 
 
-def run_path(pathname, init_globals=None, run_name='__umain__', usefulpy=True):
+def run_path(pathname, init_globals=None, run_name='__main__', usefulpy=True):
     if init_globals is None:
         init_globals = {}
 

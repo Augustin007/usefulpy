@@ -1,22 +1,22 @@
 import sys
 from usefulpy.IDE import ide, run_path
+import argparse
 
-
-n = list(sys.argv)
-print(n)
-if len(n) == 3:
-    assert n[1].startswith('-')
-    mode = n[1][1:]
-    if mode == 'i':
-        space = run_path(n[2])
-        ide(space)
-    else:
-        raise RuntimeError('Invalid argument')
-elif len(n) == 2:
-    run_path(n[1])
-elif len(n) == 1:
+arguments = list(sys.argv)
+if len(arguments) <= 1:
     ide()
-else:
-    raise RuntimeError('Error occured')
+    sys.exit()
 
-# eof
+my_parser = argparse.ArgumentParser(prog='usefulpy', usage='%(prog)s [options] [path]', description='run path with usefulpy or launch usefulpy')
+my_parser.add_argument('Path', action='store', type=str, help='program to run')
+my_parser.add_argument('-i', '--interactive', action='store_true', help='Enable interactive mode')
+args = my_parser.parse_args()
+
+input_path = args.Path
+
+print(input_path)
+space = run_path(input_path)
+
+if args.interactive:
+    ide(space)
+n = list(sys.argv)
