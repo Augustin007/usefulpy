@@ -1,21 +1,23 @@
-#minecraft-like 20 by 20 block generation
+# minecraft-like 20 by 20 block generation
 from usefulpy.gui.py3d import Simple_camera as _c
-from usefulpy.gui.py3d import tools3d as _t
 from usefulpy.gui import Frame as _frame
-import logging as log
 import cProfile
 import pstats
+
 Space = _c.space()
-canv = _frame(width = 800, height =800).addCanvas(width = 800, height =800)
+canv = _frame(width=800, height=800).addCanvas(width=800, height=800)
 cam = _c.simple_camera(Space, _c.quaternion(), _c.i)
 cam.add_canvas(canv)
 
-import random as _r
 _c.light_scource = (2*_c.i+_c.j+5*_c.k).normal()
+
+
 def make_block(x, y, z, color):
     pointa = _c.quaternion(0, x, y, z)
     pointb = _c.quaternion(0, x+1, y+1, z+1)
     return _c.make_rectangular_prism(Space, pointa, pointb, color)
+
+
 brown = (177, 124, 83)
 green = (133, 183, 98)
 height = 2
