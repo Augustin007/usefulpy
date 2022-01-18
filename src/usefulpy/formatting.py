@@ -180,46 +180,47 @@ def Fix_longtos(text):
 
 
 _numbers = {
-        'zero': 0,
-        'one': 1,
-        'two': 2,
-        'three': 3,
-        'four': 4,
-        'five': 5,
-        'six': 6,
-        'seven': 7,
-        'eight': 8,
-        'nine': 9,
-        'eleven': 11,
-        'twelve': 12,
-        'thirteen': 13,
-        'fourteen': 14,
-        'fifteen': 15,
-        'sixteen': 16,
-        'seventeen': 17,
-        'eighteen': 18,
-        'nineteen': 19,
-        'ten': 10,
-        'twenty': 20,
-        'thirty': 30,
-        'forty': 40,
-        'fifty': 50,
-        'sixty': 60,
-        'seventy': 70,
-        'eighty': 80,
-        'ninety': 90
-        }
+    'zero': 0,
+    'one': 1,
+    'two': 2,
+    'three': 3,
+    'four': 4,
+    'five': 5,
+    'six': 6,
+    'seven': 7,
+    'eight': 8,
+    'nine': 9,
+    'eleven': 11,
+    'twelve': 12,
+    'thirteen': 13,
+    'fourteen': 14,
+    'fifteen': 15,
+    'sixteen': 16,
+    'seventeen': 17,
+    'eighteen': 18,
+    'nineteen': 19,
+    'ten': 10,
+    'twenty': 20,
+    'thirty': 30,
+    'forty': 40,
+    'fifty': 50,
+    'sixty': 60,
+    'seventy': 70,
+    'eighty': 80,
+    'ninety': 90
+    }
+
 _furtherplaces = {
-        'thousand': 1000,
-        'million': 1000000,
-        'billion': 1000000000,
-        'trillion': 1000000000000,
-        'quatrillion': 1000000000000000,
-        'quitillion': 1000000000000000000,
-        'hexillion': 1000000000000000000000,
-        'septillion': 1000000000000000000000000,
-        'octillion': 1000000000000000000000000000
-        }
+    'thousand': 1000,
+    'million': 1000000,
+    'billion': 1000000000,
+    'trillion': 1000000000000,
+    'quatrillion': 1000000000000000,
+    'quitillion': 1000000000000000000,
+    'hexillion': 1000000000000000000000,
+    'septillion': 1000000000000000000000000,
+    'octillion': 1000000000000000000000000000
+    }
 
 
 def unformat(text: str, /, query=1):
@@ -577,9 +578,8 @@ def Syllables(word: str):
             Base = ''
             SyllCount += 1
 
-    if not (word[-2:] in ['le', 'he', 'ie', 'ae', 'ee', 'oe', 'ue'] or
-            word[-3:] in ['ses', 'les', 'ies', 'aes', 'oes', 'ues', 'ees',
-            'eed', 'aed', 'ied', 'oed', 'ued']):
+    if not (word[-2:] in ['le', 'he', 'ie', 'ae', 'ee', 'oe', 'ue'] or word[-3:] in [
+            'ses', 'les', 'ies', 'aes', 'oes', 'ues', 'ees', 'eed', 'aed', 'ied', 'oed', 'ued']):
         # endings that do make sound even though the word ends in e, es, or ed
         for ending in ['es', 'ed', 'e']:  # Usually don't constitute syllable
             if word.endswith(ending):

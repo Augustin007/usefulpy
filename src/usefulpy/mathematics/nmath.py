@@ -254,7 +254,7 @@ def _taylor_summation(function):
         start = 0
         change = function(start)
         sm = 0
-        check = lambda x:  abs(x) < 1e-25
+        check = lambda x: abs(x) < 1e-25
         while not all(map(check, (change, prev, prev1, prev2))):
             start += 1
             try:
@@ -402,7 +402,7 @@ class t:  # taylor series
         return _taylor_summation(iteration)
 
     def tan(theta, /):
-        # TODO:  Add Taylor Series for tan
+        # TODO: Add Taylor Series for tan
         return t.sin(theta)/t.cos(theta)
 
     def exp(num):

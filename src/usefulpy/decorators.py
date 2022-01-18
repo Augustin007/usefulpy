@@ -151,7 +151,8 @@ def pipeline(b):
         def __repr__(self):
             return f'<Pipeline[{str(self)}] at {hex(id(self))}>'
 
-    def pipe_dec(a): return _pipeline(a, b)
+    def pipe_dec(a):
+        return _pipeline(a, b)
 
     return pipe_dec
 

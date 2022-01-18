@@ -58,22 +58,22 @@ class interval:
         self.start = float(start)
         self.stop = float(stop)
         if mode in ('open', 0):
-            self._check = (lambda x:  (x > start) and (x < stop))
+            self._check = (lambda x: (x > start) and (x < stop))
             self._repstr = '('+str(self.start)+', '+str(self.stop)+')'
             self.mode = 0
             return
         if mode in ('right', 1):
-            self._check = (lambda x:  (x > start) and (x <= stop))
+            self._check = (lambda x: (x > start) and (x <= stop))
             self._repstr = '('+str(self.start)+', '+str(self.stop)+']'
             self.mode = 1
             return
         if mode in ('left', 2):
-            self._check = (lambda x:  (x >= start) and (x < stop))
+            self._check = (lambda x: (x >= start) and (x < stop))
             self._repstr = '['+str(self.start)+', '+str(self.stop)+')'
             self.mode = 2
             return
         if mode in ('close', 3):
-            self._check = (lambda x:  (x >= start) and (x <= stop))
+            self._check = (lambda x: (x >= start) and (x <= stop))
             self._repstr = '['+str(self.start)+', '+str(self.stop)+']'
             self.mode = 3
             return
@@ -179,7 +179,7 @@ class interval:
 
 
 class unified_interval:
-    intervals:  tuple[interval]
+    intervals: tuple[interval]
 
     def __init__(self, *intervals):
         self.intervals = tuple(sorted(intervals))
