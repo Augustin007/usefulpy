@@ -40,6 +40,9 @@ RELEASE NOTES:
    Mathfunc class capabilities expanded with a simple algebraic simplifier
    system. Math sections improved for faster and better capabilities.
    Newer, faster prime sieve.
+  Version 0.2.1:
+   Implemented terminal/command line interface.
+   CAS system now supports more variables, types, and functions.
 
 SECTIONS:
 validation
@@ -59,14 +62,10 @@ Usefulpy IDE and interpreter
 
 # INFO #
 __author__ = 'Austin Garcia'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 if __name__ != '__main__':
     __package__ = 'usefulpy'
 __all__ = ('validation', 'formatting', 'mathematics', 'decorators')
 
 # IMPORT #
 from . import validation, formatting, mathematics, decorators
-from .IDE import ide
-
-if __name__ == '__main__':
-    ide()
