@@ -79,8 +79,8 @@ def ide(namespace=None):
                     old__1 = namespace['__']
                 except Exception:
                     pass
-
-                output = eval(corrected_input, namespace)
+                code = compile(corrected_input, '<Usefulpy IDE>', 'eval')
+                output = eval(code, namespace)
                 print()
                 if output is None:
                     count += 1
@@ -99,10 +99,11 @@ def ide(namespace=None):
                 In.append(input_)
                 count += 1
                 continue
-            except Exception:
+            except SyntaxError:
                 pass
             try:
-                exec(corrected_input, namespace)
+                code = compile(corrected_input, '<Usefulpy IDE>', 'exec')
+                exec(code, namespace)
                 print()
             except BaseException as err:
                 print()

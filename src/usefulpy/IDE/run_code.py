@@ -68,6 +68,8 @@ def run_path(pathname, init_globals=None, run_name='__main__', usefulpy=True):
     run_scope['__name__'] = run_name
     run_scope['__doc__'] = doc
 
+    code = compile(code, os.path.realpath(pathname), 'exec')
+
     exec(code, run_scope)
     usefulpy_syntax.namespace_management.keep_unique(run_scope, globals)
     return run_scope
