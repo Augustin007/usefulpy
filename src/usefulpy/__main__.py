@@ -15,13 +15,17 @@ my_parser = argparse.ArgumentParser(prog='usefulpy', usage='%(prog)s [options] [
 my_parser.add_argument('Path', action='store', type=str, help='program to run')
 my_parser.add_argument('-i', '--interactive', action='store_true', help='Enable interactive mode')
 my_parser.add_argument('-l', '--log', action='count', help='increase logging level by 10')
+my_parser.add_argument('extra_args', nargs=argparse.REMAINDER, help='arguments for code')
 
 args = my_parser.parse_args()
 
 input_path = args.Path
+
 if not os.path.exists(input_path):
     print('No such file or directory:', input_path, '\n')
     sys.exit()
+
+sys.argv = [os.path.realpath(args.Path)] + args.extra_args
 
 if args.log:
     logging.basicConfig(level=args.log*10)
