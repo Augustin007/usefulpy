@@ -596,6 +596,10 @@ def Syllables(word: str):
     return SyllCount
 
 
+def colored(r, g, b, text):
+    return "\033[38;2;{};{};{}m{} \033[38;2;255;255;255m".format(r, g, b, text)
+
+
 # TODO: colors can be improved severely.
 class colors:
     '''Colors class: reset all colors with colors.reset; two subclasses:
