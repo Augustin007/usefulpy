@@ -75,8 +75,8 @@ class vector(tuple):
             type_map = tuple(map(type, scalars))
             assert str not in type_map
             nscalars = []
-            fn = []
-            var = []
+            fn: list = []
+            var: list = []
             for n in scalars:
                 if is_constant(n):
                     nscalars.append(n)

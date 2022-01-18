@@ -36,12 +36,17 @@ RELEASE NOTES:
    More bugfixing, some more functions. Efficiency increased
 1
  1.0
-  Version 1.0.0
+  Version 1.0.0:
    Entirety of folder restructured. Much improved use of mathfuncs. Expression
    check has taken the place of eq and algebraic solver. Basic CAS implemented
    for the new mathfunc-eq-solver merge. Greater efficiency and power to most
    other areas. nmath made much smaller, most of its functionality has been
    moved to the mathfunc file.
+  Version 1.0.1:
+   Heavy bugfixing
+ 1.1
+  Version 1.1.0
+   Remade CAS system. Moved things around to nmath.
 '''
 
 # INFO #

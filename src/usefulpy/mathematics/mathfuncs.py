@@ -56,6 +56,7 @@ from abc import abstractmethod
 import types
 from functools import cache, wraps
 import logging
+import typing
 # Maths
 import math
 import cmath
@@ -116,7 +117,7 @@ class cas_variable:
 
     name: str
     names: dict = {}  # stores all created variables
-    value = None
+    valu0e: typing.Any = None
 
     # INITIALIZATION #
 
@@ -860,7 +861,8 @@ differentiation'''
     function: str
     __name__: str
     inverse: types.FunctionType
-    interval = None
+    interval: typing.Any = None
+    composition: typing.Any = None
     __is_frozen: bool = False
     variables: set
 
