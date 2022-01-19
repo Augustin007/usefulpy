@@ -1,5 +1,7 @@
 .pytest_cache
 
+.mypy_cache
+
 .vscode
 
 __pycache__
@@ -11,3 +13,5 @@ dist/
 build/
 
 usefulpython.egg-info
+
+future
