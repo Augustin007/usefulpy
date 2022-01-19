@@ -62,6 +62,7 @@ import math
 import cmath
 from decimal import Decimal
 from fractions import Fraction
+from numbers import Number
 
 if __name__ == '__main__':
     level = validation.intinput('enter logging level: ')
@@ -70,12 +71,12 @@ if __name__ == '__main__':
     logging.root.setLevel(level)
 
 
-constants = (int, float, complex, Decimal, Fraction)
+constants = (int, float, complex, Decimal, Fraction, Number)
 
 
 def is_constant(n) -> bool:
     '''Checks whether n is constant for cas engine'''
-    if type(n) in constants:
+    if isinstance(n, constants):
         return True
     try:
         return bool(n.is_constant())
