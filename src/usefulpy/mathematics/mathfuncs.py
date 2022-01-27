@@ -118,7 +118,7 @@ class cas_variable:
 
     name: str
     names: dict = {}  # stores all created variables
-    valu0e: typing.Any = None
+    value: typing.Any = None
 
     # INITIALIZATION #
 
