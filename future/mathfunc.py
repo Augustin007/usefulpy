@@ -591,6 +591,12 @@ class cas_exact(cas_exact_object):
     def __repr__(self):
         return f'cas_exact({str(self.value)!r})'
 
+    def __float__(self):
+        return float(self.value)
+
+    def __int__(self):
+        return int(self.value)
+
 
 class cas_expression(cas_object):
     oper: str
@@ -670,9 +676,25 @@ def comp_extract(obj):
     return obj
 
 
+def cas_safe(n):
+    if is_constant(n):
+        if not isinstance(n, cas_exact_object):
+            try:
+                return cas_exact(n)
+            except Exception as error:
+                logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
+        return n
+    if type(n) is mathfunc:
+        return n.composition
+    return n
+
+
 class commutative_expression(cas_expression, tuple):
+    LaTeXoper: str
+
     def __new__(cls, iterable=()):
         '''__new__ for any communative expressions'''
+        iterable = tuple(map(cas_safe, iterable))
         if all(map(is_constant, iterable)):
             return cls.cas_exact(iterable)
         self = tuple.__new__(cls, map(comp_extract, iterable))
@@ -745,6 +767,9 @@ Return functions involved in expression'''
         '''evaluate self at values of variables'''
         return self.__class__(map(_get, self))
 
+    def LaTeX(self):
+        return '{'+f'}}{self.LaTeXoper}{{'.join(map(getLaTeX, self))+'}'
+
 
 class non_commutative_expression(cas_expression):
     var: tuple
@@ -791,6 +816,7 @@ class cas_exact_commutative_expression(cas_exact_expression, tuple):
 
     def __new__(cls, iterable=()):
         '''__new__ for any communative expressions'''
+        iterable = tuple(map(cas_safe, iterable))
         if not all(map(is_constant, iterable)):
             return cls.cas_inexact(iterable)
         self = tuple.__new__(cls, map(comp_extract, iterable))
@@ -892,11 +918,6 @@ class add_exact_expression(cas_exact_commutative_expression):
                 if count != 1:
                     expressions_short.append(mul_exact_expression((count, value)))
                     continue
-                    if type(value) is mul_expression:
-                        expressions_short.append(tuple.__new__(mul_exact_expression, (count, *value)))
-                        continue
-                    expressions_short.append(tuple.__new__(mul_exact_expression, (count, value)))
-                    continue
                 expressions_short.append(value)
 
         # Return clean results
@@ -929,6 +950,7 @@ class add_exact_expression(cas_exact_commutative_expression):
 class add_expression(commutative_expression):
     oper = '+'
     hook_intercept = 'add'
+    LaTeXoper = '+'
     cas_exact = add_exact_expression
 
     def _simplify(self, /):
@@ -1089,6 +1111,7 @@ class mul_expression(commutative_expression):
     oper = '*'
     hook_intercept = 'mul'
     cas_exact = mul_exact_expression
+    LaTeXoper = ''
 
     def _simplify(self, /):
         '''Simplifies multiplication expression'''
@@ -1210,6 +1233,34 @@ class pow_exact_expression(cas_exact_non_commutative_expression):
     hook_intercept = 'pow'
     true_operation = lambda x, y: x**y
 
+    def __new__(cls, a, b):
+        if is_rational(a) and validation.is_integer(b):
+            return a**b
+        self = super(cas_exact_non_commutative_expression, cls).__new__(cls)
+        self.a = a
+        self.b = b
+        self.value = a.value**b.value
+        return self._simplify()
+
+    def _simplify(self, /):
+        '''Simplifies power expression '''
+        # special cases
+        if self.b == 0:
+            return 1
+        if self.b == 1:
+            return self.a
+        if self.a == 0:
+            return 0
+        if self.a == 1:
+            return 1
+        if type(self.a) in (mul_expression, mul_exact_expression):
+            return mul_expression(map(lambda n: pow_expression(n, self.b),
+                                  self.a))
+        if type(self.a) in (pow_expression, pow_exact_expression):
+            return pow_expression(self.a.a,
+                                  mul_expression((self.a.b, self.b)))
+        return self
+
 
 def remove_duplicates(tup):  # TEMPORARY:
     return tuple(set(tup))
@@ -1223,6 +1274,8 @@ class pow_expression(non_commutative_expression):
     def __new__(cls, a, b):
         '''__new__ for non-communative expressions'''
         self = super(non_commutative_expression, cls).__new__(cls)
+        if is_constant(a) and is_constant(b):
+            return pow_exact_expression(a, b)
         if type(a) is mathfunc:
             a = a.composition
         if type(b) is mathfunc:
@@ -1263,6 +1316,25 @@ class pow_expression(non_commutative_expression):
 
     def LaTeX(self):
         return '{'+getLaTeX(self.a)+'}^{'+getLaTeX(self.b)+'}'
+
+    def _simplify(self, /):
+        '''Simplifies power expression '''
+        # special cases
+        if self.b == 0:
+            return 1
+        if self.b == 1:
+            return self.a
+        if self.a == 0:
+            return 0
+        if self.a == 1:
+            return 1
+        if type(self.a) in (mul_expression, mul_exact_expression):
+            return mul_expression(map(lambda n: pow_expression(n, self.b),
+                                  self.a))
+        if type(self.a) in (pow_expression, pow_exact_expression):
+            return pow_expression(self.a.a,
+                                  mul_expression((self.a.b, self.b)))
+        return self
 
 
 def getLaTeX(value):
