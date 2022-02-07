@@ -42,8 +42,6 @@ if __name__ == '__main__':  # To account for relative imports when run
 
 # IMPORTS #
 # Relative imports
-import functools
-
 from .. import decorators
 from .. import validation
 # Utilities
@@ -127,7 +125,7 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
         lvarnum = varnum if varnum is not None else function.__code__.co_varnames
         attrs = tuple([custom.get(n, fhook if n not in riter else bhook) if n not in ignore else None for n in range(lvarnum)])
 
-        @functools.wraps(function)
+        @wraps(function)
         def wrapper(*args):
             for arg, attr in zip(args, attrs):
                 if hasattr(arg, attr):
@@ -140,7 +138,7 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
 
 
 def math_return_dec(function):
-    @functools.wraps(function)
+    @wraps(function)
     def wrapper(*args, **kwargs):
         try:
             return_val = function(*args, **kwargs)
@@ -245,7 +243,7 @@ class cas_object:
 
 class cas_callable:
     fns: tuple
-    vars: tuple
+    var: tuple
     __data: dict
     __doc__: str
     shortcut_function: types.FunctionType
@@ -314,7 +312,7 @@ class cas_callable:
         if self.__is_frozen:
             raise AttributeError(f'attributes of {self!r} are no longer writeable')
         if name in self.__annotations__:
-            if name in ('arguments_call', 'fn', 'vars') and hasattr(self, name):
+            if name in ('arguments_call', 'fn', 'var') and hasattr(self, name):
                 raise AttributeError('this attribute is not writeable')
             super.__setattr__(self, name, value)
             if name in self.special:
@@ -408,7 +406,7 @@ class cas_variable(cas_object):
 
 
 def math_return_dec(function):
-    @functools.wraps(function)
+    @wraps(function)
     def wrapper(*args, **kwargs):
         try:
             return_val = function(*args, **kwargs)
@@ -448,6 +446,10 @@ class cas_exact_object:
     @hook('add', 2, False, (1,), 'exact')
     def __add__(self, other):
         '''Return self+other'''
+        if is_rational(other) and is_rational(self):
+            if type(other) is not cas_exact:
+                other = cas_exact(other)
+            return self.value + other.value
         return add_exact_expression((self, other))
 
     @hook('add', 2, True, (1,), 'exact')
@@ -468,6 +470,10 @@ class cas_exact_object:
     @hook('mul', 2, False, (1,), 'exact')
     def __mul__(self, other):
         '''Return self*other'''
+        if is_rational(other) and is_rational(self):
+            if type(other) is not cas_exact:
+                other = cas_exact(other)
+            return self.value * other.value
         return mul_exact_expression((self, other))
 
     @hook('mul', 2, True, (1,), 'exact')
@@ -511,10 +517,11 @@ class cas_constant(cas_exact_object):
     name: str
     names: dict = cas_variable.names  # stores all created variables
     value: typing.Any = None
+    LaTeX: str
 
     # INITIALIZATION #
 
-    def __new__(cls, name, value):
+    def __new__(cls, name, value, LaTeX=None):
         '''__new__ for cas_variable'''
         assert is_constant(value)
         if name in cls.names:
@@ -536,20 +543,24 @@ class cas_constant(cas_exact_object):
         logging.info(f'Constant created: {name!r}')
         self = super(cas_constant, cls).__new__(cls)
 
+        if LaTeX is None:
+            LaTeX = name
+
         self.name = name
         self.names[name] = self
         self.value = value
+        self.LaTeX = LaTeX
 
         return self
 
     # CONVERSIONS #
     def __repr__(self):
         ''' representation string for cas_variable '''
-        return f'<{self.__class__.__name__} <{self}={self.value}> at {hex(id(self))}>'
+        return f'<{self.__class__.__name__} <{self.name}={self.value}> at {hex(id(self))}>'
 
     def __str__(self):
         ''' str for cas_variable '''
-        return self.name
+        return str(self.value)
 
 
 class cas_exact(cas_exact_object):
@@ -574,6 +585,9 @@ class cas_exact(cas_exact_object):
                     return
         raise TypeError('Invalid Type')
 
+    def __str__(self):
+        return self.value
+
     def __repr__(self):
         return f'cas_exact({str(self.value)!r})'
 
@@ -597,26 +611,14 @@ Return cas derivative of self'''
 
     def evaluate(self, *args):
         '''Return self evaluated with args as values for variables'''
-        if len(self.vars) != len(args):
+        if len(self.var) != len(args):
             raise ValueError('Incorrect number of arguments entered')
-        for arg, var in zip(args, self.vars):
+        for arg, var in zip(args, self.var):
             var._set(arg)
         value = self._evaluate()
-        for var in self.vars:
+        for var in self.var:
             var._reset()
         return value
-
-    @abstractmethod
-    def vars(self):
-        '''abstract method: create as a @property
-Return variables involved in expression'''
-        pass
-
-    @abstractmethod
-    def fn(self):
-        '''abstract method: create as a @property
-Return functions involved in expression'''
-        pass
 
     @abstractmethod
     def _evaluate(self, /):
@@ -636,7 +638,25 @@ Return self converted into a string'''
 
 
 class cas_exact_expression(cas_exact_object):
-    pass
+    @abstractmethod
+    def _simplify(self, /):
+        '''abstract method: called during initialization
+Return a simplified version of current expression'''
+        pass
+
+    def _comp_derive(self, k, n, /):
+        '''Return cas derivative of self'''
+        return 0
+
+    @abstractmethod
+    def __str__(self, /):
+        '''abstract method: called by str
+Return self converted into a string'''
+        pass
+
+    def __repr__(self, /):
+        '''Return ide representation of self'''
+        return f'<{self.__class__.__name__[: -11]} {self} at {hex(id(self))}>'
 
 
 def comp_extract(obj):
@@ -657,12 +677,14 @@ class commutative_expression(cas_expression, tuple):
             return cls.cas_exact(iterable)
         self = tuple.__new__(cls, map(comp_extract, iterable))
         self = self._simplify()
+        if not isinstance(self, cls):
+            return self
         var = []
         for n in self:
             if type(n) is cas_variable:
                 var.append(n)
             elif isinstance(n, cas_expression):
-                var.extend(n.vars)
+                var.extend(n.var)
             elif callable(n):
                 var.extend(n.info)
         self.var = remove_duplicates(var)
@@ -698,7 +720,19 @@ class commutative_expression(cas_expression, tuple):
                 continue
             expressions.append(n)
         return numbers, expressions
+    """
+    @abstractmethod
+    def var(self):
+        '''abstract method: create as a @property
+Return variables involved in expression'''
+        pass
 
+    @abstractmethod
+    def fn(self):
+        '''abstract method: create as a @property
+Return functions involved in expression'''
+        pass
+"""
     def __hash__(self, /):
         '''hash for communative expression '''
         return hash((self.oper, tuple(self)))
@@ -713,7 +747,7 @@ class commutative_expression(cas_expression, tuple):
 
 
 class non_commutative_expression(cas_expression):
-    vars: tuple
+    var: tuple
     fn: tuple
 
     @abstractmethod
@@ -747,7 +781,73 @@ def _get(current):
 
 
 class cas_exact_commutative_expression(cas_exact_expression, tuple):
-    pass
+    oper: str
+    hook_intercept: str
+    cas_inexact: typing.Any
+    true_operation: typing.Any
+    value: typing.Any
+    LaTeXoper: str
+    start: typing.Any
+
+    def __new__(cls, iterable=()):
+        '''__new__ for any communative expressions'''
+        if not all(map(is_constant, iterable)):
+            return cls.cas_inexact(iterable)
+        self = tuple.__new__(cls, map(comp_extract, iterable))
+        self = self._simplify()
+
+        if not isinstance(self, cls):
+            return self
+
+        run = cls.start
+        for n in iterable:
+            if hasattr(n, 'value'):
+                run = cls.true_operation(run, n.value)
+                continue
+            run = cls.true_operation(run, n)
+        self.value = run
+        return self
+
+    def __eq__(self, other, /):
+        ''' Return self==other'''
+        if hasattr(other, 'value'):
+            return self.value == other.value
+        return self.value == other
+
+    def _expand(self, /):
+        ''' Expands according to assosiative property'''
+        for n in self:
+            if type(n) == type(self):
+                yield from n
+                continue
+            yield n
+
+    def __hash__(self, /):
+        '''hash for communative expression '''
+        return hash(self.value)
+
+    def __str__(self, /):
+        '''string for communative expression'''
+        return '('+str(self.value)+')'
+
+    def _extract_num(self, /):
+        ''' seperates rationals from non-rational expressions'''
+        logging.debug('seperating rationals from non-rational expressions')
+        rationals = []
+        nonrationals = []
+        for n in self._expand():
+            if is_rational(n):
+                rationals.append(n)
+                continue
+            nonrationals.append(n)
+        return rationals, nonrationals
+
+    def LaTeX(self):
+        return '{'+f'}}{self.LaTeXoper}{{'.join(map(getLaTeX, self))+'}'
+
+
+def is_rational(n):
+    return isinstance(n, (cas_exact, *constants))
 
 
 class cas_exact_non_commutative_expression(cas_exact_expression):
@@ -755,7 +855,75 @@ class cas_exact_non_commutative_expression(cas_exact_expression):
 
 
 class add_exact_expression(cas_exact_commutative_expression):
-    pass
+    oper = '+'
+    LaTeXoper = '+'
+    hook_intercept = 'add'
+    true_operation = lambda x, y: x+y
+    start = 0
+
+    def _simplify(self, /):
+        '''Simplifies addition expression'''
+        # Fast cases
+        if len(self) == 1:
+            return self[0]
+        if len(self) == 0:
+            return 0
+
+        # Seperates constants out
+        numbers, expressions = self._extract_num()
+        # adds constants
+        number = add_exact_expression(numbers)
+        # extracts count, value data from expressions
+        expressions_extract = list(map(self._data_extract, expressions))
+
+        # Loop through creating a new list of simplified data
+        expressions_short = []
+        while expressions_extract:
+            count, value = expressions_extract.pop(0)
+            runcount = 0
+            for new_count, new_value in tuple(expressions_extract):
+                if new_value == value:
+                    count += new_count
+                    expressions_extract.pop(runcount)
+                    continue
+                runcount += 1
+                continue
+            if count != 0:
+                if count != 1:
+                    expressions_short.append(mul_exact_expression((count, value)))
+                    continue
+                    if type(value) is mul_expression:
+                        expressions_short.append(tuple.__new__(mul_exact_expression, (count, *value)))
+                        continue
+                    expressions_short.append(tuple.__new__(mul_exact_expression, (count, value)))
+                    continue
+                expressions_short.append(value)
+
+        # Return clean results
+        if len(expressions_short) == 0:
+            return number
+        if number == 0:
+            if len(expressions_short) == 1:
+                return expressions_short[0]
+            return tuple.__new__(self.__class__, expressions_short)
+        return tuple.__new__(self.__class__, (number, *expressions_short))
+
+    def _data_extract(self, value, /):
+        '''extracts count and truevalue data from value'''
+        if isinstance(value, cas_exact_expression):
+            if value.oper == '*':
+                value_sub = value._extract_num()
+                return math.prod(value_sub[0]), mul_expression(value_sub[1])
+            # pow value count not implemented
+            return 1, value
+
+        if isinstance(value, cas_constant):
+            return 1, value
+        raise TypeError(f'invalid type recieved: type {type(value)}')
+
+    def _comp_derive(self, var, k, /):
+        '''computes kth partial of self with respect to var'''
+        return 0
 
 
 class add_expression(commutative_expression):
@@ -831,17 +999,95 @@ class add_expression(commutative_expression):
         return add_expression(map(lambda x: _comp_derive(x, var, k), self))
 
 
+add_exact_expression.cas_inexact = add_expression
+
+
 def _comp_derive(n, var, k):
     return NotImplemented
 
 
 class mul_exact_expression(cas_exact_commutative_expression):
-    pass
+    oper = '*'
+    hook_intercept = 'mul'
+    true_operation = lambda x, y: x*y
+    start = 1
+    LaTeXoper = ''
+
+    def _simplify(self, /):
+        '''Simplifies multiplication expression'''
+        # fast return
+        if len(self) == 1:
+            return self[0]
+        if len(self) == 0:
+            return 1
+        if 0 in self:
+            return 0
+
+        # expands accross addition expressions within it
+        for count, value in enumerate(self):
+            if type(value) == add_expression:
+
+                def distributor(x):
+                    data = (x, *self[: count], *self[count+1:])
+                    return mul_expression(data)
+
+                run = tuple(map(distributor, value))
+                return add_expression(run)
+
+        # extracts constants
+        numbers, expressions = self._extract_num()
+        # product of constants
+        number = math.prod(numbers)
+        # extracts count value information from expressions
+        expressions_extract = list(map(self._data_extract, expressions))
+
+        # Loop through creating a list of simplified data
+        expressions_short = []
+        while expressions_extract:
+            count, value = expressions_extract.pop(0)
+            runcount = 0
+            for new_count, new_value in tuple(expressions_extract):
+                if new_value == value:
+                    count += new_count
+                    expressions_extract.pop(runcount)
+                    continue
+                runcount += 1
+                continue
+            if count != 0:
+                if count != 1:
+                    expressions_short.append(pow_expression(value, count))
+                    continue
+                expressions_short.append(value)
+
+        # Return clean results
+        if len(expressions_short) == 0:
+            return number
+        if number == 1:
+            if len(expressions_short) == 1:
+                return expressions_short[0]
+            return tuple.__new__(self.__class__, expressions_short)
+        return tuple.__new__(self.__class__, (number, *expressions_short))
+
+    def _data_extract(self, value, /):
+        ''' Extract count and truevalue from data'''
+        if isinstance(value, cas_exact_expression):
+            if value.oper == '^':
+                if is_constant(value.b):
+                    return value.b, value.a
+            return 1, value
+
+        if isinstance(value, cas_constant):
+            return 1, value
+
+        raise TypeError(f'invalid type recieved: type {type(value)}')
+
+    def _comp_derive(self, var, k, /):
+        return 0
 
 
 class mul_expression(commutative_expression):
-    oper = '+'
-    hook_intercept = 'add'
+    oper = '*'
+    hook_intercept = 'mul'
     cas_exact = mul_exact_expression
 
     def _simplify(self, /):
@@ -935,6 +1181,9 @@ class mul_expression(commutative_expression):
         return add_expression(terms)
 
 
+mul_exact_expression.cas_inexact = mul_expression
+
+
 def _mul_derive_expansion(f, g, v, k, n):
     f_p = _comp_derive(f, v, n)
     g_p = _comp_derive(g, v, k-n)
@@ -947,7 +1196,8 @@ def binomial_coeficient(k, n):
 
 
 class div_exact_shortcut(cas_exact_non_commutative_expression):
-    pass
+    def __new__(cls, a, b):  # TEMPORARY
+        return a*(b**-1)
 
 
 class div_shortcut(non_commutative_expression):
@@ -956,7 +1206,9 @@ class div_shortcut(non_commutative_expression):
 
 
 class pow_exact_expression(cas_exact_non_commutative_expression):
-    pass
+    oper = '^'
+    hook_intercept = 'pow'
+    true_operation = lambda x, y: x**y
 
 
 def remove_duplicates(tup):  # TEMPORARY:
@@ -964,6 +1216,10 @@ def remove_duplicates(tup):  # TEMPORARY:
 
 
 class pow_expression(non_commutative_expression):
+    oper = '**'
+    hook_intercept = 'pow'
+    cas_exact = remove_duplicates
+
     def __new__(cls, a, b):
         '''__new__ for non-communative expressions'''
         self = super(non_commutative_expression, cls).__new__(cls)
@@ -979,7 +1235,7 @@ class pow_expression(non_commutative_expression):
             if type(n) == cas_variable:
                 var.append(n)
             elif isinstance(n, cas_expression):
-                var.extend(n.vars)
+                var.extend(n.var)
             elif callable(n):
                 var.extend(n.info)
         self.var = remove_duplicates(var)
@@ -1035,5 +1291,9 @@ def test(a, b):
 
 
 t = cas_callable(test)
+
+pi = cas_constant('pi', math.pi, '\\pi')
+
+x = cas_variable('x')
 
 # eof
