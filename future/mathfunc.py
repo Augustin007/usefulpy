@@ -58,12 +58,15 @@ from decimal import Decimal
 from fractions import Fraction
 from numbers import Number
 
+# SETUP FOR TESTING #
+
 if __name__ == '__main__':
     level = validation.intinput('enter logging level: ')
     fmt = '[ % (levelname)s] % (name)s - % (message)s'
     logging.basicConfig(level=level, format=fmt)
     logging.root.setLevel(level)
 
+# CHECKS #
 
 constants = (int, float, complex, Decimal, Fraction, Number)
 
@@ -82,6 +85,9 @@ def is_rational(n):
     return isinstance(n, (cas_exact, *constants))
 
 
+# DATA HANDLING #
+
+
 def remove_duplicates(tup):  # TEMPORARY:
     return tuple(set(tup))
 
@@ -90,6 +96,8 @@ def get_args(args, selector):
     '''get args according to selector'''
     return [args[select] for select in selector]
 
+
+# TYPE VALIDATION AND CONVERSION TOOLS #
 
 def comp_extract(obj):
     if isinstance(obj, mathfunc):
@@ -132,9 +140,7 @@ def _get(current):
     return current
 
 
-def _comp_derive(n, var, k):
-    return NotImplemented
-
+# ALTERNATE STRING TOOLS #
 
 def getLaTeX(value):
     if hasattr(value, 'LaTeX'):
@@ -143,6 +149,21 @@ def getLaTeX(value):
             return LaTeX()
         return LaTeX
     return str(value)
+
+
+def evaluateable_string(value):
+    if hasattr(value, 'evalstr'):
+        evalstr = value.evalstr
+        if callable(evalstr):
+            return evalstr()
+        return evalstr
+    return str(value)
+
+
+# MATH TOOLS #
+
+def _comp_derive(n, var, k):
+    return NotImplemented
 
 
 def _mul_derive_expansion(f, g, v, k, n):
@@ -155,6 +176,8 @@ def _mul_derive_expansion(f, g, v, k, n):
 def binomial_coeficient(k, n):
     return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
 
+
+# DECORATORS #
 
 def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), preface: str='', ignore: tuple[int]=(), custom: dict[int: str]={}):
     '''hook
@@ -228,6 +251,8 @@ def math_return_dec(function):
 
 
 class cas_object:
+    '''Master type for cas engine, contains methods for the
+standard arithmatic functions'''
     safe: typing.Any
 
     @staticmethod
@@ -320,6 +345,8 @@ class cas_object:
 
 
 class cas_callable:
+    '''Generic function for cas_engine that implements
+basic calling abilities and custom setattr getattr methods'''
     fn: tuple
     var: tuple
     _data: dict
@@ -471,6 +498,7 @@ class cas_variable(cas_object):
 
 
 class cas_exact_object:
+    '''Master class for constants'''
     value: typing.Any
 
     @classmethod
@@ -613,6 +641,10 @@ class cas_constant(cas_exact_object):
 
     def __str__(self):
         ''' str for cas_variable '''
+        return self.name
+
+    def evalstr(self):
+        '''evaluateable_string'''
         return str(self.value)
 
 
@@ -792,6 +824,9 @@ Return functions involved in expression'''
         '''string for communative expression'''
         return '('+self.oper.join(map(str, self))+')'
 
+    def evalstr(self):
+        return '('+self.oper.join(map(evaluateable_string, self))+')'
+
     def _evaluate(self):
         '''evaluate self at values of variables'''
         return self.__class__(map(_get, self))
@@ -867,8 +902,11 @@ class cas_exact_commutative_expression(cas_exact_expression, tuple):
         return hash(self.value)
 
     def __str__(self, /):
+        return self.oper.join(map(str, self))
+
+    def evalstr(self, /):
         '''string for communative expression'''
-        return '('+str(self.value)+')'
+        return '('+evaluateable_string(self.value)+')'
 
     def _extract_num(self, /):
         ''' seperates rationals from non-rational expressions'''
@@ -1235,6 +1273,15 @@ class pow_exact_expression(cas_exact_non_commutative_expression):
         self.value = a.value**b.value
         return self._simplify()
 
+    def LaTeX(self):
+        return '{'+getLaTeX(self.a)+'}^{'+getLaTeX(self.b)+'}'
+
+    def __str__(self):
+        return str(self.a)+'**'+str(self.b)
+
+    def evalstr(self):
+        return evaluateable_string(self.a)+'**'+evaluateable_string(self.b)
+
     def _simplify(self, /):
         '''Simplifies power expression '''
         # special cases
@@ -1304,6 +1351,12 @@ class pow_expression(non_commutative_expression):
     def LaTeX(self):
         return '{'+getLaTeX(self.a)+'}^{'+getLaTeX(self.b)+'}'
 
+    def __str__(self):
+        return str(self.a)+'**'+str(self.b)
+
+    def evalstr(self):
+        return evaluateable_string(self.a)+'**'+evaluateable_string(self.b)
+
     def _simplify(self, /):
         '''Simplifies power expression '''
         # special cases
@@ -1367,13 +1420,19 @@ class cas_function:
         self.__call__ = tmd[func.__name__]
         if func.format:
             string = func.format
+            evalstr = func.format
             for n, arg in enumerate(args):
                 string = string.replace(f'<{n}>', f'({arg})')
+                evalstr = evalstr.replace(f'<{n}>', f'({evaluateable_string(arg)})')
         else:
             string = func.__name__+'('
             string += ', '.join(map(str, args))
             string += ')'
+            evalstr = func.__name__+'('
+            evalstr += ', '.join(map(evaluateable_string, args))
+            evalstr += ')'
         self.string = string
+        self.evalstr = evalstr
         self.arg_data_func_wrap = tmd[func.__name__]
         if hasattr(func, 'LaTeX'):
             self.LaTeX = func.LaTeX
@@ -1472,8 +1531,8 @@ class mathfunc(cas_callable, cas_object):
         self.arguments_call = func.var
         self.var = func.var
         self.fn = func.fn
-        self.function = str(func)
-        self.__doc__ = 'Return '+self.function
+        self.function = evaluateable_string(func)
+        self.__doc__ = 'Return '+str(func)
         var_list_str = ', '.join(map(str, self.var))
         space = {fn.__name__: fn for fn in func.fn}
         _short = eval(f'lambda {var_list_str}: {self.function}', None, space)
@@ -1494,7 +1553,7 @@ class mathfunc(cas_callable, cas_object):
 
     def __str__(self):
         '''str for mathfunc'''
-        return self.function
+        return str(self.composition)
 
     def __hash__(self, /):
         '''hash for mathfunc'''
@@ -1503,9 +1562,11 @@ class mathfunc(cas_callable, cas_object):
     def LaTeX(self):
         return getLaTeX(self.composition)
 
+
 @cas_func_wrap
 def f(a, b):
     return a+b
+
 
 pi = cas_constant('pi', math.pi, '\\pi')
 
