@@ -78,6 +78,84 @@ def is_constant(n) -> bool:
         return False
 
 
+def is_rational(n):
+    return isinstance(n, (cas_exact, *constants))
+
+
+def remove_duplicates(tup):  # TEMPORARY:
+    return tuple(set(tup))
+
+
+def get_args(args, selector):
+    '''get args according to selector'''
+    return [args[select] for select in selector]
+
+
+def comp_extract(obj):
+    if isinstance(obj, mathfunc):
+        return obj.composition
+    if is_constant(obj):
+        if not isinstance(obj, cas_exact_object):
+            return cas_exact(obj)
+        return obj
+    if isinstance(obj, cas_function):
+        return obj
+    assert isinstance(obj, cas_object)
+    return obj
+
+
+def cas_safe(n):
+    if is_constant(n):
+        if not isinstance(n, cas_exact_object):
+            try:
+                return cas_exact(n)
+            except Exception as error:
+                logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
+        return n
+    if type(n) is mathfunc:
+        return n.composition
+    return n
+
+
+def _get(current):
+    '''gets current according to variable values'''
+    if is_constant(current):
+        return current
+    if isinstance(current, cas_variable):
+        return current.value
+    if type(current) is mathfunc:
+        return _get(current.composition)
+    if isinstance(current, cas_expression):
+        return current._evaluate()
+    if callable(current):
+        return current.func(*map(_get, current.args))
+    return current
+
+
+def _comp_derive(n, var, k):
+    return NotImplemented
+
+
+def getLaTeX(value):
+    if hasattr(value, 'LaTeX'):
+        LaTeX = value.LaTeX
+        if callable(LaTeX):
+            return LaTeX()
+        return LaTeX
+    return str(value)
+
+
+def _mul_derive_expansion(f, g, v, k, n):
+    f_p = _comp_derive(f, v, n)
+    g_p = _comp_derive(g, v, k-n)
+    c_p = binomial_coeficient(n, k)
+    return mul_expression((c_p, f_p, g_p))
+
+
+def binomial_coeficient(k, n):
+    return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
+
+
 def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), preface: str='', ignore: tuple[int]=(), custom: dict[int: str]={}):
     '''hook
 
@@ -242,9 +320,9 @@ class cas_object:
 
 
 class cas_callable:
-    fns: tuple
+    fn: tuple
     var: tuple
-    __data: dict
+    _data: dict
     __doc__: str
     shortcut_function: types.FunctionType
     function: str
@@ -259,22 +337,6 @@ class cas_callable:
     domain_restrictions: tuple
     safe: typing.Any
     exact_return: bool = False
-
-    def __new__(cls, composition):
-        self = super(cas_callable, cls).__new__(cls)
-        self.__data = {'inputs': {}, 'pass': {}, 'oper': {}, 'custom_data': {}}
-        self.composition = composition
-        self.special = {'arguments_comp': self.__set_args_comp}
-        self.safe = composition
-        self.exact_composition = composition
-        self.true_call = composition
-        if isinstance(composition, types.FunctionType):
-            self.arguments_comp = composition.__code__.co_varnames
-            self.arguments_call = composition.__code__.co_varnames
-        elif isinstance(composition, cas_object):
-            self.arguments_comp = composition.var
-            self.arguments_call = composition.var
-        return self
 
     def check_domain(self, *args):
         pass
@@ -293,7 +355,7 @@ class cas_callable:
 
         for varname, a in zip(self.arguments_comp, args):
             if hasattr(a, 'hook_intercept'):
-                idict = self.__data['inputs'][varname]
+                idict = self._data['inputs'][varname]
                 if a.hook_intercept in idict:
                     return_val = idict[a.hook_intercept](*args)
                     if return_val is not NotImplemented:
@@ -301,17 +363,20 @@ class cas_callable:
         return self.truecall(*args)
 
     def _get_data_copy(self):
-        return self.__data.copy()
+        return self._data.copy()
 
-    def __set_args_comp(self, value):
+    def _set_args_comp(self, value):
         for n in value:
-            self.__data['inputs'][n] = {}
+            self._data['inputs'][n] = {}
 
     def __setattr__(self, name: str, value) -> None:
         '''Intercepts attribute setting, for customized storage'''
         if self.__is_frozen:
             raise AttributeError(f'attributes of {self!r} are no longer writeable')
-        if name in self.__annotations__:
+        if name == '__call__':
+            super.__setattr__(self, name, value)
+            return
+        if name in {**cas_callable.__annotations__, **self.__annotations__}:
             if name in ('arguments_call', 'fn', 'var') and hasattr(self, name):
                 raise AttributeError('this attribute is not writeable')
             super.__setattr__(self, name, value)
@@ -325,13 +390,13 @@ class cas_callable:
                 vmethod = name[6:-6]
                 for var in self.arguments_comp:
                     if vmethod.startswith(var):
-                        self.__data['inputs'][var][vmethod[len(var):]] = value
+                        self._data['inputs'][var][vmethod[len(var):]] = value
                         return
                 raise ValueError('Invalid name')
             if name.startswith('__'):
-                self.__data['oper'][name[2:-6]] = value
+                self._data['oper'][name[2:-6]] = value
                 return
-        self.__data['custom_data'][name] = value
+        self._data['custom_data'][name] = value
 
     def __getattr__(self, name):
         '''Customized attribute storage also necesitates custom attribute lookup'''
@@ -341,14 +406,14 @@ class cas_callable:
                 for var in self.arguments_comp:
                     with suppress(KeyError):
                         if vmethod.startswith(var):
-                            return self.__data['inputs'][var][vmethod[len(var):]]
+                            return self._data['inputs'][var][vmethod[len(var):]]
             if name.startswith('__'):
                 with suppress(KeyError):
-                    return self.__data['oper'][name[2:-6]]
+                    return self._data['oper'][name[2:-6]]
         with suppress(KeyError):
-            return self.__data['custom_data'][name]
+            return self._data['custom_data'][name]
         raise AttributeError(f'{self.__class__.__name__!r} object has no attribute {name!r}')
-    special: dict = {'arguments_comp': __set_args_comp}
+    special: dict = {'arguments_comp': _set_args_comp}
 
 
 class cas_variable(cas_object):
@@ -403,18 +468,6 @@ class cas_variable(cas_object):
     def __str__(self):
         ''' str for cas_variable '''
         return self.name
-
-
-def math_return_dec(function):
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        try:
-            return_val = function(*args, **kwargs)
-            return cas_object._math_return(return_val)
-        except Exception as error:
-            logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
-            return NotImplemented
-    return wrapper
 
 
 class cas_exact_object:
@@ -586,7 +639,7 @@ class cas_exact(cas_exact_object):
         raise TypeError('Invalid Type')
 
     def __str__(self):
-        return self.value
+        return str(self.value)
 
     def __repr__(self):
         return f'cas_exact({str(self.value)!r})'
@@ -665,30 +718,6 @@ Return self converted into a string'''
         return f'<{self.__class__.__name__[: -11]} {self} at {hex(id(self))}>'
 
 
-def comp_extract(obj):
-    if isinstance(obj, mathfunc):
-        return obj.composition
-    if is_constant(obj):
-        if not isinstance(obj, cas_exact_object):
-            return cas_exact(obj)
-        return obj
-    assert isinstance(obj, cas_object)
-    return obj
-
-
-def cas_safe(n):
-    if is_constant(n):
-        if not isinstance(n, cas_exact_object):
-            try:
-                return cas_exact(n)
-            except Exception as error:
-                logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
-        return n
-    if type(n) is mathfunc:
-        return n.composition
-    return n
-
-
 class commutative_expression(cas_expression, tuple):
     LaTeXoper: str
 
@@ -708,7 +737,7 @@ class commutative_expression(cas_expression, tuple):
             elif isinstance(n, cas_expression):
                 var.extend(n.var)
             elif callable(n):
-                var.extend(n.info)
+                var.extend(n.var)
         self.var = remove_duplicates(var)
         fn = []
         for n in self:
@@ -790,21 +819,6 @@ class non_commutative_expression(cas_expression):
         pass
 
 
-def _get(current):
-    '''gets current according to variable values'''
-    if is_constant(current):
-        return current
-    if isinstance(current, cas_variable):
-        return current.value
-    if type(current) is mathfunc:
-        return _get(current.composition)
-    if isinstance(current, cas_expression):
-        return current._evaluate()
-    if callable(current):
-        return current.firstwrap(*map(_get, current.args))
-    return current
-
-
 class cas_exact_commutative_expression(cas_exact_expression, tuple):
     oper: str
     hook_intercept: str
@@ -870,10 +884,6 @@ class cas_exact_commutative_expression(cas_exact_expression, tuple):
 
     def LaTeX(self):
         return '{'+f'}}{self.LaTeXoper}{{'.join(map(getLaTeX, self))+'}'
-
-
-def is_rational(n):
-    return isinstance(n, (cas_exact, *constants))
 
 
 class cas_exact_non_commutative_expression(cas_exact_expression):
@@ -1007,9 +1017,7 @@ class add_expression(commutative_expression):
             # pow value count not implemented
             return 1, value
 
-        if callable(value):
-            if not value.expressionable:
-                raise ValueError('function must be expressionable')
+        if isinstance(value, cas_function):
             return 1, value
 
         if isinstance(value, cas_variable):
@@ -1022,10 +1030,6 @@ class add_expression(commutative_expression):
 
 
 add_exact_expression.cas_inexact = add_expression
-
-
-def _comp_derive(n, var, k):
-    return NotImplemented
 
 
 class mul_exact_expression(cas_exact_commutative_expression):
@@ -1207,17 +1211,6 @@ class mul_expression(commutative_expression):
 mul_exact_expression.cas_inexact = mul_expression
 
 
-def _mul_derive_expansion(f, g, v, k, n):
-    f_p = _comp_derive(f, v, n)
-    g_p = _comp_derive(g, v, k-n)
-    c_p = binomial_coeficient(n, k)
-    return mul_expression((c_p, f_p, g_p))
-
-
-def binomial_coeficient(k, n):
-    return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
-
-
 class div_exact_shortcut(cas_exact_non_commutative_expression):
     def __new__(cls, a, b):  # TEMPORARY
         return a*(b**-1)
@@ -1262,10 +1255,6 @@ class pow_exact_expression(cas_exact_non_commutative_expression):
         return self
 
 
-def remove_duplicates(tup):  # TEMPORARY:
-    return tuple(set(tup))
-
-
 class pow_expression(non_commutative_expression):
     oper = '**'
     hook_intercept = 'pow'
@@ -1287,10 +1276,8 @@ class pow_expression(non_commutative_expression):
         for n in (self.a, self.b):
             if type(n) == cas_variable:
                 var.append(n)
-            elif isinstance(n, cas_expression):
+            elif isinstance(n, (cas_expression, cas_function)):
                 var.extend(n.var)
-            elif callable(n):
-                var.extend(n.info)
         self.var = remove_duplicates(var)
         fn = []
         for n in (self.a, self.b):
@@ -1337,32 +1324,188 @@ class pow_expression(non_commutative_expression):
         return self
 
 
-def getLaTeX(value):
-    if hasattr(value, 'LaTeX'):
-        LaTeX = value.LaTeX
-        if callable(LaTeX):
-            return LaTeX()
-        return LaTeX
-    return str(value)
-
-
 class cas_exact_nest(cas_exact_object):
     pass
 
 
-class cas_function(cas_callable):
-    pass
+class cas_function:
+    func: types.FunctionType
+    string: str
+
+    def __new__(cls, func, args):
+        self = super(cas_function, cls).__new__(cls)
+        self.func = func
+        self.args = args
+        self.prime = self.func.prime
+        self.prime_cycle = self.func.prime_cycle
+        var = []
+        fn = [func]
+        for arg in args:
+            if is_constant(arg):
+                continue
+            if isinstance(arg, cas_variable):
+                var.append(arg)
+                continue
+            if isinstance(arg, cas_expression):
+                var.extend(arg.vars)
+                fn.extend(arg.fn)
+                continue
+            if isinstance(arg, cas_function):
+                var.extend(arg.var)
+                fn.extend(arg.fn)
+                continue
+        self.raw_vars = tuple(var)
+        self.var = remove_duplicates(var)
+        self.fn = remove_duplicates(fn)
+        var_names = ', '.join(map(lambda x: x.name, self.var))
+        tmd = {}
+        if func.__doc__:
+            exec(f'def {func.__name__}({var_names}): \
+                  \t\n    """{func.__doc__}"""\n    pass ', tmd)
+        else:
+            exec(f'def {func.__name__}({var_names}): pass', tmd)
+        self.__call__ = tmd[func.__name__]
+        if func.format:
+            string = func.format
+            for n, arg in enumerate(args):
+                string = string.replace(f'<{n}>', f'({arg})')
+        else:
+            string = func.__name__+'('
+            string += ', '.join(map(str, args))
+            string += ')'
+        self.string = string
+        self.arg_data_func_wrap = tmd[func.__name__]
+        if hasattr(func, 'LaTeX'):
+            self.LaTeX = func.LaTeX
+        return self
+
+    def __str__(self):
+        return self.string
+
+    def _comp_derive(self, v, k):
+        if k == 0:
+            return self
+        if v not in self.var:
+            return 0
+
+        if self.raw_vars.count(v) == 1:
+            i = self.args.index(v)
+            if i in self.prime_cycle:
+                cycle = self.prime_cycle[i]
+                if cycle <= k:
+                    return self._comp_derive(v, k % cycle)
+
+        run = []
+        for n, a in enumerate(self.args):
+            if is_constant(a):
+                continue
+            if isinstance(a, cas_variable):
+                if a != v:
+                    continue
+                ap = 1
+            else:
+                ap = _comp_derive(a, v, 1)
+            if ap:
+                if len(self.prime[n]) == 2:
+                    prime_func = self.prime[n][0]
+                    prime_args = self.prime[n][1]
+                    fp = prime_func(*get_args(self.args, prime_args))
+                    fp = fp.composition
+                else:
+                    fp = self.prime[n]
+
+                run.append(mul_expression((fp, ap)))
+        return _comp_derive(add_expression(run), v, k-1)
+
+    def __call__(self, *args):
+        if len(args) != len(self.var):
+            raise ValueError('Length of args != length of var')
+        for v, a in zip(self.var, args):
+            v._set(a)
+        return_val = self.func(*map(_get, self.args))
+        for v in self.var:
+            v._reset()
+        return return_val
+    evaluate = __call__
+
+
+def cas_func_wrap(func):
+    '''Wraps a function to make it work in the cas engine.'''
+
+    @wraps(func)
+    def wrap(*args):
+        if all(map(is_constant, args)):
+            return func(*args)
+        args = tuple(map(cas_safe, args))
+        return mathfunc(cas_function(wrap, args))
+
+    wrap.prime = {}
+    wrap.format = None
+    wrap.prime_cycle = {}
+    return wrap
 
 
 class mathfunc(cas_callable, cas_object):
-    pass
+    _data: dict
 
+    def __new__(cls, func):
+        if type(func) is mathfunc:
+            return func
+        if callable(func):
+            assert isinstance(func, cas_function)
+        elif isinstance(func, cas_expression):
+            pass
+        else:
+            raise TypeError(f'Invalid type recieved, type({type(func)})')
+        self = super(mathfunc, cls).__new__(cls)
+        self._data = {'inputs': {}, 'pass': {}, 'oper': {}, 'custom_data': {}}
+        self.special = {'arguments_comp': self._set_args_comp}
+        self.composition = func
+        self.safe = self.composition
+        self.exact_composition = self.composition
+        self.true_call = self.composition
+        if isinstance(func, cas_function):
+            self.__name__ = func.func.__name__
+        else:
+            self.__name__ = None
+        self.arguments_comp = func.var
+        self.arguments_call = func.var
+        self.var = func.var
+        self.fn = func.fn
+        self.function = str(func)
+        self.__doc__ = 'Return '+self.function
+        var_list_str = ', '.join(map(str, self.var))
+        space = {fn.__name__: fn for fn in func.fn}
+        _short = eval(f'lambda {var_list_str}: {self.function}', None, space)
+        self.shortcut_function = _short
+        _get = eval(f'lambda self, {var_list_str}: {self.function}', None, space)
+        self.__call__ = _get.__get__(self)
 
-def test(a, b):
-    return a, b
+        self._data = {'composition': func, 'oper': {}, 'custom_data': {}}
+        return self
 
+    @ math_return_dec
+    def truecall(self, *args):
+        return self.composition.evaluate(*args)
 
-t = cas_callable(test)
+    def __repr__(self):
+        '''repr for mathfunc'''
+        return f'<mathfunc {self} at {hex(id(self))}>'
+
+    def __str__(self):
+        '''str for mathfunc'''
+        return self.function
+
+    def __hash__(self, /):
+        '''hash for mathfunc'''
+        return hash(self.composition)
+
+    def LaTeX(self):
+        return getLaTeX(self.composition)
+
+@cas_func_wrap
+def f(a, b):
+    return a+b
 
 pi = cas_constant('pi', math.pi, '\\pi')
 
