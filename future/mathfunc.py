@@ -40,17 +40,33 @@ RELEASE NOTES:
 if __name__ == '__main__':  # To account for relative imports when run
     __package__ = 'usefulpy.mathematics'
 
+# SETUP FOR TESTING #
+import logging
+
+if __name__ == '__main__':
+    print('Debug: 10', 'Info: 20', 'Warn: 30', 'Error: 40', 'Critical: 50', sep='\n')
+    level = input('enter logging level: ')
+    if level == '':
+        level = '30'
+    while not level.isnumeric():
+        level = input('Invalid\nenter logging level: ')
+        if level == '':
+            level = '30'
+    lvl = int(level)
+    fmt = '[%(levelname)s] %(name)s - %(message)s'
+    logging.basicConfig(format=fmt, level=lvl)
+
 # IMPORTS #
 # Relative imports
-from .. import decorators
 from .. import validation
+from .. import decorators
 # Utilities
 from abc import abstractmethod
 import types
 import typing
 from functools import cache, wraps
-import logging
 from contextlib import suppress
+from collections import OrderedDict
 # Maths
 import math
 import cmath
@@ -58,13 +74,6 @@ from decimal import Decimal
 from fractions import Fraction
 from numbers import Number
 
-# SETUP FOR TESTING #
-
-if __name__ == '__main__':
-    level = validation.intinput('enter logging level: ')
-    fmt = '[ % (levelname)s] % (name)s - % (message)s'
-    logging.basicConfig(level=level, format=fmt)
-    logging.root.setLevel(level)
 
 # CHECKS #
 
@@ -85,11 +94,18 @@ def is_rational(n):
     return isinstance(n, (cas_exact, *constants))
 
 
+def is_exact(n):
+    return isinstance(n, cas_object)
+
 # DATA HANDLING #
 
 
-def remove_duplicates(tup):  # TEMPORARY:
-    return tuple(set(tup))
+def create_variables(*names):
+    return tuple(map(cas_variable, names))
+
+
+def remove_duplicates(tup):
+    return tuple(OrderedDict.fromkeys(tup).keys())
 
 
 def get_args(args, selector):
@@ -99,29 +115,20 @@ def get_args(args, selector):
 
 # TYPE VALIDATION AND CONVERSION TOOLS #
 
-def comp_extract(obj):
-    if isinstance(obj, mathfunc):
-        return obj.composition
-    if is_constant(obj):
-        if not isinstance(obj, cas_exact_object):
-            return cas_exact(obj)
-        return obj
-    if isinstance(obj, cas_function):
-        return obj
-    assert isinstance(obj, cas_object)
-    return obj
-
-
 def cas_safe(n):
+    if type(n) is mathfunc:
+        n = n.composition
     if is_constant(n):
         if not isinstance(n, cas_exact_object):
+            logging.debug(f'converting {n} to cas_exact')
             try:
                 return cas_exact(n)
             except Exception as error:
-                logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
+                logging.warn(f'{error.__class__.__name__}: {error.args[0]}')
         return n
-    if type(n) is mathfunc:
-        return n.composition
+    if isinstance(n, cas_function):
+        return n
+    assert isinstance(n, cas_object)
     return n
 
 
@@ -150,6 +157,8 @@ def getLaTeX(value):
         return LaTeX
     return str(value)
 
+def print_raw_LaTeX(value):
+    print(getLaTeX(value))
 
 def evaluateable_string(value):
     if hasattr(value, 'evalstr'):
@@ -163,7 +172,31 @@ def evaluateable_string(value):
 # MATH TOOLS #
 
 def _comp_derive(n, var, k):
-    return NotImplemented
+    '''Computes the kth partial derivative of n with respect to var'''
+    # Making sure k is valid
+    assert k >= 0
+    assert type(k) is int
+
+    # 0th derivative means nothing
+    if k == 0:
+        return n
+
+    # logging computation
+    log = f'Computing {k} partial of {str(n)} with respect to {var.name}'
+    logging.info(log)
+
+    # catch trivial and identity derivatives
+    if k == 1 and var == n:
+        return 1
+
+    elif is_constant(n) or isinstance(n, cas_variable):
+        return 0
+
+    # Call attributes
+    if isinstance(n, (cas_expression, cas_function)):
+        return n._comp_derive(var, k)
+
+    raise TypeError(f'Invalid type, type {type(n)}')
 
 
 def _mul_derive_expansion(f, g, v, k, n):
@@ -245,8 +278,15 @@ def math_return_dec(function):
             return_val = function(*args, **kwargs)
             return cas_object._math_return(return_val)
         except Exception as error:
-            logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
+            logging.error(f'{error.__class__.__name__}: {error.args[0]}')
             return NotImplemented
+    return wrapper
+
+def log_call(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        logging.debug(f'{function.__name__} called with args {args} and kwargs {kwargs}')
+        return function(*args, **kwargs)
     return wrapper
 
 
@@ -257,68 +297,86 @@ standard arithmatic functions'''
 
     @staticmethod
     def _math_return(return_val):
+        logging.info(f'math return: {return_val}')
         if is_constant(return_val):
+            if not isinstance(return_val, cas_exact_object):
+                try:
+                    return cas_exact(return_val)
+                except Exception as error:
+                    logging.error(f'{error.__class__.__name__}: {error.args[0]}')
+                    return return_val
+                return return_val
             return return_val
         if isinstance(return_val, cas_variable):
             return return_val
         try:
             return mathfunc(return_val)
         except Exception as error:
-            logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
+            logging.error(f'{error.__class__.__name__}: {error.args[0]}')
             return return_val
 
+    @log_call
     def __pos__(self):
         '''Return +self'''
         return self
 
     @math_return_dec
+    @log_call
     def __neg__(self):
         '''Return -self'''
         return mul_expression((-1, self))
 
     @math_return_dec
     @hook('add', 2, False, (1,))
+    @log_call
     def __add__(self, other):
         '''Return self+other'''
         return add_expression((self, other))
 
     @math_return_dec
     @hook('add', 2, True, (1,))
+    @log_call
     def __radd__(self, other):
         '''Return other+self'''
         return self+other
 
     @math_return_dec
     @hook('sub', 2, False, (1,))
+    @log_call
     def __sub__(self, other):
         '''Return self-other'''
         return self+(-other)
 
     @math_return_dec
     @hook('sub', 2, True, (1,))
+    @log_call
     def __rsub__(self, other):
         '''Return other-self'''
         return other+(-self)
 
     @math_return_dec
     @hook('mul', 2, False, (1,))
+    @log_call
     def __mul__(self, other):
         '''Return self*other'''
         return mul_expression((self, other))
 
     @math_return_dec
     @hook('mul', 2, True, (1,))
+    @log_call
     def __rmul__(self, other):
         '''Return other*self'''
         return self*other
 
     @math_return_dec
+    @log_call
     def reciprocal(self):
         '''Return 1/self'''
         return pow_expression(self, -1)
 
     @math_return_dec
     @hook('truediv', 2, False, (1,))
+    @log_call
     def __truediv__(self, other):
         '''Return self/other'''
         if type(other) is mathfunc:
@@ -327,18 +385,21 @@ standard arithmatic functions'''
 
     @math_return_dec
     @hook('truediv', 2, True, (1,))
+    @log_call
     def __rtruediv__(self, other):
         '''Return other/self'''
         return self.reciprocal()*other
 
     @math_return_dec
     @hook('pow', 2, False, (1,))
+    @log_call
     def __pow__(self, other):
         '''Return self**other'''
         return pow_expression(self, other)
 
     @math_return_dec
     @hook('pow', 2, True, (1,))
+    @log_call
     def __rpow__(self, other):
         '''Return other**self'''
         return pow_expression(other, self)
@@ -363,11 +424,14 @@ basic calling abilities and custom setattr getattr methods'''
     arguments_call: tuple
     domain_restrictions: tuple
     safe: typing.Any
-    exact_return: bool = False
 
     def check_domain(self, *args):
-        pass
+        '''Not implemented: Raises ValueError
+if args are not in domain as defined by domain restrictions
+or interval'''
+        return NotImplemented
 
+    @log_call
     def __call__(self, *args):
         self.check_domain(args)
         get_key = lambda x: (self.arguments_comp.index(self.arguments_call[x[0]]))
@@ -377,7 +441,7 @@ basic calling abilities and custom setattr getattr methods'''
             return_val = self.__callhook__(*args)
             if return_val is not NotImplemented:
                 return return_val
-        if all(map(is_constant, args)) and not self.exact_return:
+        if all(map(is_constant, args)) and not any(map(is_exact, args)):
             return self.shortcut_function(*args)
 
         for varname, a in zip(self.arguments_comp, args):
@@ -501,22 +565,12 @@ class cas_exact_object:
     '''Master class for constants'''
     value: typing.Any
 
-    @classmethod
-    def _math_return(return_val):
-        if is_constant(return_val):
-            return return_val
-        if isinstance(return_val, cas_variable):
-            return return_val
-        try:
-            return mathfunc(return_val)
-        except Exception as error:
-            logging.debug(f'{error.__class__.__name__}: {error.args[0]}')
-            return return_val
-
     def __pos__(self):
         '''Return +self'''
         return self
 
+    @math_return_dec
+    @log_call
     def __neg__(self):
         '''Return -self'''
         try:
@@ -524,7 +578,9 @@ class cas_exact_object:
         except Exception:
             return mul_exact_expression((-1, self.value))
 
+    @math_return_dec
     @hook('add', 2, False, (1,), 'exact')
+    @log_call
     def __add__(self, other):
         '''Return self+other'''
         if is_rational(other) and is_rational(self):
@@ -533,22 +589,30 @@ class cas_exact_object:
             return self.value + other.value
         return add_exact_expression((self, other))
 
+    @math_return_dec
     @hook('add', 2, True, (1,), 'exact')
+    @log_call
     def __radd__(self, other):
         '''Return other+self'''
         return self+other
 
+    @math_return_dec
     @hook('sub', 2, False, (1,), 'exact')
+    @log_call
     def __sub__(self, other):
         '''Return self-other'''
         return self+(-other)
 
+    @math_return_dec
     @hook('sub', 2, True, (1,), 'exact')
+    @log_call
     def __rsub__(self, other):
         '''Return other-self'''
         return other+(-self)
 
+    @math_return_dec
     @hook('mul', 2, False, (1,), 'exact')
+    @log_call
     def __mul__(self, other):
         '''Return self*other'''
         if is_rational(other) and is_rational(self):
@@ -557,33 +621,45 @@ class cas_exact_object:
             return self.value * other.value
         return mul_exact_expression((self, other))
 
+    @math_return_dec
     @hook('mul', 2, True, (1,), 'exact')
+    @log_call
     def __rmul__(self, other):
         '''Return other*self'''
         return self*other
 
+    @math_return_dec
+    @log_call
     def reciprocal(self):
         '''Return 1/self'''
         return pow_exact_expression(self, -1)
 
+    @math_return_dec
     @hook('truediv', 2, False, (1,), 'exact')
+    @log_call
     def __truediv__(self, other):
         '''Return self/other'''
         if type(other) is mathfunc:
             return self*other.reciprocal()
         return div_exact_shortcut(self, other)
 
+    @math_return_dec
     @hook('truediv', 2, True, (1,), 'exact')
+    @log_call
     def __rtruediv__(self, other):
         '''Return other/self'''
         return self.reciprocal()*other
 
+    @math_return_dec
     @hook('pow', 2, False, (1,), 'exact')
+    @log_call
     def __pow__(self, other):
         '''Return self**other'''
         return pow_exact_expression(self, other)
 
+    @math_return_dec
     @hook('pow', 2, True, (1,), 'exact')
+    @log_call
     def __rpow__(self, other):
         '''Return other**self'''
         return pow(other, self)
@@ -758,7 +834,7 @@ class commutative_expression(cas_expression, tuple):
         iterable = tuple(map(cas_safe, iterable))
         if all(map(is_constant, iterable)):
             return cls.cas_exact(iterable)
-        self = tuple.__new__(cls, map(comp_extract, iterable))
+        self = tuple.__new__(cls, map(cas_safe, iterable))
         self = self._simplify()
         if not isinstance(self, cls):
             return self
@@ -868,7 +944,7 @@ class cas_exact_commutative_expression(cas_exact_expression, tuple):
         iterable = tuple(map(cas_safe, iterable))
         if not all(map(is_constant, iterable)):
             return cls.cas_inexact(iterable)
-        self = tuple.__new__(cls, map(comp_extract, iterable))
+        self = tuple.__new__(cls, map(cas_safe, iterable))
         self = self._simplify()
 
         if not isinstance(self, cls):
@@ -910,7 +986,6 @@ class cas_exact_commutative_expression(cas_exact_expression, tuple):
 
     def _extract_num(self, /):
         ''' seperates rationals from non-rational expressions'''
-        logging.debug('seperating rationals from non-rational expressions')
         rationals = []
         nonrationals = []
         for n in self._expand():
@@ -946,7 +1021,7 @@ class add_exact_expression(cas_exact_commutative_expression):
         # Seperates constants out
         numbers, expressions = self._extract_num()
         # adds constants
-        number = add_exact_expression(numbers)
+        number = sum(numbers)
         # extracts count, value data from expressions
         expressions_extract = list(map(self._data_extract, expressions))
 
@@ -1135,7 +1210,7 @@ class mul_exact_expression(cas_exact_commutative_expression):
     def _data_extract(self, value, /):
         ''' Extract count and truevalue from data'''
         if isinstance(value, cas_exact_expression):
-            if value.oper == '^':
+            if value.oper == '**':
                 if is_constant(value.b):
                     return value.b, value.a
             return 1, value
@@ -1179,7 +1254,7 @@ class mul_expression(commutative_expression):
         # extracts constants
         numbers, expressions = self._extract_num()
         # product of constants
-        number = math.prod(numbers)
+        number = mul_exact_expression(numbers)
         # extracts count value information from expressions
         expressions_extract = list(map(self._data_extract, expressions))
 
@@ -1216,7 +1291,7 @@ class mul_expression(commutative_expression):
             value = value.composition
 
         if isinstance(value, cas_expression):
-            if value.oper == '^':
+            if value.oper == '**':
                 if is_constant(value.b):
                     return value.b, value.a
             return 1, value
@@ -1260,7 +1335,7 @@ class div_shortcut(non_commutative_expression):
 
 
 class pow_exact_expression(cas_exact_non_commutative_expression):
-    oper = '^'
+    oper = '**'
     hook_intercept = 'pow'
     true_operation = lambda x, y: x**y
 
@@ -1268,9 +1343,9 @@ class pow_exact_expression(cas_exact_non_commutative_expression):
         if is_rational(a) and validation.is_integer(b):
             return a**b
         self = super(cas_exact_non_commutative_expression, cls).__new__(cls)
-        self.a = a
-        self.b = b
-        self.value = a.value**b.value
+        self.a = cas_safe(a)
+        self.b = cas_safe(b)
+        self.value = self.a.value**self.b.value
         return self._simplify()
 
     def LaTeX(self):
@@ -1378,7 +1453,8 @@ class pow_expression(non_commutative_expression):
 
 
 class cas_exact_nest(cas_exact_object):
-    pass
+    def __new__(cls, func, args):
+        pass
 
 
 class cas_function:
@@ -1400,7 +1476,7 @@ class cas_function:
                 var.append(arg)
                 continue
             if isinstance(arg, cas_expression):
-                var.extend(arg.vars)
+                var.extend(arg.var)
                 fn.extend(arg.fn)
                 continue
             if isinstance(arg, cas_function):
@@ -1522,7 +1598,6 @@ class mathfunc(cas_callable, cas_object):
         self.composition = func
         self.safe = self.composition
         self.exact_composition = self.composition
-        self.true_call = self.composition
         if isinstance(func, cas_function):
             self.__name__ = func.func.__name__
         else:
@@ -1543,7 +1618,7 @@ class mathfunc(cas_callable, cas_object):
         self._data = {'composition': func, 'oper': {}, 'custom_data': {}}
         return self
 
-    @ math_return_dec
+    @math_return_dec
     def truecall(self, *args):
         return self.composition.evaluate(*args)
 
@@ -1562,14 +1637,895 @@ class mathfunc(cas_callable, cas_object):
     def LaTeX(self):
         return getLaTeX(self.composition)
 
+    @math_return_dec
+    def differentiate(self, var, k):
+        if var not in self.var:
+            return 0
+        return _comp_derive(self.composition, var, k)
 
-@cas_func_wrap
-def f(a, b):
-    return a+b
+    def partial(self, var):
+        return self.differentiate(var, 1)
 
 
-pi = cas_constant('pi', math.pi, '\\pi')
+pi = cas_constant('π', math.pi, '\\pi')
+e = cas_constant('e', math.e)
+tau = cas_constant('τ', math.tau, '\\tau')
 
-x = cas_variable('x')
+x, y, z, t = create_variables('x', 'y', 'z', 't')
+
+mathfunction = cas_func_wrap
+
+@mathfunction
+def exp(x, /):
+    '''Return e to the power of x'''
+    try:
+        return math.exp(x)
+    except Exception:
+        pass
+    try:
+        return cmath.exp(x)
+    except Exception:
+        pass
+    try:
+        return x.exp()
+    except Exception:
+        pass
+    try:
+        return math.e**x
+    except Exception:
+        pass
+    raise TypeError(f'invalid type, type {type(x).__name__}')
+
+
+exp.prime[0] = exp, (0, )
+exp.prime_cycle[0] = 1
+
+
+@mathfunction
+def floor(x, /):
+    '''Return the floor of x'''
+    try:
+        return math.floor(x)  # math's floor already allows for custom types
+    except Exception:
+        pass
+    # I feel that imaginary types should still work
+    # They bring it to the closest gaussian number
+    if type(x) is complex:
+        return math.floor(x.real) + math.floor(x.imag)*1j
+    raise TypeError(f'invalid type, type {type(x).__name__}')
+
+
+floor.prime[0] = 0
+
+
+@mathfunction
+def ceil(x, /):
+    '''Return the ceil of x'''
+    try:
+        return math.ceil(x)  # math's ceil already allows for custom types
+    except Exception:
+        pass
+    # imaginary type is not built in.
+    if type(x) is complex:
+        return ceil(x.real) + ceil(x.imag)*1j
+
+    raise TypeError(f'invalid type, type {type(x).__name__}')
+
+
+ceil.prime[0] = 0
+
+
+@mathfunction
+def S(x, /):
+    '''Sigmoid function'''
+    epow = exp(-x)
+    return 1/(1+epow)
+
+
+sigmoid = S
+sigmoid.prime[0] = exp(-x)/((1+exp(-x))**2), (0, )
+
+
+@mathfunction
+def expm1(x, /):
+    '''Return exp(x)-1'''
+    try:
+        return math.expm1(x)
+    except Exception:
+        return exp(x)-1
+
+
+expm1.prime[0] = exp, (0, )
+
+
+@mathfunction
+def sqrt(x, /):
+    '''Return the square root of x'''
+    try:
+        return math.sqrt(x)
+    except Exception:
+        pass
+    try:
+        return cmath.sqrt(x)
+    except Exception:
+        pass
+    try:
+        return x**(1/2)
+    except Exception:
+        pass
+    raise ValueError('math domain error')
+
+
+sqrt.prime[0] = (0.5)*x**(-1/2), (0, )
+
+
+@mathfunction
+def isqrt(x, /):
+    '''Return the floored square root of x'''
+    try:
+        return math.isqrt(x)
+    except Exception:
+        return floor(sqrt(x))
+
+
+isqrt.prime[0] = 0
+
+
+@mathfunction
+def cbrt(x, /):
+    '''Return the cube root of x'''
+    try:
+        return x**(1/3)
+    except Exception:
+        pass
+    raise ValueError('math domain error')
+
+
+cbrt.prime[0] = (1/3)*x**(-2/3), (0, )
+
+
+@mathfunction
+def icbrt(x, /):
+    '''Return the floored cube root of x'''
+    try:
+        return int(x**(1/3))
+    except Exception:
+        pass
+    raise ValueError('math domain error')
+
+
+icbrt.prime[0] = (0, )
+
+
+@mathfunction
+def square(x, /):
+    '''Return x**2'''
+    return x*x
+
+
+square.prime[0] = 2*x, (0, )
+
+
+@mathfunction
+def cube(x, /):
+    '''Return x**3'''
+    return x*x*x
+
+
+cube.prime[0] = 3*x**2, (0, )
+
+
+@mathfunction
+def tesser(x, /):
+    '''Return x**4'''
+    return x*x*x*x
+
+
+cube.prime[0] = 4*x**3, (0, )
+
+
+@mathfunction
+def ln(x, /):
+    '''Return the natural logarithm of x
+recources to x.ln() or x.log(e) if ln cannot be found'''
+    if x == 0:
+        raise ValueError('math domain error')
+    try:
+        return math.log(x)
+    except Exception:
+        pass
+    try:
+        return cmath.log(x)
+    except Exception:
+        pass
+    try:
+        return x.ln()
+    except Exception:
+        pass
+    try:
+        return x.log(math.e)
+    except Exception:
+        pass
+    raise TypeError('ln cannot be found of % s.' % type(x).__name__)
+
+
+ln.prime[0] = x**-1, (0, )
+
+
+@mathfunction
+def log(base, x):
+    ''' log([base=10], x)
+    Return the log base 'base' of x
+    recources to x.log(base) and base.rlog(x) if log cannot be found'''
+    if x == base:
+        return 1
+    if 0 in (x, base):
+        raise ValueError('math domain error')
+    if base == 1:
+        raise ValueError('math domain error')
+    try:
+        return math.log(x, base)
+    except Exception:
+        pass
+    try:
+        return cmath.log(x, base)
+    except Exception:
+        pass
+    try:
+        return x.log(base)
+    except Exception:
+        pass
+    try:
+        return base.rlog(x)
+    except Exception:
+        pass
+    raise TypeError('Logarithm cannot be found of a type % s.' % type(x))
+
+
+log.prime[0] = (-ln(x))*((ln(y))**-2)*(y**-1), (0, 1)
+log.prime[1] = (x*ln(y))**-1, (0, 1)
+log = decorators.shift_args({2: (0, 1), 1: ((10, ), 0)})(log)
+
+
+@mathfunction
+def log2(x, /):
+    '''Return the log base 2 of x'''
+    if x == 0:
+        raise ValueError('math domain error')
+    try:
+        return math.log2(x)
+    except Exception:
+        pass
+    try:
+        return log(2, x)
+    except Exception:
+        pass
+    raise TypeError('Log base 2 cannot be found of a type % s.' % type(x))
+
+
+log2.prime[0] = 1/ln(2)*(x**-1), (0, )
+
+
+@mathfunction
+def log1p(x, /):
+    '''Return the natural logarithm of x+1'''
+    try:
+        return math.log1p(x)
+    except Exception:
+        pass
+    try:
+        return ln(x+1)
+    except Exception:
+        pass
+    raise TypeError('log1p cannot be found of a type % s.' % type(x))
+
+
+log1p.prime[0] = 1/(x+1), (0, )
+
+
+@mathfunction
+def acos(x):
+    '''Return the arc cosine of x,
+recources to x.acos if cos cannot be found'''
+    if validation.is_float(x) and (x <= 1 and x >= -1):
+        return math.acos(x)
+    elif validation.is_complex(x):
+        return cmath.acos(x)
+    else:
+        try:
+            return x.acos()
+        except Exception:
+            pass
+    raise TypeError('acos cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def acosh(x):
+    '''Return the inverse hyperbolic cosine of x
+recources to x.acosh if cosh cannot be found'''
+    if validation.is_float(x):
+        return math.acosh(x)
+    elif validation.is_complex(x):
+        return cmath.acosh(x)
+    else:
+        try:
+            return x.acosh()
+        except Exception:
+            pass
+    raise TypeError('acos cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def asin(x):
+    '''Return the arc sine of x,
+recources to x.asin if sin cannot be found'''
+    if validation.is_float(x) and (x <= 1 and x >= -1):
+        return math.asin(x)
+    elif validation.is_complex(x):
+        return cmath.asin(x)
+    else:
+        try:
+            return x.asin()
+        except Exception:
+            pass
+    raise TypeError('asin cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def asinh(x):
+    '''Return the inverse hyperbolic sine of x
+recources to x.asinh if sinh cannot be found'''
+    if validation.is_float(x):
+        return math.asinh(x)
+    elif validation.is_complex(x):
+        return cmath.asinh(x)
+    else:
+        try:
+            return x.asinh()
+        except Exception:
+            pass
+    raise TypeError('asin cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def atan(x):
+    '''Return the arc tangent of x,
+recources to x.atan if tan cannot be found'''
+    if validation.is_float(x):
+        return math.atan(x)
+    elif validation.is_complex(x):
+        return cmath.atan(x)
+    else:
+        try:
+            return x.atan()
+        except Exception:
+            pass
+    raise TypeError('atan cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def atan2(y, x):
+    '''Return the arc tangent(measured in radians) of y/x'''
+    return math.atan2(validation.trynumber(y), validation.trynumber(x))
+
+
+atan2.prime[0] = (y+y*(x/y)**2)**-1, (0, 1)
+atan2.prime[1] = -(y+y*(x/y)**2)**-1, (0, 1)
+
+
+@mathfunction
+def atanh(x):
+    '''Return the inverse hyperbolic tangent of x
+recources to x.atanh if tanh cannot be found'''
+    if validation.is_float(x):
+        return math.atanh(x)
+    elif validation.is_complex(x):
+        return cmath.atanh(x)
+    else:
+        try:
+            return x.atanh()
+        except Exception:
+            pass
+    raise TypeError('atan cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def asec(x):
+    '''Return the arc secant of x
+recources to x.asec if sec cannot be found'''
+    zde = False
+    if validation.is_float(x):
+        try:
+            return(1/math.acos(x))
+        except ZeroDivisionError:
+            zde = True
+    elif validation.is_complex(x):
+        try:
+            return(1/cmath.acos(x))
+        except ZeroDivisionError:
+            zde = True
+    else:
+        try:
+            try:
+                return x.asec()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+    if zde:
+        raise ValueError('math domain error')
+    raise TypeError('asec cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def asech(x):
+    '''Return the inverse hyperbolic secant of x
+recources to x.asech if sech cannot be found'''
+    zde = False
+    if validation.is_float(x):
+        try:
+            return(1/math.acosh(x))
+        except ZeroDivisionError:
+            zde = True
+    elif validation.is_complex(x):
+        try:
+            return(1/cmath.acosh(x))
+        except ZeroDivisionError:
+            zde = True
+    else:
+        try:
+            try:
+                return x.asech()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+    if zde:
+        raise ValueError('math domain error')
+    raise TypeError('asech cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def acsc(x):
+    '''Return the arc cosecant of x
+recources to x.acsc if csc cannot be found'''
+    zde = False
+    if validation.is_float(x):
+        try:
+            return(1/math.asin(x))
+        except ZeroDivisionError:
+            zde = True
+    elif validation.is_complex(x):
+        try:
+            return(1/cmath.asin(x))
+        except ZeroDivisionError:
+            zde = True
+    else:
+        try:
+            try:
+                return x.acsc()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+    if zde:
+        raise ValueError('math domain error')
+    raise TypeError('acsc cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def acsch(x, /):
+    '''Return the inverse hyperbolic cosecant of x
+recources to x.acsch if csch cannot be found'''
+    zde = False
+    if validation.is_float(x):
+        try:
+            return(1/math.asinh(x))
+        except ZeroDivisionError:
+            zde = True
+    elif validation.is_complex(x):
+        try:
+            return(1/cmath.asinh(x))
+        except ZeroDivisionError:
+            zde = True
+    else:
+        try:
+            try:
+                return x.acsch()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+    if zde:
+        raise ValueError('math domain error')
+    raise TypeError('acsch cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def acot(x, /):
+    '''Return the arc cotangent of x
+recources to x.acot if cot cannot be found'''
+    zde = False
+    if validation.is_float(x):
+        try:
+            return(1/math.atan(x))
+        except ZeroDivisionError:
+            zde = True
+    elif validation.is_complex(x):
+        try:
+            return(1/cmath.atan(x))
+        except ZeroDivisionError:
+            zde = True
+    else:
+        try:
+            try:
+                return x.acot()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+    if zde:
+        raise ValueError('math domain error')
+    raise TypeError('acot cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def acoth(x, /):
+    '''Return the inverse hyperbolic cotangent of x
+recources to x.acoth if coth cannot be found'''
+    zde = False
+    if validation.is_float(x):
+        try:
+            return(1/math.atanh(x))
+        except ZeroDivisionError:
+            zde = True
+    elif validation.is_complex(x):
+        try:
+            return(1/cmath.atanh(x))
+        except ZeroDivisionError:
+            zde = True
+    else:
+        try:
+            try:
+                return x.acoth()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+    if zde:
+        raise ValueError('math domain error')
+    raise TypeError('acoth cannot be found of a type % s' % (type(x)))
+
+
+@mathfunction
+def cos(θ):
+    '''Return the cosine of θ,
+recources to θ.cos if cos cannot be found'''
+    if validation.is_float(θ):
+        return math.cos(θ)
+    elif validation.is_complex(θ):
+        return cmath.cos(θ)
+    else:
+        try:
+            return θ.cos()
+        except Exception:
+            pass
+    raise TypeError('cos cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def cosh(θ):
+    '''Return the hyperbolic cosine of θ,
+recources to θ.cosh if cosh cannot be found'''
+    if validation.is_float(θ):
+        return math.cosh(θ)
+    elif validation.is_complex(θ):
+        return cmath.cosh(θ)
+    else:
+        try:
+            return θ.cosh()
+        except Exception:
+            pass
+    raise TypeError('cosh cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def sin(θ):
+    '''Return the sine of θ,
+recources to θ.sin if sin cannot be found'''
+    if validation.is_float(θ):
+        return math.sin(θ)
+    elif validation.is_complex(θ):
+        return cmath.sin(θ)
+    else:
+        try:
+            return θ.sin()
+        except Exception:
+            pass
+    raise TypeError('sin cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def sinh(θ):
+    '''Return the hyperbolic sine of θ,
+recources to θ.sinh if sinh cannot be found'''
+    if validation.is_float(θ):
+        return math.sinh(θ)
+    elif validation.is_complex(θ):
+        return cmath.sinh(θ)
+    else:
+        try:
+            return θ.sinh()
+        except Exception:
+            pass
+    raise TypeError('sinh cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def tan(θ):
+    '''Return the tangent of θ,
+recources to θ.tan if tan cannot be found'''
+    if validation.is_float(θ):
+        return math.tan(θ)
+    elif validation.is_complex(θ):
+        return cmath.tan(θ)
+    else:
+        try:
+            return θ.tan()
+        except Exception:
+            pass
+    raise TypeError('tan cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def tanh(θ):
+    '''Return the hyperbolic tangent of θ,
+recources to θ.tanh if tanh cannot be found'''
+    if validation.is_float(θ):
+        return math.tanh(θ)
+    elif validation.is_complex(θ):
+        return cmath.tanh(θ)
+    else:
+        try:
+            return θ.tanh()
+        except Exception:
+            pass
+    raise TypeError('tanh cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def sec(θ):
+    '''Return the secant of θ,
+recources to θ.sec if sec cannot be found'''
+    if validation.is_float(θ):
+        try:
+            return math.cos(1/θ)
+        except ZeroDivisionError:
+            pass
+        raise ValueError('math domain error')
+    elif validation.is_complex(θ):
+        try:
+            return cmath.cos(1/θ)
+        except ZeroDivisionError:
+            pass
+
+    else:
+        zde = False
+        try:
+            try:
+                return θ.sec()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+        if zde:
+            raise ValueError('math domain error')
+    raise TypeError('sec cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def sech(θ):
+    '''Return the hyperbolic secant of θ
+recources to θ.sech if sech cannot be found'''
+    if validation.is_float(θ):
+        try:
+            return math.cosh(1/θ)
+        except ZeroDivisionError:
+            pass
+        raise ValueError('math domain error')
+    elif validation.is_complex(θ):
+        try:
+            return cmath.cosh(1/θ)
+        except ZeroDivisionError:
+            pass
+
+    else:
+        zde = False
+        try:
+            try:
+                return θ.sech()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+        if zde:
+            raise ValueError('math domain error')
+    raise TypeError('sech cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def csc(θ):
+    '''Return the cosecant of θ,
+recources to θ.csc if csc cannot be found'''
+    if validation.is_float(θ):
+        try:
+            return math.sin(1/θ)
+        except ZeroDivisionError:
+            pass
+        raise ValueError('math domain error')
+    elif validation.is_complex(θ):
+        try:
+            return cmath.sin(1/θ)
+        except ZeroDivisionError:
+            pass
+    else:
+        zde = False
+        try:
+            try:
+                return θ.csc()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+        if zde:
+            raise ValueError('math domain error')
+    raise TypeError('csc cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def csch(θ):
+    '''Return the hyperbolic cosecant of θ
+recources to θ.csch if csch cannot be found'''
+    if validation.is_float(θ):
+        try:
+            return math.sinh(1/θ)
+        except ZeroDivisionError:
+            pass
+        raise ValueError('math domain error')
+    elif validation.is_complex(θ):
+        try:
+            return cmath.sinh(1/θ)
+        except ZeroDivisionError:
+            pass
+
+    else:
+        zde = False
+        try:
+            try:
+                return θ.csch()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+        if zde:
+            raise ValueError('math domain error')
+    raise TypeError('csch cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def cot(θ):
+    '''Return the cotangent of θ,
+recources to θ.cot if cot cannot be found'''
+    if validation.is_float(θ):
+        try:
+            return math.tan(1/θ)
+        except ZeroDivisionError:
+            pass
+        raise ValueError('math domain error')
+    elif validation.is_complex(θ):
+        try:
+            return cmath.tan(1/θ)
+        except ZeroDivisionError:
+            pass
+
+    else:
+        zde = False
+        try:
+            try:
+                return θ.cot()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+        if zde:
+            raise ValueError('math domain error')
+    raise TypeError('cot cannot be found of a type % s' % (type(θ)))
+
+
+@mathfunction
+def coth(θ):
+    '''Return the hyperbolic cotangent of θ
+recources to θ.coth if coth cannot be found'''
+
+    if validation.is_float(θ):
+        try:
+            return math.tanh(1/θ)
+        except ZeroDivisionError:
+            pass
+        raise ValueError('math domain error')
+    elif validation.is_complex(θ):
+        try:
+            return cmath.tanh(1/θ)
+        except ZeroDivisionError:
+            pass
+
+    else:
+        zde = False
+        try:
+            try:
+                return θ.coth()
+            except ZeroDivisionError:
+                zde = True
+        except Exception:
+            pass
+        if zde:
+            raise ValueError('math domain error')
+    raise TypeError('coth cannot be found of a type % s' % (type(θ)))
+
+
+acos.prime[0] = -(1-x**2)**-(1/2), (0, )
+asin.prime[0] = (1-x**2)**-(1/2), (0, )
+atan.prime[0] = 1/(1+x**2), (0, )
+asec.prime[0] = (x**4-x**2)**(-1/2), (0, )
+acot.prime[0] = -1/(1+x**2), (0, )
+acsc.prime[0] = -(x**4-x**2)**(-1/2), (0, )
+
+cos.prime[0] = -sin(x), (0, )
+sin.prime[0] = cos, (0, )
+cos.prime_cycle[0] = 4
+sin.prime_cycle[0] = 4
+tan.prime[0] = sec(x)**2, (0, )
+sec.prime[0] = sec(x)*tan(x), (0, )
+cot.prime[0] = -(csc(x)**2), (0, )
+csc.prime[0] = -csc(x)*cot(x), (0, )
+
+acosh.prime[0] = (x**2-1)**(-1/2), (0, )
+asinh.prime[0] = (x**2+1)**(-1/2), (0, ), (0, )
+atanh.prime[0] = 1/(1-x**2), (0, )
+asech.prime[0] = -1/(x*(1-x**2)**(1/2)), (0, )
+acoth.prime[0] = 1/(1-x**2), (0, )
+acsch.prime[0] = -(x**4+x**2)**(-1/2), (0, )
+
+cosh.prime[0] = sinh, (0, )
+sinh.prime[0] = cosh, (0, )
+cosh.prime_cycle[0] = 2
+sinh.prime_cycle[0] = 2
+tanh.prime[0] = sech(x)**2, (0, )
+sech.prime[0] = -sech(x)*tanh(x), (0, )
+coth.prime[0] = -(csch(x)**2), (0, )
+csch.prime[0] = -csch(x)*coth(x), (0, )
+
+
+@mathfunction
+def cis(θ, n=1j):
+    '''Return cos(θ) + nsin(θ)'''
+    if abs(abs(n)-1) > 1e-10:
+        raise ValueError('math domain error')
+    if n.real != 0:
+        raise ValueError('math domain error')
+    return cos(θ)+(n*sin(θ))
+
+
+cis.prime[0] = -sin(x)+y*cos(x), (0, 1)
+cis.prime[1] = sin(x), (0, )
+
+variable = cas_variable
+
+
+def polynomial(*terms):
+    runfunc = 0
+    for power, coefficient in enumerate(terms):
+        runfunc += coefficient*x**power
+    return runfunc
 
 # eof
