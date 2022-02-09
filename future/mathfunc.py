@@ -95,7 +95,7 @@ def is_rational(n):
 
 
 def is_exact(n):
-    return isinstance(n, cas_object)
+    return isinstance(n, cas_exact_object)
 
 # DATA HANDLING #
 
@@ -157,8 +157,10 @@ def getLaTeX(value):
         return LaTeX
     return str(value)
 
+
 def print_raw_LaTeX(value):
     print(getLaTeX(value))
+
 
 def evaluateable_string(value):
     if hasattr(value, 'evalstr'):
@@ -282,6 +284,7 @@ def math_return_dec(function):
             return NotImplemented
     return wrapper
 
+
 def log_call(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
@@ -305,7 +308,6 @@ standard arithmatic functions'''
                 except Exception as error:
                     logging.error(f'{error.__class__.__name__}: {error.args[0]}')
                     return return_val
-                return return_val
             return return_val
         if isinstance(return_val, cas_variable):
             return return_val
@@ -667,6 +669,10 @@ class cas_exact_object:
     def is_constant(self):
         return True
 
+    def __eq__(self, other):
+        if hasattr(other, 'value'):
+            return self.value == other.value
+        return self.value == other
 
 class cas_constant(cas_exact_object):
     '''constant class for cas engine'''
@@ -1376,6 +1382,9 @@ class pow_exact_expression(cas_exact_non_commutative_expression):
                                   mul_expression((self.a.b, self.b)))
         return self
 
+    def _comp_derive(self, var, k, /):
+        return 0
+
 
 class pow_expression(non_commutative_expression):
     oper = '**'
@@ -1424,6 +1433,8 @@ class pow_expression(non_commutative_expression):
         return self.__class__(_get(self.a), _get(self.b))
 
     def LaTeX(self):
+        if isinstance(self.a, (cas_expression, cas_exact_expression)):
+            return '\\left('+getLaTeX(self.a)+'\\right)^{'+getLaTeX(self.b)+'}'
         return '{'+getLaTeX(self.a)+'}^{'+getLaTeX(self.b)+'}'
 
     def __str__(self):
@@ -1451,10 +1462,59 @@ class pow_expression(non_commutative_expression):
                                   mul_expression((self.a.b, self.b)))
         return self
 
+    def _comp_derive(self, var, k, /):
+        '''computes kth partial of self with respect to var'''
+        if is_constant(self.b):
+            if self.a == var:
+                if k > self.b:
+                    return 0
+                coef = math.prod(range(self.b-k+1, self.b+1))
+                return mul_expression((coef, pow_expression(var, self.b-k)))
+            if isinstance(self.a, cas_variable):
+                return 0
+            a = self.a
+            b = self.b
+            first_derivative = mul_expression((b, pow_expression(a, b-1),
+                                               _comp_derive(self.a, var, 1)))
+            return _comp_derive(first_derivative, var, k-1)
+        if is_constant(self.a):
+            return _comp_derive(mul_expression((ln(self.a), self)), var, k-1)
+        pross = mul_expression((ln(self.a).composition, self.b))
+        internal = _comp_derive(pross, var, 1)
+        return _comp_derive(mul_expression((self, internal)), var, k-1)
 
-class cas_exact_nest(cas_exact_object):
+
+class cas_exact_nest(cas_exact_expression):
+    oper = '()'
     def __new__(cls, func, args):
-        pass
+        if hasattr(func, 'exact_hook'):
+            with suppress(Exception):
+                rval = func.exact_hook(args)
+                if rval is not NotImplemented:
+                    return rval
+        self = super(cas_exact_nest, cls).__new__(cls)
+        self.value = func.original(*args)
+        self.func = func
+        self.args = args
+        self.string_end = ', '.join(map(str, args))
+        self.eval_end = ', '.join(map(evaluateable_string, args))
+        self.LaTeX_end = ', '.join(map(getLaTeX, args))
+        return self
+
+    def __str__(self):
+        return f'{self.func.__name__}({self.string_end})'
+
+    def evalstr(self):
+        return str(self.value)
+
+    def _comp_derive(n, var, k):
+        return 0
+
+    def LaTeX(self):
+        return f'{self.func.__name__}\left({self.LaTeX_end}\right)'
+
+    def __repr__(self):
+        return f'{self.func.__name__}({self.string_end})'
 
 
 class cas_function:
@@ -1570,10 +1630,13 @@ def cas_func_wrap(func):
     @wraps(func)
     def wrap(*args):
         if all(map(is_constant, args)):
+            if any(map(is_exact, args)):
+                return cas_exact_nest(wrap, args)
             return func(*args)
         args = tuple(map(cas_safe, args))
         return mathfunc(cas_function(wrap, args))
 
+    wrap.original = func
     wrap.prime = {}
     wrap.format = None
     wrap.prime_cycle = {}
@@ -1654,6 +1717,7 @@ tau = cas_constant('τ', math.tau, '\\tau')
 x, y, z, t = create_variables('x', 'y', 'z', 't')
 
 mathfunction = cas_func_wrap
+
 
 @mathfunction
 def exp(x, /):
