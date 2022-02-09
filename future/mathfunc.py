@@ -300,6 +300,8 @@ standard arithmatic functions'''
 
     @staticmethod
     def _math_return(return_val):
+        if return_val is NotImplemented:
+            return NotImplemented
         logging.info(f'math return: {return_val}')
         if is_constant(return_val):
             if not isinstance(return_val, cas_exact_object):
@@ -412,7 +414,7 @@ class cas_callable:
 basic calling abilities and custom setattr getattr methods'''
     fn: tuple
     var: tuple
-    _data: dict
+    __data: dict
     __doc__: str
     shortcut_function: types.FunctionType
     function: str
@@ -426,6 +428,18 @@ basic calling abilities and custom setattr getattr methods'''
     arguments_call: tuple
     domain_restrictions: tuple
     safe: typing.Any
+    custom_latex: str
+
+    def __new__(cls, func):
+        assert callable(func)
+        self = super(cas_callable, cls).__new__(cls)
+        self.__data = {'inputs': {}, 'pass': {}, 'oper': {}, 'custom_data': {}}
+        self.special = {'arguments_comp': self._set_args_comp}
+        self.truecall = func
+        self.arguments_comp = func.original.__code__.co_varnames
+        self.__name__ = func.__name__
+        self.func = func
+        return self
 
     def check_domain(self, *args):
         '''Not implemented: Raises ValueError
@@ -435,32 +449,32 @@ or interval'''
 
     @log_call
     def __call__(self, *args):
+        if all(map(is_constant, args)) and not any(map(is_exact, args)):
+            return self.original(*args)
+        args = tuple(map(cas_safe, args))
         self.check_domain(args)
-        get_key = lambda x: (self.arguments_comp.index(self.arguments_call[x[0]]))
-        sorter = sorted(enumerate(args), key=get_key)
-        args = tuple((i[1] for i in sorter))
         if hasattr(self, '__callhook__'):
-            return_val = self.__callhook__(*args)
+            return_val = cas_object._math_return(self.__callhook__(*args))
             if return_val is not NotImplemented:
                 return return_val
-        if all(map(is_constant, args)) and not any(map(is_exact, args)):
-            return self.shortcut_function(*args)
-
         for varname, a in zip(self.arguments_comp, args):
             if hasattr(a, 'hook_intercept'):
-                idict = self._data['inputs'][varname]
+                idict = self.__data['inputs'][varname]
                 if a.hook_intercept in idict:
-                    return_val = idict[a.hook_intercept](*args)
+                    return_val = cas_object._math_return(idict[a.hook_intercept](*args))
                     if return_val is not NotImplemented:
                         return return_val
         return self.truecall(*args)
 
     def _get_data_copy(self):
-        return self._data.copy()
+        return self.__data.copy()
+
+    def _get_data_item_copy(self, index):
+        return self.__data[index]
 
     def _set_args_comp(self, value):
         for n in value:
-            self._data['inputs'][n] = {}
+            self.__data['inputs'][n] = {}
 
     def __setattr__(self, name: str, value) -> None:
         '''Intercepts attribute setting, for customized storage'''
@@ -483,13 +497,13 @@ or interval'''
                 vmethod = name[6:-6]
                 for var in self.arguments_comp:
                     if vmethod.startswith(var):
-                        self._data['inputs'][var][vmethod[len(var):]] = value
+                        self.__data['inputs'][var][vmethod[len(var):]] = value
                         return
                 raise ValueError('Invalid name')
             if name.startswith('__'):
-                self._data['oper'][name[2:-6]] = value
+                self.__data['oper'][name[2:-6]] = value
                 return
-        self._data['custom_data'][name] = value
+        self.__data['custom_data'][name] = value
 
     def __getattr__(self, name):
         '''Customized attribute storage also necesitates custom attribute lookup'''
@@ -499,13 +513,14 @@ or interval'''
                 for var in self.arguments_comp:
                     with suppress(KeyError):
                         if vmethod.startswith(var):
-                            return self._data['inputs'][var][vmethod[len(var):]]
+                            return self.__data['inputs'][var][vmethod[len(var):]]
             if name.startswith('__'):
                 with suppress(KeyError):
-                    return self._data['oper'][name[2:-6]]
+                    return self.__data['oper'][name[2:-6]]
         with suppress(KeyError):
-            return self._data['custom_data'][name]
+            return self.__data['custom_data'][name]
         raise AttributeError(f'{self.__class__.__name__!r} object has no attribute {name!r}')
+
     special: dict = {'arguments_comp': _set_args_comp}
 
 
@@ -673,6 +688,7 @@ class cas_exact_object:
         if hasattr(other, 'value'):
             return self.value == other.value
         return self.value == other
+
 
 class cas_constant(cas_exact_object):
     '''constant class for cas engine'''
@@ -885,19 +901,7 @@ class commutative_expression(cas_expression, tuple):
                 continue
             expressions.append(n)
         return numbers, expressions
-    """
-    @abstractmethod
-    def var(self):
-        '''abstract method: create as a @property
-Return variables involved in expression'''
-        pass
 
-    @abstractmethod
-    def fn(self):
-        '''abstract method: create as a @property
-Return functions involved in expression'''
-        pass
-"""
     def __hash__(self, /):
         '''hash for communative expression '''
         return hash((self.oper, tuple(self)))
@@ -1346,11 +1350,13 @@ class pow_exact_expression(cas_exact_non_commutative_expression):
     true_operation = lambda x, y: x**y
 
     def __new__(cls, a, b):
+        a = cas_safe(a)
+        b = cas_safe(b)
         if is_rational(a) and validation.is_integer(b):
-            return a**b
+            return a.value**b.value
         self = super(cas_exact_non_commutative_expression, cls).__new__(cls)
-        self.a = cas_safe(a)
-        self.b = cas_safe(b)
+        self.a = a
+        self.b = b
         self.value = self.a.value**self.b.value
         return self._simplify()
 
@@ -1486,6 +1492,7 @@ class pow_expression(non_commutative_expression):
 
 class cas_exact_nest(cas_exact_expression):
     oper = '()'
+
     def __new__(cls, func, args):
         if hasattr(func, 'exact_hook'):
             with suppress(Exception):
@@ -1496,13 +1503,35 @@ class cas_exact_nest(cas_exact_expression):
         self.value = func.original(*args)
         self.func = func
         self.args = args
-        self.string_end = ', '.join(map(str, args))
-        self.eval_end = ', '.join(map(evaluateable_string, args))
-        self.LaTeX_end = ', '.join(map(getLaTeX, args))
+        if func.format:
+            string = func.format
+            for n, arg in enumerate(args):
+                string = string.replace(f'<{n}>', f'{arg}')
+        else:
+            string = func.__name__+'('
+            string += ', '.join(map(str, args))
+            string += ')'
+        if hasattr(func, 'custom_latex'):
+            latex = func.custom_latex
+            for n, arg in enumerate(args):
+                latex = latex.replace(f'<{n}>', f'{arg}')
+            self.LaTeX = latex
+        elif hasattr(func, 'LaTeX'):
+            self.LaTeX = func.LaTeX
+        else:
+            if hasattr(func, 'latexname'):
+                latex = func.latexname+'\\left('
+            elif hasattr(func, 'latexfunc') and func.latexfunc:
+                latex = '\\'+func.__name__+'\\left('
+            else:
+                latex = func.__name__+'\\left('
+            LaTeX_end = ', '.join(map(getLaTeX, args))
+            self.LaTeX = f'{latex}{LaTeX_end}\\right)'
+        self.string = string
         return self
 
     def __str__(self):
-        return f'{self.func.__name__}({self.string_end})'
+        return self.string
 
     def evalstr(self):
         return str(self.value)
@@ -1510,11 +1539,8 @@ class cas_exact_nest(cas_exact_expression):
     def _comp_derive(n, var, k):
         return 0
 
-    def LaTeX(self):
-        return f'{self.func.__name__}\left({self.LaTeX_end}\right)'
-
     def __repr__(self):
-        return f'{self.func.__name__}({self.string_end})'
+        return str(self)
 
 
 class cas_function:
@@ -1558,8 +1584,8 @@ class cas_function:
             string = func.format
             evalstr = func.format
             for n, arg in enumerate(args):
-                string = string.replace(f'<{n}>', f'({arg})')
-                evalstr = evalstr.replace(f'<{n}>', f'({evaluateable_string(arg)})')
+                string = string.replace(f'<{n}>', f'{arg}')
+                evalstr = evalstr.replace(f'<{n}>', f'{evaluateable_string(arg)}')
         else:
             string = func.__name__+'('
             string += ', '.join(map(str, args))
@@ -1567,11 +1593,26 @@ class cas_function:
             evalstr = func.__name__+'('
             evalstr += ', '.join(map(evaluateable_string, args))
             evalstr += ')'
+        if hasattr(func, 'custom_latex'):
+            latex = func.custom_latex
+            for n, arg in enumerate(args):
+                latex = latex.replace(f'<{n}>', f'{arg}')
+            self.LaTeX = latex
+        elif hasattr(func, 'LaTeX'):
+            self.LaTeX = func.LaTeX
+        else:
+            if hasattr(func, 'latexname'):
+                latex = func.latexname+'\\left('
+            elif hasattr(func, 'latexfunc') and func.latexfunc:
+                latex = '\\'+func.__name__+'\\left('
+            else:
+                latex = func.__name__+'\\left('
+            latex += ', '.join(map(getLaTeX, args))
+            latex += '\\right)'
+            self.LaTeX = latex
         self.string = string
         self.evalstr = evalstr
         self.arg_data_func_wrap = tmd[func.__name__]
-        if hasattr(func, 'LaTeX'):
-            self.LaTeX = func.LaTeX
         return self
 
     def __str__(self):
@@ -1633,9 +1674,10 @@ def cas_func_wrap(func):
             if any(map(is_exact, args)):
                 return cas_exact_nest(wrap, args)
             return func(*args)
-        args = tuple(map(cas_safe, args))
         return mathfunc(cas_function(wrap, args))
 
+    wrap.original = func
+    wrap = cas_callable(wrap)
     wrap.original = func
     wrap.prime = {}
     wrap.format = None
@@ -1643,7 +1685,7 @@ def cas_func_wrap(func):
     return wrap
 
 
-class mathfunc(cas_callable, cas_object):
+class mathfunc(cas_object):
     _data: dict
 
     def __new__(cls, func):
@@ -1656,11 +1698,7 @@ class mathfunc(cas_callable, cas_object):
         else:
             raise TypeError(f'Invalid type recieved, type({type(func)})')
         self = super(mathfunc, cls).__new__(cls)
-        self._data = {'inputs': {}, 'pass': {}, 'oper': {}, 'custom_data': {}}
-        self.special = {'arguments_comp': self._set_args_comp}
         self.composition = func
-        self.safe = self.composition
-        self.exact_composition = self.composition
         if isinstance(func, cas_function):
             self.__name__ = func.func.__name__
         else:
@@ -1682,7 +1720,9 @@ class mathfunc(cas_callable, cas_object):
         return self
 
     @math_return_dec
-    def truecall(self, *args):
+    def __call__(self, *args):
+        if all(map(is_constant, args)) and not any(map(is_constant, args)):
+            return self.shortcut_function(*args)
         return self.composition.evaluate(*args)
 
     def __repr__(self):
@@ -1845,7 +1885,7 @@ def cbrt(x, /):
     raise ValueError('math domain error')
 
 
-cbrt.prime[0] = (1/3)*x**(-2/3), (0, )
+cbrt.prime[0] = (cas_exact('1/3'))*x**(cas_exact('-2/3')), (0, )
 
 
 @mathfunction
@@ -1946,8 +1986,37 @@ def log(base, x):
     raise TypeError('Logarithm cannot be found of a type % s.' % type(x))
 
 
+def logcallhook(a, b):
+    if a == 1 or (0 in (a, b)):
+        raise ValueError('math domain error')
+    if a == b:
+        return cas_exact(1)
+    if b == 1:
+        return cas_exact(0)
+    return NotImplemented
+
+
+def logpassxpowhook(a, b):
+    return mul_expression((b.b, log(a, b.a)))
+
+
+def logpassbasepowhook(a, b):
+    return mul_expression((a.b**-1, log(a.a, b)))
+
+
+def logpassxmulhook(a, b):
+    return add_expression(map(lambda x: log(a, x), b))
+
+
 log.prime[0] = (-ln(x))*((ln(y))**-2)*(y**-1), (0, 1)
 log.prime[1] = (x*ln(y))**-1, (0, 1)
+log.__passxpowhook__ = logpassxpowhook
+log.__passbasepowhook__ = logpassbasepowhook
+log.__passxmulhook__ = logpassxmulhook
+log.__callhook__ = logcallhook
+log.custom_latex = '\\log_{<0>}\\left({<1>}\\right)'
+
+true_log = log
 log = decorators.shift_args({2: (0, 1), 1: ((10, ), 0)})(log)
 
 
@@ -2001,6 +2070,9 @@ recources to x.acos if cos cannot be found'''
         except Exception:
             pass
     raise TypeError('acos cannot be found of a type % s' % (type(x)))
+
+
+acos.latexname = '\\arccos'
 
 
 @mathfunction
@@ -2275,6 +2347,9 @@ recources to θ.cos if cos cannot be found'''
         except Exception:
             pass
     raise TypeError('cos cannot be found of a type % s' % (type(θ)))
+
+
+cos.latexfunc = True
 
 
 @mathfunction
