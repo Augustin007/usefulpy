@@ -128,7 +128,8 @@ def cas_safe(n):
         return n
     if isinstance(n, cas_function):
         return n
-    assert isinstance(n, cas_object)
+    if not isinstance(n, cas_object):
+        raise TypeError(f'Invalid CAS types, {type(n)}')
     return n
 
 
@@ -254,8 +255,8 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
         raise TypeError(f'Invalid type recieved for argument `ignore` recieved {type(ignore)} and not tuple')
     if not all(map(lambda x: type(x) is int, ignore)):
         raise ValueError('All values of `ignore` must be int')
-    fhook = f'__{preface}{"r" if r else None}{name}hook__'
-    bhook = f'__{preface}{"r" if not r else None}{name}hook__'
+    fhook = f'__{preface}{"r" if r else ""}{name}hook__'
+    bhook = f'__{preface}{"r" if not r else ""}{name}hook__'
 
     def decorator(function):
         lvarnum = varnum if varnum is not None else function.__code__.co_varnames
@@ -408,6 +409,10 @@ standard arithmatic functions'''
         '''Return other**self'''
         return pow_expression(other, self)
 
+    def __repr__(self):
+        ''' representation string for CAS objects '''
+        return f'CAS[ {self} ]'
+
 
 class cas_callable:
     '''Generic function for cas_engine that implements
@@ -429,6 +434,7 @@ basic calling abilities and custom setattr getattr methods'''
     domain_restrictions: tuple
     safe: typing.Any
     custom_latex: str
+    custom_composition: typing.Any
 
     def __new__(cls, func):
         assert callable(func)
@@ -521,6 +527,10 @@ or interval'''
             return self.__data['custom_data'][name]
         raise AttributeError(f'{self.__class__.__name__!r} object has no attribute {name!r}')
 
+    def __repr__(self):
+        ''' representation string for cas_variable '''
+        return f'<Callable {self.__name__} at {hex(id(self))}'
+
     special: dict = {'arguments_comp': _set_args_comp}
 
 
@@ -569,9 +579,6 @@ class cas_variable(cas_object):
         self.value = None
 
     # CONVERSIONS #
-    def __repr__(self):
-        ''' representation string for cas_variable '''
-        return f'<{self.__class__.__name__} <{self}> at {hex(id(self))}>'
 
     def __str__(self):
         ''' str for cas_variable '''
@@ -689,6 +696,10 @@ class cas_exact_object:
             return self.value == other.value
         return self.value == other
 
+    def __repr__(self):
+        ''' representation string for CAS objects '''
+        return f'CAS[ {self} ]'
+
 
 class cas_constant(cas_exact_object):
     '''constant class for cas engine'''
@@ -733,10 +744,6 @@ class cas_constant(cas_exact_object):
         return self
 
     # CONVERSIONS #
-    def __repr__(self):
-        ''' representation string for cas_variable '''
-        return f'<{self.__class__.__name__} <{self.name}={self.value}> at {hex(id(self))}>'
-
     def __str__(self):
         ''' str for cas_variable '''
         return self.name
@@ -770,9 +777,6 @@ class cas_exact(cas_exact_object):
 
     def __str__(self):
         return str(self.value)
-
-    def __repr__(self):
-        return f'cas_exact({str(self.value)!r})'
 
     def __float__(self):
         return float(self.value)
@@ -821,10 +825,6 @@ Return self evaluated at values of variables'''
 Return self converted into a string'''
         pass
 
-    def __repr__(self, /):
-        '''Return ide representation of self'''
-        return f'<{self.__class__.__name__[: -11]} {self} at {hex(id(self))}>'
-
 
 class cas_exact_expression(cas_exact_object):
     @abstractmethod
@@ -843,10 +843,6 @@ Return a simplified version of current expression'''
 Return self converted into a string'''
         pass
 
-    def __repr__(self, /):
-        '''Return ide representation of self'''
-        return f'<{self.__class__.__name__[: -11]} {self} at {hex(id(self))}>'
-
 
 class commutative_expression(cas_expression, tuple):
     LaTeXoper: str
@@ -858,6 +854,9 @@ class commutative_expression(cas_expression, tuple):
             return cls.cas_exact(iterable)
         self = tuple.__new__(cls, map(cas_safe, iterable))
         self = self._simplify()
+        if not isinstance(self, cls):
+            return self
+        self = self._check_hooks()
         if not isinstance(self, cls):
             return self
         var = []
@@ -1128,6 +1127,13 @@ class add_expression(commutative_expression):
             return tuple.__new__(self.__class__, expressions_short)
         return tuple.__new__(self.__class__, (number, *expressions_short))
 
+    def _check_hooks(self):
+        for i, n in enumerate(self):
+            if isinstance(n, cas_function):
+                if hasattr(n.func, '__addcheckhook__'):
+                    return n.func.__addcheckhook__(self)
+        return self
+
     def _data_extract(self, value, /):
         '''extracts count and truevalue data from value'''
         if type(value) is mathfunc:
@@ -1330,12 +1336,21 @@ class mul_expression(commutative_expression):
         terms = [_mul_derive_expansion(f, g, var, k, n) for n in range(k+1)]
         return add_expression(terms)
 
+    def _check_hooks(self):
+        for i, n in enumerate(self):
+            if isinstance(n, cas_function):
+                if hasattr(n.func, '__mulcheckhook__'):
+                    return n.func.__mulcheckhook__(self)
+        return self
+
 
 mul_exact_expression.cas_inexact = mul_expression
 
 
 class div_exact_shortcut(cas_exact_non_commutative_expression):
     def __new__(cls, a, b):  # TEMPORARY
+        a = cas_safe(a)
+        b = cas_safe(b)
         return a*(b**-1)
 
 
@@ -1350,10 +1365,15 @@ class pow_exact_expression(cas_exact_non_commutative_expression):
     true_operation = lambda x, y: x**y
 
     def __new__(cls, a, b):
+        if not (is_constant(a) and is_constant(b)):
+            return pow_expression(a, b)
         a = cas_safe(a)
         b = cas_safe(b)
         if is_rational(a) and validation.is_integer(b):
-            return a.value**b.value
+            if b.value < 0:
+                temp = a.value**(-b.value)
+                return cas_exact(Fraction(1, temp))
+            return cas_exact(a.value**b.value)
         self = super(cas_exact_non_commutative_expression, cls).__new__(cls)
         self.a = a
         self.b = b
@@ -1409,6 +1429,10 @@ class pow_expression(non_commutative_expression):
         # Check for constant exact types
         self.a = a
         self.b = b
+        self = self._simplify()
+        check = self._check_hooks()
+        if check is not NotImplemented:
+            return check
         var = []
         for n in (self.a, self.b):
             if type(n) == cas_variable:
@@ -1421,7 +1445,7 @@ class pow_expression(non_commutative_expression):
             if isinstance(n, cas_expression) or callable(n):
                 fn.extend(n.fn)
         self.fn = remove_duplicates(fn)
-        return self._simplify()
+        return self
 
     def __eq__(self, other, /):
         '''Return self==other'''
@@ -1489,6 +1513,13 @@ class pow_expression(non_commutative_expression):
         internal = _comp_derive(pross, var, 1)
         return _comp_derive(mul_expression((self, internal)), var, k-1)
 
+    def _check_hooks(self):
+        if hasattr(self.a, '__powahook__'):
+            return self.a.__powahook__(self)
+        if hasattr(self.b, '__powbhook__'):
+            return self.b.__powbhook__(self)
+        return self
+
 
 class cas_exact_nest(cas_exact_expression):
     oper = '()'
@@ -1539,9 +1570,6 @@ class cas_exact_nest(cas_exact_expression):
     def _comp_derive(n, var, k):
         return 0
 
-    def __repr__(self):
-        return str(self)
-
 
 class cas_function:
     func: types.FunctionType
@@ -1553,6 +1581,8 @@ class cas_function:
         self.args = args
         self.prime = self.func.prime
         self.prime_cycle = self.func.prime_cycle
+        if hasattr(func, 'custom_composition'):
+            self.custom_composition = func.custom_composition
         var = []
         fn = [func]
         for arg in args:
@@ -1698,7 +1728,10 @@ class mathfunc(cas_object):
         else:
             raise TypeError(f'Invalid type recieved, type({type(func)})')
         self = super(mathfunc, cls).__new__(cls)
-        self.composition = func
+        if hasattr(func, 'custom_composition') and hasattr(func, 'args'):
+            self.composition = func.custom_composition.evaluate(*func.args)
+        else:
+            self.composition = func
         if isinstance(func, cas_function):
             self.__name__ = func.func.__name__
         else:
@@ -1783,6 +1816,7 @@ def exp(x, /):
 
 exp.prime[0] = exp, (0, )
 exp.prime_cycle[0] = 1
+exp.custom_composition = (e**x).composition
 
 
 @mathfunction
@@ -1828,6 +1862,7 @@ def S(x, /):
 
 sigmoid = S
 sigmoid.prime[0] = exp(-x)/((1+exp(-x))**2), (0, )
+sigmoid.custom_composition = (1/(1+exp(-x))).composition
 
 
 @mathfunction
@@ -1860,6 +1895,7 @@ def sqrt(x, /):
     raise ValueError('math domain error')
 
 
+sqrt.custom_composition = (x**(0.5)).composition
 sqrt.prime[0] = (0.5)*x**(-1/2), (0, )
 
 
@@ -1872,6 +1908,7 @@ def isqrt(x, /):
         return floor(sqrt(x))
 
 
+isqrt.custom_composition = floor(sqrt(x)).composition
 isqrt.prime[0] = 0
 
 
@@ -1885,6 +1922,7 @@ def cbrt(x, /):
     raise ValueError('math domain error')
 
 
+cbrt.custom_composition = (x**cas_exact('1/3')).composition
 cbrt.prime[0] = (cas_exact('1/3'))*x**(cas_exact('-2/3')), (0, )
 
 
@@ -1892,12 +1930,13 @@ cbrt.prime[0] = (cas_exact('1/3'))*x**(cas_exact('-2/3')), (0, )
 def icbrt(x, /):
     '''Return the floored cube root of x'''
     try:
-        return int(x**(1/3))
+        return floor(x**(1/3))
     except Exception:
         pass
     raise ValueError('math domain error')
 
 
+icbrt.custom_composition = (floor(cbrt(x))).composition
 icbrt.prime[0] = (0, )
 
 
@@ -1907,6 +1946,7 @@ def square(x, /):
     return x*x
 
 
+square.custom_composition = (x**2).composition
 square.prime[0] = 2*x, (0, )
 
 
@@ -1916,6 +1956,7 @@ def cube(x, /):
     return x*x*x
 
 
+cube.custom_composition = (x**3).composition
 cube.prime[0] = 3*x**2, (0, )
 
 
@@ -1925,7 +1966,8 @@ def tesser(x, /):
     return x*x*x*x
 
 
-cube.prime[0] = 4*x**3, (0, )
+tesser.custom_composition = (x**4).composition
+tesser.prime[0] = 4*x**3, (0, )
 
 
 @mathfunction
@@ -1954,6 +1996,7 @@ recources to x.ln() or x.log(e) if ln cannot be found'''
 
 
 ln.prime[0] = x**-1, (0, )
+# TODO: Interaction between logs.
 
 
 @mathfunction
@@ -2091,6 +2134,9 @@ recources to x.acosh if cosh cannot be found'''
     raise TypeError('acos cannot be found of a type % s' % (type(x)))
 
 
+acosh.latexname = '\\arccosh'
+
+
 @mathfunction
 def asin(x):
     '''Return the arc sine of x,
@@ -2105,6 +2151,9 @@ recources to x.asin if sin cannot be found'''
         except Exception:
             pass
     raise TypeError('asin cannot be found of a type % s' % (type(x)))
+
+
+asin.latexname = '\\arcsin'
 
 
 @mathfunction
@@ -2123,6 +2172,9 @@ recources to x.asinh if sinh cannot be found'''
     raise TypeError('asin cannot be found of a type % s' % (type(x)))
 
 
+asinh.latexname = '\\arcsinh'
+
+
 @mathfunction
 def atan(x):
     '''Return the arc tangent of x,
@@ -2139,12 +2191,16 @@ recources to x.atan if tan cannot be found'''
     raise TypeError('atan cannot be found of a type % s' % (type(x)))
 
 
+atan.latexname = '\\arctan'
+
+
 @mathfunction
 def atan2(y, x):
     '''Return the arc tangent(measured in radians) of y/x'''
     return math.atan2(validation.trynumber(y), validation.trynumber(x))
 
 
+atan2.latexname = '\\arctan2'
 atan2.prime[0] = (y+y*(x/y)**2)**-1, (0, 1)
 atan2.prime[1] = -(y+y*(x/y)**2)**-1, (0, 1)
 
@@ -2163,6 +2219,9 @@ recources to x.atanh if tanh cannot be found'''
         except Exception:
             pass
     raise TypeError('atan cannot be found of a type % s' % (type(x)))
+
+
+atanh.latexname = '\\arctanh'
 
 
 @mathfunction
@@ -2193,6 +2252,9 @@ recources to x.asec if sec cannot be found'''
     raise TypeError('asec cannot be found of a type % s' % (type(x)))
 
 
+asec.latexname = '\\arcsec'
+
+
 @mathfunction
 def asech(x):
     '''Return the inverse hyperbolic secant of x
@@ -2219,6 +2281,9 @@ recources to x.asech if sech cannot be found'''
     if zde:
         raise ValueError('math domain error')
     raise TypeError('asech cannot be found of a type % s' % (type(x)))
+
+
+asech.latexname = '\\arcsech'
 
 
 @mathfunction
@@ -2249,6 +2314,9 @@ recources to x.acsc if csc cannot be found'''
     raise TypeError('acsc cannot be found of a type % s' % (type(x)))
 
 
+acsc.latexname = '\\arccsc'
+
+
 @mathfunction
 def acsch(x, /):
     '''Return the inverse hyperbolic cosecant of x
@@ -2275,6 +2343,9 @@ recources to x.acsch if csch cannot be found'''
     if zde:
         raise ValueError('math domain error')
     raise TypeError('acsch cannot be found of a type % s' % (type(x)))
+
+
+acsch.latexname = '\\arccsch'
 
 
 @mathfunction
@@ -2305,6 +2376,9 @@ recources to x.acot if cot cannot be found'''
     raise TypeError('acot cannot be found of a type % s' % (type(x)))
 
 
+acot.latexname = '\\arccot'
+
+
 @mathfunction
 def acoth(x, /):
     '''Return the inverse hyperbolic cotangent of x
@@ -2333,6 +2407,9 @@ recources to x.acoth if coth cannot be found'''
     raise TypeError('acoth cannot be found of a type % s' % (type(x)))
 
 
+acot.latexname = '\\arccot'
+
+
 @mathfunction
 def cos(θ):
     '''Return the cosine of θ,
@@ -2347,6 +2424,22 @@ recources to θ.cos if cos cannot be found'''
         except Exception:
             pass
     raise TypeError('cos cannot be found of a type % s' % (type(θ)))
+
+
+def cospowahook(powexp):
+    if powexp.b == 2:
+        powexp.__mulcheckhook__ = cos2mulhook
+        powexp.__addcheckhook__ = cos2addhook
+        return powexp
+    return NotImplemented
+
+
+def cos2addhook(addexp):
+    return NotImplemented
+
+
+def cos2mulhook(mulexp):
+    return NotImplemented
 
 
 cos.latexfunc = True
@@ -2368,6 +2461,9 @@ recources to θ.cosh if cosh cannot be found'''
     raise TypeError('cosh cannot be found of a type % s' % (type(θ)))
 
 
+cosh.latexfunc = True
+
+
 @mathfunction
 def sin(θ):
     '''Return the sine of θ,
@@ -2382,6 +2478,9 @@ recources to θ.sin if sin cannot be found'''
         except Exception:
             pass
     raise TypeError('sin cannot be found of a type % s' % (type(θ)))
+
+
+sin.latexfunc = True
 
 
 @mathfunction
@@ -2400,6 +2499,9 @@ recources to θ.sinh if sinh cannot be found'''
     raise TypeError('sinh cannot be found of a type % s' % (type(θ)))
 
 
+sinh.latexfunc = True
+
+
 @mathfunction
 def tan(θ):
     '''Return the tangent of θ,
@@ -2416,6 +2518,9 @@ recources to θ.tan if tan cannot be found'''
     raise TypeError('tan cannot be found of a type % s' % (type(θ)))
 
 
+tan.latexfunc = True
+
+
 @mathfunction
 def tanh(θ):
     '''Return the hyperbolic tangent of θ,
@@ -2430,6 +2535,9 @@ recources to θ.tanh if tanh cannot be found'''
         except Exception:
             pass
     raise TypeError('tanh cannot be found of a type % s' % (type(θ)))
+
+
+tanh.latexfunc = True
 
 
 @mathfunction
@@ -2462,6 +2570,9 @@ recources to θ.sec if sec cannot be found'''
     raise TypeError('sec cannot be found of a type % s' % (type(θ)))
 
 
+sec.latexfunc = True
+
+
 @mathfunction
 def sech(θ):
     '''Return the hyperbolic secant of θ
@@ -2492,6 +2603,9 @@ recources to θ.sech if sech cannot be found'''
     raise TypeError('sech cannot be found of a type % s' % (type(θ)))
 
 
+sech.latexfunc = True
+
+
 @mathfunction
 def csc(θ):
     '''Return the cosecant of θ,
@@ -2519,6 +2633,9 @@ recources to θ.csc if csc cannot be found'''
         if zde:
             raise ValueError('math domain error')
     raise TypeError('csc cannot be found of a type % s' % (type(θ)))
+
+
+csc.latexfunc = True
 
 
 @mathfunction
@@ -2551,6 +2668,9 @@ recources to θ.csch if csch cannot be found'''
     raise TypeError('csch cannot be found of a type % s' % (type(θ)))
 
 
+csch.latexfunc = True
+
+
 @mathfunction
 def cot(θ):
     '''Return the cotangent of θ,
@@ -2579,6 +2699,9 @@ recources to θ.cot if cot cannot be found'''
         if zde:
             raise ValueError('math domain error')
     raise TypeError('cot cannot be found of a type % s' % (type(θ)))
+
+
+cot.latexfunc = True
 
 
 @mathfunction
@@ -2611,6 +2734,8 @@ recources to θ.coth if coth cannot be found'''
             raise ValueError('math domain error')
     raise TypeError('coth cannot be found of a type % s' % (type(θ)))
 
+
+coth.latexfunc = True
 
 acos.prime[0] = -(1-x**2)**-(1/2), (0, )
 asin.prime[0] = (1-x**2)**-(1/2), (0, )
