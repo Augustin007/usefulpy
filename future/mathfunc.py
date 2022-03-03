@@ -856,7 +856,9 @@ class commutative_expression(cas_expression, tuple):
         self = self._simplify()
         if not isinstance(self, cls):
             return self
-        self = self._check_hooks()
+        check = self._check_hooks()
+        if check is not NotImplemented:
+            return check
         if not isinstance(self, cls):
             return self
         var = []
@@ -1132,7 +1134,7 @@ class add_expression(commutative_expression):
             if isinstance(n, cas_function):
                 if hasattr(n.func, '__addcheckhook__'):
                     return n.func.__addcheckhook__(self)
-        return self
+        return NotImplemented
 
     def _data_extract(self, value, /):
         '''extracts count and truevalue data from value'''
@@ -1341,7 +1343,7 @@ class mul_expression(commutative_expression):
             if isinstance(n, cas_function):
                 if hasattr(n.func, '__mulcheckhook__'):
                     return n.func.__mulcheckhook__(self)
-        return self
+        return NotImplemented
 
 
 mul_exact_expression.cas_inexact = mul_expression
@@ -1430,6 +1432,8 @@ class pow_expression(non_commutative_expression):
         self.a = a
         self.b = b
         self = self._simplify()
+        if type(self) is not cls:
+            return self
         check = self._check_hooks()
         if check is not NotImplemented:
             return check
@@ -1518,7 +1522,7 @@ class pow_expression(non_commutative_expression):
             return self.a.__powahook__(self)
         if hasattr(self.b, '__powbhook__'):
             return self.b.__powbhook__(self)
-        return self
+        return NotImplemented
 
 
 class cas_exact_nest(cas_exact_expression):
