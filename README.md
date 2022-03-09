@@ -47,49 +47,54 @@ losing any value'''
 
 Other parts of the project are a little more complicated, including
 
-quaternions
+Quaternions
 
 ```python
->>> from usefulpy.mathematics import quaternions
-```
+In [1]: from usefulpy.mathematics import quaternion
 
-```python
->>> quaternion(1, 2, 2, 2)
-1+2i+2j+2k
->>> _*quaternion(2, 1, 1, 1)
--4+5i+5j+5k
->>> 
+In [2]: quaternion(1, 2, 2, 2)
+Out[2]: 1+2i+2j+2k
+
+In [3]: _ * quaternion(2, 1, 1, 1)
+Out[3]: -4+5i+5j+5k
 ```
 
 Prime sieves
 
 ```python
->>> from usefulpy.mathematics import Prime
->>> import timeit
->>> timeit.timeit('Prime(9999999999998999999999)', number = 1000, globals=globals())/1000
-0.02101861490000738
-timeit.timeit('Prime(9999999999998999999999)', number = 1, globals=globals())
-0.020142099994700402
->>> Prime(9999999999998999999999)
-True
+In [1]: from usefulpy.mathematics import Prime
+
+In [2]: import timeit
+
+In [3]: timeit.timeit("Prime(9999999999998999999999)", number=1000, globals=globals()) / 1000 # Average time over 1000 runs.
+Out[3]: 0.008421884500188753
+
+In [4]: Prime(9999999999998999999999)
+Out[4]: True
 ```
 
 Basic algebraic simplifier and derivative finder
 
 ```python
->>> from usefulpy.mathematics import cos, x
->>> x+x
-<mathfunc x*2 at 0x3a129d0>
->>> x*x
-<mathfunc x**2 at 0x3a30100>
->>> x**x
-<mathfunc x**x at 0x3a30118>
->>> _.derivative()
-<mathfunc x**x+ln(x)*(x**x) at 0x3ca09a0>
->>> cos*2 == cos+cos
-True
->>> 
+In [1]: from usefulpy.mathematics import cos, x
+
+In [2]: x + x
+Out[2]: <mathfunc (2*x) at 0x20115c616f0>
+
+In [3]: x * x
+Out[3]: <mathfunc (x**2) at 0x2011566b0d0>
+
+In [4]: x ** x
+Out[4]: <mathfunc (x**x) at 0x20115c62200>
+
+In [5]: _.partial(x)
+Out[5]: <mathfunc ((x**x)+(ln(x)*(x**x))) at 0x20116781180>
+
+In [6]: cos(x) * 2 == cos(x) + cos(x)
+Out[6]: True
 ```
+
+And indeed ${\frac{d}{dx}\left[x^{x}\right]}={x^{x}+\ln\left({x}\right)x^{x}}$
 
 3d projection systems
 
