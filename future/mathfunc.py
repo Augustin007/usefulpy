@@ -185,8 +185,8 @@ def _comp_derive(n, var, k):
         return n
 
     # logging computation
-    log = f'Computing {k} partial of {str(n)} with respect to {var.name}'
-    logging.info(log)
+    logmsg = f'Computing {k} partial of {str(n)} with respect to {var.name}'
+    logging.info(logmsg)
 
     # catch trivial and identity derivatives
     if k == 1 and var == n:
