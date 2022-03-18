@@ -27,9 +27,10 @@ __all__ = ('vector', 'matrix')
 
 from .. import validation
 from .. import formatting
-from .mathfuncs import is_constant, mathfunc, cas_expression, safe_str, cas_variable, _comp_derive
+from .mathfuncs import is_constant, mathfunc, cas_expression, cas_variable, _comp_derive, is_exact, cas_safe
 import itertools
 import functools
+from contextlib import suppress
 import math
 
 
@@ -81,27 +82,16 @@ class vector(tuple):
                 if is_constant(n):
                     nscalars.append(n)
                     continue
-                if callable(n):
-                    if type(n) is mathfunc:
-                        nscalars.append(n)
-                        fn.extend(n.composition.fn)
-                        var.extend(n.variables)
-                        continue
-                    if isinstance(n, cas_expression):
-                        nscalars.append(mathfunc(n))
-                        fn.extend(n.fn)
-                        var.extend(n.var)
-                        continue
-                    if hasattr(n, 'expressionable') and n.expressionable:
-                        nscalars.append(mathfunc(n))
-                        fn.extend(n.fn)
-                        var.extend(n.info)
-                        continue
-                    raise ValueError('function is not expressionable')
-                if type(n) is cas_variable:
+                elif type(n) is cas_variable:
                     nscalars.append(n)
                     var.append(n)
                     continue
+                else:
+                    with suppress(Exception):
+                        nscalars.append(n)
+                        var.extend(n.var)
+                        fn.extend(n.fn)
+                        continue
                 raise TypeError(f'Invalid type, {type(n)}')
             return _mathfunc_vector(tuple(nscalars), set(fn), set(var))
         v = tuple.__new__(cls, scalars)
@@ -192,7 +182,7 @@ class vector(tuple):
     __rmul__ = __mul__
 
     def __str__(v):
-        scalars = map(safe_str, v)
+        scalars = map(str, v)
         if v.str_mode == 0:
             tup = ', '.join(scalars)
             return f'vector({tup})'
@@ -206,7 +196,7 @@ class vector(tuple):
         return '\n'.join((top, mstr, bottom))
 
     def __repr__(v):
-        scalars = map(safe_str, v)
+        scalars = map(str, v)
         tup = ', '.join(scalars)
         return f'vector({tup})'
 
@@ -231,29 +221,31 @@ class _mathfunc_vector(vector):
         v.dims = len(scalars)
         v.variables = tuple(var)
         v.magnitude = sum(map(lambda x: x**2, scalars))**(1/2)
-        var_list_str = ', '.join(map(safe_str, v.variables))
+        var_list_str = ', '.join(map(str, v.variables))
         space = {func.__name__: func for func in fn}
+        v.space = {'vector': vector, **space}
         v.fn = fn
         _function_names = map(_get_name, scalars)
         _func_list_str = ', '.join(_function_names)
         v.function = f'vector({_func_list_str})'
         v.__doc__ = 'Return '+v.function
-        _short = eval(f'lambda {var_list_str}: {v.function}', None, space)
+        _short = eval(f'lambda {var_list_str}: {v.function}', v.space, v.space)
         v.shortcut_function = _short
-        _get = eval(f'lambda v, {var_list_str}: {v.function}', None, space)
+        _get = eval(f'lambda v, {var_list_str}: {v.function}', v.space, v.space)
         v.__call__ = _get.__get__(v)
         return v
 
     def __call__(self, *args):
-        if all(map(is_constant, args)):
+        if all(map(is_constant, args)) and not any(map(is_exact, args)):
             return self.shortcut_function(*args)
+        args = map(cas_safe, args)
         d = {var: value for value, var in zip(args, self.variables, strict=True)}
         new_scalars = []
         for n in self:
             if is_constant(n):
                 new_scalars.append(n)
             if type(n) is mathfunc:
-                new_scalars.append(n(*map(d.__getitem__, n.variables)))
+                new_scalars.append(n(*map(d.__getitem__, n.var)))
             if type(n) is cas_variable:
                 new_scalars.append(d[n])
         return vector(*new_scalars)
@@ -298,7 +290,7 @@ class matrix:
                         function_list.append(repr(n))
                 m.variables = tuple(set(vars))
                 m.fn = tuple(set(fn))
-                var_list_str = ', '.join(map(safe_str, m.variables))
+                var_list_str = ', '.join(map(str, m.variables))
                 space = {func.__name__: func for func in fn}
                 _func_list_str = ', '.join(function_list)
                 m.function = f'matrix({_func_list_str})'
