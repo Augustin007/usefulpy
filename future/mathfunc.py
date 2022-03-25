@@ -67,6 +67,7 @@ import typing
 from functools import cache, wraps
 from contextlib import suppress
 from collections import OrderedDict
+import warnings
 # Maths
 import math
 import cmath
@@ -74,6 +75,7 @@ from decimal import Decimal
 from fractions import Fraction
 from numbers import Number
 
+zero_limit = 100
 
 # CHECKS #
 
@@ -214,6 +216,18 @@ def binomial_coeficient(k, n):
 
 
 # DECORATORS #
+experiments = []
+
+
+def experimental(func):
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        warnings.warn('This function is experimental')
+        return func(*args, **kwargs)
+    wrap.experimental = True
+    experiments.append(wrap)
+    return wrap
+
 
 def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), preface: str='', ignore: tuple[int]=(), custom: dict[int: str]={}):
     '''hook
@@ -1756,11 +1770,47 @@ class mathfunc(cas_object):
         self._data = {'composition': func, 'oper': {}, 'custom_data': {}}
         return self
 
-    @math_return_dec
     def __call__(self, *args):
-        if all(map(is_constant, args)) and not any(map(is_constant, args)):
+        if all(map(is_constant, args)) and not any(map(is_exact, args)):
             return self.shortcut_function(*args)
-        return self.composition.evaluate(*args)
+        return cas_object._math_return(self.composition.evaluate(*args))
+
+    def _zero_search(self, precalculated_partial, at, depth=0):
+        if depth > zero_limit:
+            return None
+        linear_guess = -self(at)/precalculated_partial(at)+at
+        if abs(self(linear_guess)) < 1e-16:
+            return linear_guess
+        return self._zero_search(precalculated_partial, linear_guess, depth+1)
+
+    def _zero_interval(self, a, b):
+        if abs(self(a)) < 1e-16:
+            return a
+        if abs(self(b)) < 1e-16:
+            return b
+        if self(a) > 0:
+            if self(b) < 0:
+                if self((a+b)/2) > 0:
+                    return self._zero_interval((a+b)/2, b)
+                return self._zero_interval(a, (a+b)/2)
+            raise ValueError('Both are positive')
+        if self(b) > 0:
+            if self(a) < 0:
+                if self((a+b)/2) > 0:
+                    return self._zero_interval(a, (a+b)/2)
+                return self._zero_interval((a+b)/2, b)
+        raise ValueError('Both are negative')
+
+    @experimental
+    def zeroes(self, a, b=None):
+        if b is None:
+            return self._zero_search(self.partial(x), a)
+        return self._zero_interval(a, b)
+
+    def crit_points(self, a, b=None):
+        if b is None:
+            return self.partial(x)._zero_search(self.partial(x), a)
+        return self.partial(x)._zero_interval(a, b)
 
     def __repr__(self):
         '''repr for mathfunc'''
