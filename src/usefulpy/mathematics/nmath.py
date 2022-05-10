@@ -558,6 +558,15 @@ def primes_till(n: int):
     return tuple(sieve.Primes_till(n))
 
 
+def gauss_search(n):
+    i = _math.isqrt(n)
+    for i in range(i, 0, -1):
+        t = _math.sqrt(n-i**2)
+        if int(t) == t:
+            return i+t*1j, i-t*1j
+    return None
+
+
 def _factor_sub(n):
     if not ((type(n) is int) and (n >= 0)):
         raise ValueError('Only natural numbers can be Prime or Composite')
