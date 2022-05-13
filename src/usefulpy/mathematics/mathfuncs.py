@@ -112,6 +112,10 @@ def get_args(args, selector):
     '''get args according to selector'''
     return [args[select] for select in selector]
 
+def getValue(n):
+    if hasattr(n, 'value'):
+        return n.value
+    return n
 
 # TYPE VALIDATION AND CONVERSION TOOLS #
 
@@ -751,6 +755,12 @@ class cas_constant(cas_exact_object):
     def evalstr(self):
         '''evaluateable_string'''
         return str(self.value)
+
+    def __float__(self):
+        return float(self.value)
+
+    def __int__(self):
+        return int(self.value)
 
 
 class cas_exact(cas_exact_object):
@@ -1535,7 +1545,8 @@ class cas_exact_nest(cas_exact_expression):
                 if rval is not NotImplemented:
                     return rval
         self = super(cas_exact_nest, cls).__new__(cls)
-        self.value = func.original(*args)
+        argvalues = map(getValue, args)
+        self.value = func.original(*argvalues)
         self.func = func
         self.args = args
         if func.format:
