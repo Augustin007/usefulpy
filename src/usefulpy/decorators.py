@@ -157,6 +157,39 @@ def pipeline(b):
     return pipe_dec
 
 
+class attribute_lookup_object(object):
+    def __call__(self, name, strict=True):
+        if strict:
+            return self.__getattr__(name)
+        lambda x: x.__getattr__(name) if hasattr(x, name) else x
+
+    def __getattr__(self, name):
+        return lambda x: x.__getattr__(name)
+
+
+attribute = attribute_lookup_object()
+
+
+def zip_search(*functions, raise_flag_exclusive=(Exception,), raise_flag_inclusive=(), final_exception=Exception()):
+
+    @functools.wraps(functions[0])
+    def wrapper(*args, **kwargs):
+        for function in functions:
+            flagged = False
+            try:
+                return function(*args, **kwargs)
+            except BaseException as error:
+                pasterror = error
+                if error not in raise_flag_exclusive:
+                    flagged = True
+                elif error in raise_flag_inclusive:
+                    flagged = True
+            if flagged:
+                raise pasterror
+        raise final_exception
+    return wrapper
+
+
 @functools.cache
 def default_setter(func):
     '''Make a function with a forced first argument'''
