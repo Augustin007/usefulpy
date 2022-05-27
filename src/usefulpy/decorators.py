@@ -20,8 +20,8 @@ if __name__ == '__main__':
     __package__ = 'usefulpy'
 __version__ = '0.0.1'
 __author__ = 'Augustin Garcia'
-__all__ = ('debug', 'repeat', 'timed_repeat', 'shift_args', 'default_setter',
-           'default_with_decorator', 'arg_modifier')
+# __all__ = ('debug', 'repeat', 'timed_repeat', 'shift_args', 'default_setter',
+#           'default_with_decorator', 'arg_modifier')
 
 import functools
 import time
@@ -161,10 +161,10 @@ class attribute_lookup_object(object):
     def __call__(self, name, strict=True):
         if strict:
             return self.__getattr__(name)
-        lambda x: x.__getattr__(name) if hasattr(x, name) else x
+        lambda x: getattr(x, name) if hasattr(x, name) else x
 
     def __getattr__(self, name):
-        return lambda x: x.__getattr__(name)
+        return lambda x: getattr(x, name)
 
 
 attribute = attribute_lookup_object()
