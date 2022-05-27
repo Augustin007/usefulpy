@@ -214,6 +214,7 @@ def _mul_derive_expansion(f, g, v, k, n):
 
 
 def binomial_coeficient(k, n):
+    # n!/((n-k)!*k!)
     return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
 
 
