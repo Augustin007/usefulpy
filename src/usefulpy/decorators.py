@@ -170,7 +170,7 @@ class attribute_lookup_object(object):
 attribute = attribute_lookup_object()
 
 
-def zip_search(*functions, raise_flag_exclusive=(Exception,), raise_flag_inclusive=(), final_exception=Exception()):
+def func_zip(*functions, raise_flag_exclusive=(Exception,), raise_flag_inclusive=(), final_exception=Exception()):
 
     @functools.wraps(functions[0])
     def wrapper(*args, **kwargs):
@@ -180,9 +180,9 @@ def zip_search(*functions, raise_flag_exclusive=(Exception,), raise_flag_inclusi
                 return function(*args, **kwargs)
             except BaseException as error:
                 pasterror = error
-                if error not in raise_flag_exclusive:
+                if not isinstance(error, raise_flag_exclusive):
                     flagged = True
-                elif error in raise_flag_inclusive:
+                elif isinstance(error, raise_flag_inclusive):
                     flagged = True
             if flagged:
                 raise pasterror
