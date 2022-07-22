@@ -113,7 +113,7 @@ def get_args(args, selector):
     return [args[select] for select in selector]
 
 def getValue(n):
-    if hasattr(n, 'value'):
+    if hasattr(n, 'value') and n.value is not None:
         return n.value
     return n
 
@@ -1670,7 +1670,7 @@ class cas_function:
         if v not in self.var:
             return 0
 
-        if self.raw_vars.count(v) == 1:
+        if self.args.count(v) == 1:
             i = self.args.index(v)
             if i in self.prime_cycle:
                 cycle = self.prime_cycle[i]
