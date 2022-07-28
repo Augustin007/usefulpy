@@ -2252,12 +2252,12 @@ recources to x.asec if sec cannot be found'''
     zde = False
     if validation.is_float(x):
         try:
-            return(1/math.acos(x))
+            return(math.acos(1/x))
         except ZeroDivisionError:
             zde = True
     elif validation.is_complex(x):
         try:
-            return(1/cmath.acos(x))
+            return(cmath.acos(1/x))
         except ZeroDivisionError:
             zde = True
     else:
@@ -2283,12 +2283,12 @@ recources to x.asech if sech cannot be found'''
     zde = False
     if validation.is_float(x):
         try:
-            return(1/math.acosh(x))
+            return(math.acosh(1/x))
         except ZeroDivisionError:
             zde = True
     elif validation.is_complex(x):
         try:
-            return(1/cmath.acosh(x))
+            return(cmath.acosh(1/x))
         except ZeroDivisionError:
             zde = True
     else:
@@ -2314,12 +2314,12 @@ recources to x.acsc if csc cannot be found'''
     zde = False
     if validation.is_float(x):
         try:
-            return(1/math.asin(x))
+            return(math.asin(1/x))
         except ZeroDivisionError:
             zde = True
     elif validation.is_complex(x):
         try:
-            return(1/cmath.asin(x))
+            return(cmath.asin(1/x))
         except ZeroDivisionError:
             zde = True
     else:
@@ -2345,12 +2345,12 @@ recources to x.acsch if csch cannot be found'''
     zde = False
     if validation.is_float(x):
         try:
-            return(1/math.asinh(x))
+            return(math.asinh(1/x))
         except ZeroDivisionError:
             zde = True
     elif validation.is_complex(x):
         try:
-            return(1/cmath.asinh(x))
+            return(cmath.asinh(1/x))
         except ZeroDivisionError:
             zde = True
     else:
@@ -2376,12 +2376,12 @@ recources to x.acot if cot cannot be found'''
     zde = False
     if validation.is_float(x):
         try:
-            return(1/math.atan(x))
+            return(math.atan(1/x))
         except ZeroDivisionError:
             zde = True
     elif validation.is_complex(x):
         try:
-            return(1/cmath.atan(x))
+            return (cmath.atan(1/x))
         except ZeroDivisionError:
             zde = True
     else:
@@ -2407,12 +2407,12 @@ recources to x.acoth if coth cannot be found'''
     zde = False
     if validation.is_float(x):
         try:
-            return(1/math.atanh(x))
+            return(math.atanh(1/x))
         except ZeroDivisionError:
             zde = True
     elif validation.is_complex(x):
         try:
-            return(1/cmath.atanh(x))
+            return(cmath.atanh(1/x))
         except ZeroDivisionError:
             zde = True
     else:
@@ -2567,13 +2567,13 @@ def sec(θ):
 recources to θ.sec if sec cannot be found'''
     if validation.is_float(θ):
         try:
-            return math.cos(1/θ)
+            return 1/math.cos(θ)
         except ZeroDivisionError:
             pass
         raise ValueError('math domain error')
     elif validation.is_complex(θ):
         try:
-            return cmath.cos(1/θ)
+            return 1/cmath.cos(θ)
         except ZeroDivisionError:
             pass
 
@@ -2600,13 +2600,13 @@ def sech(θ):
 recources to θ.sech if sech cannot be found'''
     if validation.is_float(θ):
         try:
-            return math.cosh(1/θ)
+            return 1/math.cosh(θ)
         except ZeroDivisionError:
             pass
         raise ValueError('math domain error')
     elif validation.is_complex(θ):
         try:
-            return cmath.cosh(1/θ)
+            return 1/cmath.cosh(θ)
         except ZeroDivisionError:
             pass
 
@@ -2633,13 +2633,13 @@ def csc(θ):
 recources to θ.csc if csc cannot be found'''
     if validation.is_float(θ):
         try:
-            return math.sin(1/θ)
+            return 1/math.sin(θ)
         except ZeroDivisionError:
             pass
         raise ValueError('math domain error')
     elif validation.is_complex(θ):
         try:
-            return cmath.sin(1/θ)
+            return 1/cmath.sin(θ)
         except ZeroDivisionError:
             pass
     else:
@@ -2665,13 +2665,13 @@ def csch(θ):
 recources to θ.csch if csch cannot be found'''
     if validation.is_float(θ):
         try:
-            return math.sinh(1/θ)
+            return 1/math.sinh(θ)
         except ZeroDivisionError:
             pass
         raise ValueError('math domain error')
     elif validation.is_complex(θ):
         try:
-            return cmath.sinh(1/θ)
+            return 1/cmath.sinh(θ)
         except ZeroDivisionError:
             pass
 
@@ -2698,13 +2698,13 @@ def cot(θ):
 recources to θ.cot if cot cannot be found'''
     if validation.is_float(θ):
         try:
-            return math.tan(1/θ)
+            return 1/math.tan(θ)
         except ZeroDivisionError:
             pass
         raise ValueError('math domain error')
     elif validation.is_complex(θ):
         try:
-            return cmath.tan(1/θ)
+            return 1/cmath.tan(θ)
         except ZeroDivisionError:
             pass
 
@@ -2732,13 +2732,13 @@ recources to θ.coth if coth cannot be found'''
 
     if validation.is_float(θ):
         try:
-            return math.tanh(1/θ)
+            return 1/math.tanh(θ)
         except ZeroDivisionError:
             pass
         raise ValueError('math domain error')
     elif validation.is_complex(θ):
         try:
-            return cmath.tanh(1/θ)
+            return 1/cmath.tanh(θ)
         except ZeroDivisionError:
             pass
 
