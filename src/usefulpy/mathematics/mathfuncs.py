@@ -84,10 +84,15 @@ def is_constant(n) -> bool:
     '''Checks whether n is constant for cas engine'''
     if isinstance(n, constants):
         return True
-    try:
-        return bool(n.is_constant())
-    except Exception:
+    if 'is_constant' in dir(n):
+        with suppress(Exception):
+            if callable(n.is_constant):
+                return bool(n.is_constant())
+            else:
+                return bool(n.is_constant())
+    if isinstance(n, (mathfunc, cas_function, cas_object)):
         return False
+    return True
 
 
 def is_rational(n):
