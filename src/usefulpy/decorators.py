@@ -158,13 +158,26 @@ def pipeline(b):
 
 
 class attribute_lookup_object(object):
-    def __call__(self, name, strict=True):
+    def __call__(self, name, strict=True, call=False):
+        if call:
+            def lookup(x):
+                if strict:
+                    y = getattr(x, name)
+                else:
+                    y = getattr(x, name) if hasattr(x, name) else x
+                if callable(y):
+                    try:
+                        return y()
+                    except TypeError:
+                        pass
+                return y
+            return lookup
         if strict:
-            return self.__getattr__(name)
-        lambda x: getattr(x, name) if hasattr(x, name) else x
+            return lambda x: getattr(x, name)
+        return lambda x: getattr(x, name) if hasattr(x, name) else x
 
     def __getattr__(self, name):
-        return lambda x: getattr(x, name)
+        return self(name)
 
 
 attribute = attribute_lookup_object()
