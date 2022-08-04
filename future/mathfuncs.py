@@ -91,7 +91,7 @@ def is_constant(n) -> bool:
 
 
 def is_rational(n):
-    if isinstance(cas_exact, *constants):
+    if isinstance(n, (cas_exact, *constants)):
         return True
     try:
         return bool(n.is_rational())
@@ -100,7 +100,7 @@ def is_rational(n):
 
 
 def is_exact(n):
-    if isinstance(cas_exact_object, *constants):
+    if isinstance(n, (cas_exact_object, *constants)):
         return True
     try:
         return bool(n.is_exact())
@@ -111,6 +111,8 @@ def is_exact(n):
 # DATA HANDLING #
 
 def create_variables(*names):
+    if not all(map(lambda x: type(x) is str, names)):
+        raise TypeError('All names must be strings')
     return tuple(map(cas_variable, names))
 
 
