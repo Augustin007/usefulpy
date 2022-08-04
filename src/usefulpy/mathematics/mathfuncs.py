@@ -35,9 +35,11 @@ RELEASE NOTES:
   1.1
    Version 1.1.0:
     Adds hooks and new features to CAS
+   Version 1.1.1:
+    Bugfixes and more thorough documentation.
 '''
 
-if __name__ == '__main__':  # To account for relative imports when run
+if __name__ == '__main__':  # To account for relative imports when run directly
     __package__ = 'usefulpy.mathematics'
 
 # SETUP FOR TESTING #
@@ -78,6 +80,7 @@ from numbers import Number
 # CHECKS #
 
 constants = (int, float, complex, Decimal, Fraction, Number)
+MathAttributes = ('__add__', '__radd__', '__sub__', '__mul__', '__rsub__', '__rmul__', '__truediv__', '__rtruediv__', '__pow__', '__rpow__')
 
 
 def is_constant(n) -> bool:
@@ -89,27 +92,33 @@ def is_constant(n) -> bool:
             if callable(n.is_constant):
                 return bool(n.is_constant())
             else:
-                return bool(n.is_constant())
+                return bool(n.is_constant)
     if isinstance(n, (mathfunc, cas_function, cas_object)):
         return False
-    return True
+    if all(map(lambda x: hasattr(n, x), MathAttributes)):
+        return True
+    return False
 
 
 def is_rational(n):
+    '''Checks whether n is rational for cas engine'''
     return isinstance(n, (cas_exact, *constants))
 
 
 def is_exact(n):
+    '''Checks whether a number is stored 'exactly' in the engine'''
     return isinstance(n, cas_exact_object)
 
+
 # DATA HANDLING #
-
-
 def create_variables(*names):
+    '''Creates CAS variables for a set of names.
+Intended usage: x, y, z = create_variables('x', 'y', 'z')'''
     return tuple(map(cas_variable, names))
 
 
 def remove_duplicates(tup):
+    '''Removes duplicates from a list'''
     return tuple(OrderedDict.fromkeys(tup).keys())
 
 
@@ -117,15 +126,19 @@ def get_args(args, selector):
     '''get args according to selector'''
     return [args[select] for select in selector]
 
+
 def getValue(n):
+    '''gets 'value' attribute when value exists and is not None'''
     if hasattr(n, 'value') and n.value is not None:
         return n.value
     return n
 
-# TYPE VALIDATION AND CONVERSION TOOLS #
 
+# TYPE VALIDATION AND CONVERSION TOOLS #
 def cas_safe(n):
+    '''Makes sure n can be used in CAS, tries to return a 'safe' version of n'''
     if type(n) is mathfunc:
+        # mathfunc is just a wrapper. Not a functioning part of CAS.
         n = n.composition
     if is_constant(n):
         if not isinstance(n, cas_exact_object):
@@ -160,6 +173,7 @@ def _get(current):
 # ALTERNATE STRING TOOLS #
 
 def getLaTeX(value):
+    '''Gets LaTeX representation of value'''
     if hasattr(value, 'LaTeX'):
         LaTeX = value.LaTeX
         if callable(LaTeX):
@@ -169,10 +183,12 @@ def getLaTeX(value):
 
 
 def print_raw_LaTeX(value):
+    ''''Utility for easier copy/pasting'''
     print(getLaTeX(value))
 
 
 def evaluateable_string(value):
+    '''Generates evaluateable string representation of CAS expression'''
     if hasattr(value, 'evalstr'):
         evalstr = value.evalstr
         if callable(evalstr):
@@ -185,17 +201,16 @@ def evaluateable_string(value):
 
 def _comp_derive(n, var, k):
     '''Computes the kth partial derivative of n with respect to var'''
+    # logging computation
+    logging.info(f'Computing {k} partial of {str(n)} with respect to {var.name}')
+
     # Making sure k is valid
-    assert k >= 0
-    assert type(k) is int
+    assert k >= 0  # Integrals not implemented yet
+    assert type(k) is int  # Decimal derivatives also not implemented yet
 
     # 0th derivative means nothing
     if k == 0:
         return n
-
-    # logging computation
-    logmsg = f'Computing {k} partial of {str(n)} with respect to {var.name}'
-    logging.info(logmsg)
 
     # catch trivial and identity derivatives
     if k == 1 and var == n:
@@ -212,6 +227,7 @@ def _comp_derive(n, var, k):
 
 
 def _mul_derive_expansion(f, g, v, k, n):
+    '''nth term of kth partial with respect to v of f*g'''
     f_p = _comp_derive(f, v, n)
     g_p = _comp_derive(g, v, k-n)
     c_p = binomial_coeficient(n, k)
@@ -219,7 +235,7 @@ def _mul_derive_expansion(f, g, v, k, n):
 
 
 def binomial_coeficient(k, n):
-    # n!/((n-k)!*k!)
+    ''' n!/((n-k)!*k!)'''
     return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
 
 
@@ -244,12 +260,13 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
         Individually reversed cases, integers refers to individual arguments so (0, 2, 3)
         would reverse the 0, 2, and 3 indeces, by default ()
     preface : str, optional
-        Add a prefact to all default and r hooks, by default empty string.
+        Add a prefact to all default and r hooks, by default ''.
     ignore : tuple[int], optional
         ignored cases, by default ()
     custom : dict[int : str], optional
         individually custom hooks or tags to look for, by default {}
     '''
+    # Validation of input parameters
     if type(name) is not str:
         raise TypeError(f'Invalid type recieved for argument `name`, recieved {type(name)} and not str')
     if varnum is not None:
@@ -265,6 +282,8 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
         raise TypeError(f'Invalid type recieved for argument `ignore` recieved {type(ignore)} and not tuple')
     if not all(map(lambda x: type(x) is int, ignore)):
         raise ValueError('All values of `ignore` must be int')
+
+    # Formulating checked hooks
     fhook = f'__{preface}{"r" if r else ""}{name}hook__'
     bhook = f'__{preface}{"r" if not r else ""}{name}hook__'
 
@@ -285,6 +304,7 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
 
 
 def math_return_dec(function):
+    '''Makes sure returns are cas_safe'''
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
@@ -297,6 +317,7 @@ def math_return_dec(function):
 
 
 def log_call(function):
+    '''Logs all calls of wrapped function'''
     @wraps(function)
     def wrapper(*args, **kwargs):
         logging.debug(f'{function.__name__} called with args {args} and kwargs {kwargs}')
@@ -311,6 +332,7 @@ standard arithmatic functions'''
 
     @staticmethod
     def _math_return(return_val):
+        '''Makes return_val cas_safe'''
         if return_val is NotImplemented:
             return NotImplemented
         logging.info(f'math return: {return_val}')
@@ -466,7 +488,7 @@ or interval'''
     @log_call
     def __call__(self, *args):
         if all(map(is_constant, args)) and not any(map(is_exact, args)):
-            return self.original(*args)
+            return self.original(*args)  # Call original function
         args = tuple(map(cas_safe, args))
         self.check_domain(args)
         if hasattr(self, '__callhook__'):
@@ -770,6 +792,7 @@ class cas_constant(cas_exact_object):
 
 
 class cas_exact(cas_exact_object):
+    '''Stores an exact version of a variable as an int or Fraction'''
     def __init__(self, value):
         if validation.is_integer(value):
             self.value = int(float(value))
@@ -877,6 +900,8 @@ class commutative_expression(cas_expression, tuple):
             return check
         if not isinstance(self, cls):
             return self
+
+        # Creating a list of all involved variables for reference.
         var = []
         for n in self:
             if type(n) is cas_variable:
@@ -886,6 +911,8 @@ class commutative_expression(cas_expression, tuple):
             elif callable(n):
                 var.extend(n.var)
         self.var = remove_duplicates(var)
+
+        # Creating a list of all involved functions for reference.
         fn = []
         for n in self:
             if isinstance(n, cas_expression) or callable(n):
@@ -1045,9 +1072,9 @@ class add_exact_expression(cas_exact_commutative_expression):
         if len(self) == 0:
             return 0
 
-        # Seperates constants out
+        # Seperates rationals out
         numbers, expressions = self._extract_num()
-        # adds constants
+        # adds rationals
         number = sum(numbers)
         # extracts count, value data from expressions
         expressions_extract = list(map(self._data_extract, expressions))
@@ -1207,9 +1234,9 @@ class mul_exact_expression(cas_exact_commutative_expression):
                 run = tuple(map(distributor, value))
                 return add_expression(run)
 
-        # extracts constants
+        # extracts rationals
         numbers, expressions = self._extract_num()
-        # product of constants
+        # product of rationals
         number = math.prod(numbers)
         # extracts count value information from expressions
         expressions_extract = list(map(self._data_extract, expressions))
@@ -1366,14 +1393,14 @@ mul_exact_expression.cas_inexact = mul_expression
 
 
 class div_exact_shortcut(cas_exact_non_commutative_expression):
-    def __new__(cls, a, b):  # TEMPORARY
+    def __new__(cls, a, b):  # TEMPORARY actual division coming as soon as I can figure out factoring
         a = cas_safe(a)
         b = cas_safe(b)
         return a*(b**-1)
 
 
 class div_shortcut(non_commutative_expression):
-    def __new__(cls, a, b):  # TEMPORARY
+    def __new__(cls, a, b):  # TEMPORARY actual division coming as soon as I can figure out factoring
         return a*(b**-1)
 
 
@@ -2120,6 +2147,7 @@ def log1p(x, /):
 log1p.prime[0] = 1/(x+1), (0, )
 
 
+# Trig functions
 @mathfunction
 def acos(x):
     '''Return the arc cosine of x,
@@ -2812,5 +2840,8 @@ def polynomial(*terms):
     for power, coefficient in enumerate(terms):
         runfunc += coefficient*x**power
     return runfunc
+
+# For those of you brave enough to read to the end. That was nearly three thousand lines of cobbled nonsense I call a CAS.
+# I plan to make it less nonsensical later
 
 # eof
