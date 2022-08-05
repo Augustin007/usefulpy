@@ -66,7 +66,7 @@ from .. import decorators
 from abc import abstractmethod
 import types
 import typing
-from functools import cache, wraps
+from functools import wraps
 from contextlib import suppress
 from collections import OrderedDict
 # Maths
