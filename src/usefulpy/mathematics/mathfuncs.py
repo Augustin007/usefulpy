@@ -80,7 +80,8 @@ from numbers import Number
 # CHECKS #
 
 constants = (int, float, complex, Decimal, Fraction, Number)
-MathAttributes = ('__add__', '__radd__', '__sub__', '__mul__', '__rsub__', '__rmul__', '__truediv__', '__rtruediv__', '__pow__', '__rpow__')
+MathAttributes = ('__add__', '__radd__', '__sub__', '__mul__', '__rsub__', '__rmul__',
+                  '__truediv__', '__rtruediv__', '__pow__', '__rpow__')
 
 
 def is_constant(n) -> bool:
