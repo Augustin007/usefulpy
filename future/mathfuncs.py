@@ -137,14 +137,10 @@ def cas_safe(n):
         if not isinstance(n, CASobject):
             logging.debug(f'converting {n} to cas_exact')
             try:
-                return n
+                return CASnumber(n)
             except Exception as error:
                 logging.warn(f'{error.__class__.__name__}: {error.args[0]}')
         return n
-    if isinstance(n, CASobject):
-        return n
-    if isinstance(n, (CASexpression)):
-        return n._evaluate()
     if not isinstance(n, CASobject):
         raise TypeError(f'Invalid CAS types, {type(n)}')
     if callable(n):
@@ -178,11 +174,12 @@ def evaluateable_string(value):
 # MATH TOOLS #
 
 
-def _comp_derive(n, var, k):
+def _compDerive(n, var, k):
     '''Computes the kth partial derivative of n with respect to var'''
     # Making sure k is valid
-    assert k >= 0
-    assert type(k) is int
+    assert k >= 0  # Send to integral.
+    if type(k) is not int:
+        return NotImplemented  # decimal derivatives not implemented
 
     # 0th derivative means nothing
     if k == 0:
@@ -200,20 +197,20 @@ def _comp_derive(n, var, k):
         return 0
 
     # Call attributes
-    if isinstance(n, (CASexpression, CASfunction)):
-        return n._comp_derive(var, k)
+    if isinstance(n, (CASobject)):
+        return n._compDerive(var, k)
 
     raise TypeError(f'Invalid type, type {type(n)}')
 
 
-def _mul_derive_expansion(f, g, v, k, n):
-    f_p = _comp_derive(f, v, n)
-    g_p = _comp_derive(g, v, k-n)
-    c_p = binomial_coeficient(n, k)
+def _prodDeriveExpansion(f, g, v, k, n):
+    f_p = _compDerive(f, v, n)
+    g_p = _compDerive(g, v, k-n)
+    c_p = binomialCoeficient(n, k)
     return CASprod((c_p, f_p, g_p))
 
 
-def binomial_coeficient(k, n):
+def binomialCoeficient(k, n):
     return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
 
 # DECORATORS #
@@ -318,15 +315,16 @@ class CASobject(metaclass=CAS):
         return f'CAS[{repr(str(self))}]'
 
     @abstractmethod
-    def repr(self, /):
-        pass
-
-    @abstractmethod
     def tex(self, /):
         pass
 
     @abstractmethod
     def _checkHooks(self, /):
+        return NotImplemented
+
+    @abstractmethod
+    def _compDerive(self, var, k, /):
+        '''kth partial of self with respect to var'''
         return NotImplemented
 
 
@@ -344,6 +342,7 @@ class CASvariable(CASobject, _arithmetic):
     names: dict = {}
     value = typing.Any = None
     exact = False
+    var: set
 
     def __new__(cls, name):
         if name in cls.names:
@@ -370,8 +369,15 @@ class CASvariable(CASobject, _arithmetic):
 
         self.name = name
         self.names[name] = self
+        self.var = {self}
 
         return self
+
+    def _set(self, value):
+        self.value = value
+
+    def _reset(self):
+        self.value = None
 
     def __str__(self, /):
         return self.name
@@ -382,7 +388,15 @@ class CASconstant(CASobject, _arithmetic):
 
 
 class CASnumber(CASobject, _arithmetic):
-    pass
+    def __init__(self, number):
+        self.value = number
+        self.exact = True
+
+    def __str__(self, /):
+        return str(self.value)
+
+    def __eq__(self, other, /):
+        return self.value == other
 
 
 bitor = lambda a, b: a|b
@@ -396,6 +410,10 @@ def get_fn(n):
     return reduce(bitor, (i.fn for i in n if hasattr(i, 'fn')), set())
 
 
+def get_simplify(n):
+    return n.simplify() if hasattr(n, 'simplify') else n
+
+
 class CASexpression(CASobject, _arithmetic):
     pass
 
@@ -403,11 +421,18 @@ class CASexpression(CASobject, _arithmetic):
 class CAScommutative(CASexpression, tuple):
     operation: types.FunctionType
     next: CASobject
+    empty: int
 
     def __new__(cls, iterable=()):
         '''__new__ for any communative expressions'''
-        # iterable = tuple(map(cas_safe, iterable))
+        if iterable == ():
+            iterable = (cls.empty,)
+        iterable = tuple(map(cas_safe, iterable))
         var, fn, exact, iterable = cls.gatherData(iterable)
+        if len(iterable) < 1:
+            if len(iterable) == 0:
+                return cls.empty
+            return iterable[0]
         self = tuple.__new__(cls, iterable)
         self.exact, self.var, self.fn = exact, var, fn
         return self
@@ -418,12 +443,14 @@ class CAScommutative(CASexpression, tuple):
         fn = get_fn(iterable)
         exact = not var
         iterable = cls.expandInternal(iterable, exact)
-        return var, fn, exact, iterable
+        return var, fn, exact, tuple(iterable)
 
     @classmethod
     def expandInternal(cls, iterable, exact):
         if exact:
             for i in iterable:
+                if i == cls.empty:
+                    continue
                 if type(i) is cls:
                     yield from i
                     continue
@@ -432,6 +459,8 @@ class CAScommutative(CASexpression, tuple):
         exactOnes = []
         for i in iterable:  # FLAG
             if i.exact:
+                if i == cls.empty:
+                    continue
                 exactOnes.append(i)
                 continue
             elif type(i) is cls:
@@ -440,12 +469,16 @@ class CAScommutative(CASexpression, tuple):
             yield i
         yield cls(exactOnes)
 
+    def mapSimple(self, /):
+        return self.__class__(map(get_simplify, self))
+
     def simplify(self):
+        self = self.mapSimple()
         # Fast cases
         if len(self) == 1:
             return self[0]
         if len(self) == 0:
-            return 0  # FLAG
+            return self.empty
 
         # Hooks
         check = self._checkHooks()
@@ -453,12 +486,11 @@ class CAScommutative(CASexpression, tuple):
             return check
 
         # Separate rationals/irrationals, or constant/variable expressions.
-        num, exp = self._extractNum(self.exact)  # FLAG
+        num, exp = self._extractNum()  # FLAG
         expExtract = list(map(self._dataExtract, exp))
         expShort = []
         while expExtract:
             count, value = expExtract.pop(0)
-            print(count, value)
             runCount = 0
             for newCount, newValue in tuple(expExtract):
                 if newValue == value:
@@ -469,7 +501,7 @@ class CAScommutative(CASexpression, tuple):
                 continue
             if count != 0:
                 if count != 1:
-                    expShort.append(self.next((count, value)))
+                    expShort.append(self.next((count, value)).simplify())
                     continue
                 expShort.append(value)
         if len(expShort) == 0:
@@ -480,8 +512,8 @@ class CAScommutative(CASexpression, tuple):
             return self.__class__(expShort)
         return self.__class__((num, *expShort))
 
-    def _extractNum(self, exact, /):
-        check = is_rational if exact else is_constant
+    def _extractNum(self, /):
+        check = is_rational if self.exact else is_constant
         numbers = []
         expressions = []
         for n in self:
@@ -532,7 +564,10 @@ class CASintegrator(CASobject, _arithmetic):
 
 
 class CASsum(CAScommutative):
-    pass
+    def _compDerive(self, var, k, /):
+        if var not in self.var:
+            return 0
+        return CASsum(tuple(map(lambda x: _compDerive(x, var, k), self))).simplify()
 
 
 class CASprod(CAScommutative):
@@ -546,9 +581,11 @@ class CASpow(CASexpression):
 CASsum.operation = sum
 CASsum.next = CASprod
 CASsum.oper = '+'
+CASsum.empty = CASnumber(0)
 CASprod.operation = math.prod
 CASprod.next = CASpow
 CASprod.oper = '*'
+CASprod.empty = CASnumber(1)
 
 #"""
 
