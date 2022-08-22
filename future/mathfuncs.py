@@ -66,7 +66,7 @@ import types
 import typing
 from functools import cache, wraps, reduce
 from contextlib import suppress
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 # Maths
 import math
 import cmath
@@ -80,7 +80,7 @@ constants = (int, float, complex, Decimal, Fraction, Number)
 exact_constants = (int, Fraction)
 
 
-def is_constant(n) -> bool:
+def isConstant(n) -> bool:
     '''Checks whether n is constant for cas engine'''
     if isinstance(n, constants):
         return True
@@ -90,16 +90,15 @@ def is_constant(n) -> bool:
         return False
 
 
-def is_rational(n):
+def isRational(n):
     if isinstance(n, (int, Fraction, *constants)):
         return True
-    try:
-        return bool(n.is_rational())
-    except AttributeError:
-        return False
+    if hasattr(n, 'rational'):
+        return bool(n.rational)
+    return False
 
 
-def is_exact(n):
+def isExact(n):
     if isinstance(n, constants):
         return True
     try:
@@ -110,30 +109,30 @@ def is_exact(n):
 
 # DATA HANDLING #
 
-def create_variables(*names):
+def createVariables(*names):
     if not all(map(lambda x: type(x) is str, names)):
         raise TypeError('All names must be strings')
     return tuple(map(CASvariable, names))
 
 
-def remove_duplicates(tup):
+def removeDuplicates(tup):
     return tuple(OrderedDict.fromkeys(tup).keys())
 
 
-def get_args(args, selector):
+def getArgs(args, selector):
     '''get args according to selector'''
     return [args[select] for select in selector]
 
 # TYPE VALIDATION AND CONVERSION TOOLS #
 
 
-def cas_safe(n):
+def casSafe(n):
     if type(n) is mathfunc:
         n = n.composition
     if isinstance(n, CASvariable):
         if n.value is not None:
             n = n.value
-    if is_constant(n):
+    if isConstant(n):
         if not isinstance(n, CASobject):
             logging.debug(f'converting {n} to cas_exact')
             try:
@@ -144,26 +143,41 @@ def cas_safe(n):
     if not isinstance(n, CASobject):
         raise TypeError(f'Invalid CAS types, {type(n)}')
     if callable(n):
-        return n(*map(cas_safe, n.args))
+        return n(*map(casSafe, n.args))
     return n
 
 # ALTERNATE STRING TOOLS #
 
 
 def getTex(value):
-    if hasattr(value, 'LaTeX'):
-        LaTeX = value.LaTeX
-        if callable(LaTeX):
-            return LaTeX()
-        return LaTeX
+    if hasattr(value, 'tex'):
+        tex = value.tex
+        if callable(tex):
+            return tex()
+        return tex
     return str(value)
 
 
-def print_raw_LaTeX(value):
+bitor = lambda a, b: a|b
+
+
+def getVar(n):
+    return reduce(bitor, (i.var for i in n if hasattr(i, 'var')), set())
+
+
+def getFn(n):
+    return reduce(bitor, (i.fn for i in n if hasattr(i, 'fn')), set())
+
+
+def getSimplify(n):
+    return n.simplify() if hasattr(n, 'simplify') else n
+
+
+def printTex(value):
     print(getTex(value))
 
 
-def evaluateable_string(value):
+def evaluateableStr(value):
     if hasattr(value, 'evalstr'):
         evalstr = value.evalstr
         if callable(evalstr):
@@ -193,7 +207,7 @@ def _compDerive(n, var, k):
     if k == 1 and var == n:
         return 1
 
-    elif is_constant(n) or isinstance(n, CASvariable):
+    elif isConstant(n) or isinstance(n, CASvariable):
         return 0
 
     # Call attributes
@@ -207,7 +221,7 @@ def _prodDeriveExpansion(f, g, v, k, n):
     f_p = _compDerive(f, v, n)
     g_p = _compDerive(g, v, k-n)
     c_p = binomialCoeficient(n, k)
-    return CASprod((c_p, f_p, g_p))
+    return CASprod(c_p, f_p, g_p)
 
 
 def binomialCoeficient(k, n):
@@ -275,7 +289,7 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
     return decorator
 
 
-def math_return_dec(function):
+def mathReturnDec(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
@@ -329,7 +343,17 @@ class CASobject(metaclass=CAS):
 
 
 class _arithmetic:
-    pass
+    def __add__(self, other, /):
+        try:
+            other = casSafe(other)
+        except Exception:
+            return NotImplemented
+        if isRational(other) and isRational(self):
+            return CASnumber(self.value + other.value)
+        return CASsum(self, other)
+
+    def __radd__(self, other):
+        return self+other
 
 
 class CASfunction(CASobject, _arithmetic):
@@ -339,10 +363,12 @@ class CASfunction(CASobject, _arithmetic):
 class CASvariable(CASobject, _arithmetic):
     '''variable for cas engine'''
     name: str
+    tex: str
     names: dict = {}
     value = typing.Any = None
     exact = False
     var: set
+    fn = set()
 
     def __new__(cls, name):
         if name in cls.names:
@@ -370,6 +396,7 @@ class CASvariable(CASobject, _arithmetic):
         self.name = name
         self.names[name] = self
         self.var = {self}
+        self.tex = name
 
         return self
 
@@ -388,9 +415,13 @@ class CASconstant(CASobject, _arithmetic):
 
 
 class CASnumber(CASobject, _arithmetic):
+    var = set()
+    fn = set()
+    rational = True
+    exact = True
+
     def __init__(self, number):
         self.value = number
-        self.exact = True
 
     def __str__(self, /):
         return str(self.value)
@@ -398,20 +429,11 @@ class CASnumber(CASobject, _arithmetic):
     def __eq__(self, other, /):
         return self.value == other
 
+    def __hash__(self, /):
+        return hash(self.value)
 
-bitor = lambda a, b: a|b
-
-
-def get_var(n):
-    return reduce(bitor, (i.var for i in n if hasattr(i, 'var')), set())
-
-
-def get_fn(n):
-    return reduce(bitor, (i.fn for i in n if hasattr(i, 'fn')), set())
-
-
-def get_simplify(n):
-    return n.simplify() if hasattr(n, 'simplify') else n
+    def tex(self, /):
+        return getTex(self.value)
 
 
 class CASexpression(CASobject, _arithmetic):
@@ -423,13 +445,13 @@ class CAScommutative(CASexpression, tuple):
     next: CASobject
     empty: int
 
-    def __new__(cls, iterable=()):
+    def __new__(cls, *iterable):
         '''__new__ for any communative expressions'''
         if iterable == ():
             iterable = (cls.empty,)
-        iterable = tuple(map(cas_safe, iterable))
+        iterable = tuple(map(casSafe, iterable))
         var, fn, exact, iterable = cls.gatherData(iterable)
-        if len(iterable) < 1:
+        if len(iterable) <= 1:
             if len(iterable) == 0:
                 return cls.empty
             return iterable[0]
@@ -439,8 +461,8 @@ class CAScommutative(CASexpression, tuple):
 
     @classmethod
     def gatherData(cls, iterable: iter, /) -> tuple[set, set, bool, iter]:
-        var = get_var(iterable)
-        fn = get_fn(iterable)
+        var = getVar(iterable)
+        fn = getFn(iterable)
         exact = not var
         iterable = cls.expandInternal(iterable, exact)
         return var, fn, exact, tuple(iterable)
@@ -467,18 +489,29 @@ class CAScommutative(CASexpression, tuple):
                 yield from i
                 continue
             yield i
-        yield cls(exactOnes)
+        if len(exactOnes) == 0:
+            return
+        if len(exactOnes) == 1:
+            yield exactOnes[0]
+            return
+        yield cls(*exactOnes)
 
     def mapSimple(self, /):
-        return self.__class__(map(get_simplify, self))
+        return self.__class__(*map(getSimplify, self))
 
     def simplify(self):
         self = self.mapSimple()
+        self = self.preSimplify()
         # Fast cases
+        if not isinstance(self, CAScommutative):
+            return self
         if len(self) == 1:
             return self[0]
         if len(self) == 0:
             return self.empty
+
+        if hasattr(self, 'collapse') and self.collapse in self:
+            return self.collapse
 
         # Hooks
         check = self._checkHooks()
@@ -501,19 +534,19 @@ class CAScommutative(CASexpression, tuple):
                 continue
             if count != 0:
                 if count != 1:
-                    expShort.append(self.next((count, value)).simplify())
+                    expShort.append(self.next(value, count).simplify())
                     continue
                 expShort.append(value)
         if len(expShort) == 0:
-            return num  # FLAG
+            return num
         if num == 0:
             if len(expShort) == 1:
                 return expShort[0]
-            return self.__class__(expShort)
-        return self.__class__((num, *expShort))
+            return self.__class__(*expShort)
+        return self.__class__(num, *expShort)
 
     def _extractNum(self, /):
-        check = is_rational if self.exact else is_constant
+        check = isRational if self.exact else isConstant
         numbers = []
         expressions = []
         for n in self:
@@ -526,14 +559,25 @@ class CAScommutative(CASexpression, tuple):
     def _dataExtract(self, value, /):
         if isinstance(value, self.next):
             count, value = value._extractNum()
-            return count, self.next(value).simplify()
+            if len(value) == 1:
+                return count, getSimplify(value[0])
+            else:
+                return count, self.next(*value).simplify()
         return 1, value
 
     def __str__(self, /):
-        return self.oper.join(map(str, self))
+        return '('+(f'){self.oper}(').join(map(str, self))+')'
 
     def tex(self, /):
-        return '{'+(f'}}{self.oper}{{').join(map(getTex, self))+'}'
+        return '{'+(f'}}{self.texoper}{{').join(map(getTex, self))+'}'
+
+    def __eq__(self, other, /):
+        other = casSafe(other)
+        self = getSimplify(self)
+        other = getSimplify(other)
+        if type(self) is not type(other):
+            return False
+        return Counter(self) == Counter(other)
 
 
 class d:  # Not entirely sure what to do here
@@ -567,25 +611,83 @@ class CASsum(CAScommutative):
     def _compDerive(self, var, k, /):
         if var not in self.var:
             return 0
-        return CASsum(tuple(map(lambda x: _compDerive(x, var, k), self))).simplify()
+        return CASsum(*map(lambda x: _compDerive(x, var, k), self)).simplify()
+
+    def preSimplify(self):
+        return self
 
 
 class CASprod(CAScommutative):
-    pass
+    def preSimplify(self):
+        if self.collapse in self:
+            return self.collapse
+        return self.distribute()
+
+    def distribute(self):
+        for i, n in enumerate(self):
+            if type(n) is CASsum:
+                return CASsum(*map(lambda x: CASprod(x, *self[:i], *self[i+1:]), n)).simplify()
+        return self
 
 
 class CASpow(CASexpression):
-    pass
+    def __new__(cls, a, b):
+        if b == 0 or a == 1:
+            return CASnumber(1)
+        if b == 1 or a == 0:
+            return casSafe(a)
+        self = super(cls, cls).__new__(cls)
+        self.a, self.b = map(casSafe, (a, b))
+        self.var = self.a.var | self.b.var
+        self.fn = self.a.fn | self.b.fn
+        self.exact = not self.var
+        return self
+
+    def simplify(self):
+        if isRational(self.a):
+            if hasattr(self.b, 'value') and type(self.b.value) is int:
+                return CASnumber(self.a.value**self.b.value)
+        if type(self.a) is CASprod:
+            return CASprod(*map(lambda n: CASpow(n, self.b).simplify(), self.a))
+        if type(self.a) is CASpow:
+            return CASpow(self.a.a, CASprod(self.a.b, self.b))
+        return self
+
+    def __hash__(self, /):
+        self = self.simplify()
+        if type(self) is CASpow:
+            return hash((self.a, self.b))
+        return hash(self)
+
+    def __eq__(self, other, /):
+        other = casSafe(other)
+        self = getSimplify(self)
+        other = getSimplify(other)
+        if type(self) is not type(other):
+            return False
+        return self.a == other.a and self.b == other.b
+
+    def _extractNum(self, /):
+        return self.b, [self.a]
+
+    def __str__(self, /):
+        return f'({self.a})**({self.b})'
+
+    def tex(self, /):
+        return '\\left({'+getTex(self.a)+'}\\right)^{'+getTex(self.b)+'}'
 
 
 CASsum.operation = sum
 CASsum.next = CASprod
 CASsum.oper = '+'
+CASsum.texoper = '+'
 CASsum.empty = CASnumber(0)
 CASprod.operation = math.prod
 CASprod.next = CASpow
 CASprod.oper = '*'
+CASprod.texoper = ''
 CASprod.empty = CASnumber(1)
+CASprod.collapse = CASsum.empty
 
 #"""
 
@@ -599,9 +701,9 @@ def cas_func_wrap(func):
 
     @wraps(func)
     def wrap(*args):
-        if all(map(is_constant, args)):
-            if any(map(is_exact, args)):
-                return CASnest(wrap, args)
+        if all(map(isConstant, args)):
+            if any(map(isExact, args)):
+                return  # CASnest(wrap, args)  # FLAG
             return func(*args)
         return mathfunc(CASfunction(wrap, args))
 
@@ -617,3 +719,10 @@ def cas_func_wrap(func):
 class mathfunc(_arithmetic):
     pass
 # """
+
+
+if __name__ == '__main__':
+    v = CASvariable('v')
+    vp1 = v+1
+    vpv = v+v
+    vtv = CASprod(vpv, vp1)
