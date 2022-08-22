@@ -1461,7 +1461,7 @@ class pow_exact_expression(cas_exact_non_commutative_expression):
 class pow_expression(non_commutative_expression):
     oper = '**'
     hook_intercept = 'pow'
-    cas_exact = remove_duplicates
+    cas_exact = pow_exact_expression
 
     def __new__(cls, a, b):
         '''__new__ for non-communative expressions'''
