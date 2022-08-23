@@ -76,161 +76,10 @@ from numbers import Number
 
 # CHECKS #
 
-constants = (int, float, complex, Decimal, Fraction, Number)
-exact_constants = (int, Fraction)
-
-
-def isConstant(n) -> bool:
-    '''Checks whether n is constant for cas engine'''
-    if isinstance(n, constants):
-        return True
-    try:
-        return bool(n.is_constant)
-    except AttributeError:
-        return False
-
-
-def isRational(n):
-    if isinstance(n, (int, Fraction, *constants)):
-        return True
-    if hasattr(n, 'rational'):
-        return bool(n.rational)
-    return False
-
-
-def isExact(n):
-    if isinstance(n, constants):
-        return True
-    try:
-        return n.exact
-    except AttributeError:
-        return False
-
-
-# DATA HANDLING #
-
-def createVariables(*names):
-    if not all(map(lambda x: type(x) is str, names)):
-        raise TypeError('All names must be strings')
-    return tuple(map(CASvariable, names))
-
-
-def removeDuplicates(tup):
-    return tuple(OrderedDict.fromkeys(tup).keys())
-
-
-def getArgs(args, selector):
-    '''get args according to selector'''
-    return [args[select] for select in selector]
-
-# TYPE VALIDATION AND CONVERSION TOOLS #
-
-
-def casSafe(n):
-    if type(n) is mathfunc:
-        n = n.composition
-    if isinstance(n, CASvariable):
-        if n.value is not None:
-            n = n.value
-    if isConstant(n):
-        if not isinstance(n, CASobject):
-            logging.debug(f'converting {n} to cas_exact')
-            try:
-                return CASnumber(n)
-            except Exception as error:
-                logging.warn(f'{error.__class__.__name__}: {error.args[0]}')
-        return n
-    if not isinstance(n, CASobject):
-        raise TypeError(f'Invalid CAS types, {type(n)}')
-    if callable(n):
-        return n(*map(casSafe, n.args))
-    return n
-
-# ALTERNATE STRING TOOLS #
-
-
-def getTex(value):
-    if hasattr(value, 'tex'):
-        tex = value.tex
-        if callable(tex):
-            return tex()
-        return tex
-    return str(value)
-
-
-bitor = lambda a, b: a|b
-
-
-def getVar(n):
-    return reduce(bitor, (i.var for i in n if hasattr(i, 'var')), set())
-
-
-def getFn(n):
-    return reduce(bitor, (i.fn for i in n if hasattr(i, 'fn')), set())
-
-
-def getSimplify(n):
-    return n.simplify() if hasattr(n, 'simplify') else n
-
-
-def printTex(value):
-    print(getTex(value))
-
-
-def evaluateableStr(value):
-    if hasattr(value, 'evalstr'):
-        evalstr = value.evalstr
-        if callable(evalstr):
-            return evalstr()
-        return evalstr
-    return str(value)
-
-# MATH TOOLS #
-
-
-def _compDerive(n, var, k):
-    '''Computes the kth partial derivative of n with respect to var'''
-    # Making sure k is valid
-    assert k >= 0  # Send to integral.
-    if type(k) is not int:
-        return NotImplemented  # decimal derivatives not implemented
-
-    # 0th derivative means nothing
-    if k == 0:
-        return n
-
-    # logging computation
-    log = f'Computing {k} partial of {str(n)} with respect to {var.name}'
-    logging.info(log)
-
-    # catch trivial and identity derivatives
-    if k == 1 and var == n:
-        return 1
-
-    elif isConstant(n) or isinstance(n, CASvariable):
-        return 0
-
-    # Call attributes
-    if isinstance(n, (CASobject)):
-        return n._compDerive(var, k)
-
-    raise TypeError(f'Invalid type, type {type(n)}')
-
-
-def _prodDeriveExpansion(f, g, v, k, n):
-    f_p = _compDerive(f, v, n)
-    g_p = _compDerive(g, v, k-n)
-    c_p = binomialCoeficient(n, k)
-    return CASprod(c_p, f_p, g_p)
-
-
-def binomialCoeficient(k, n):
-    return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
-
 # DECORATORS #
 
 
-def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), preface: str='', ignore: tuple[int]=(), custom: dict[int: str]={}):
+def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), preface: str='', ignore: tuple[int]=(), custom: dict[int: str]={}) -> types.FunctionType:
     '''hook
 
     Create a decorator that intercepts calls to the given function and checks for `hooks` within the arguments
@@ -254,6 +103,12 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
         ignored cases, by default ()
     custom : dict[int : str], optional
         individually custom hooks or tags to look for, by default {}
+
+
+    Returns
+    -------
+    int
+        Coefficient of nth term of (a+b)**k
     '''
     if type(name) is not str:
         raise TypeError(f'Invalid type recieved for argument `name`, recieved {type(name)} and not str')
@@ -289,7 +144,21 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
     return decorator
 
 
-def mathReturnDec(function):
+def mathReturnDec(function: types.FunctionType) -> types.FunctionType:
+    '''mathReturnDec
+
+    Make sure returns are cas_safe
+
+    Parameters
+    ----------
+    function : types.FunctionType
+        Function to wrap
+
+    Returns
+    -------
+    types.FunctionType
+        wrapped function
+    '''
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
@@ -301,7 +170,21 @@ def mathReturnDec(function):
     return wrapper
 
 
-def log_call(function):
+def logCall(function: types.FunctionType) -> types.FunctionType:
+    '''logCall
+
+    Logs all calls of wrapped function
+
+    Parameters
+    ----------
+    function : types.FunctionType
+        Function to wrap
+
+    Returns
+    -------
+    types.FunctionType
+        wrapped function
+    '''
     @wraps(function)
     def wrapper(*args, **kwargs):
         logging.debug(f'{function.__name__} called with args {args} and kwargs {kwargs}')
@@ -411,7 +294,42 @@ class CASvariable(CASobject, _arithmetic):
 
 
 class CASconstant(CASobject, _arithmetic):
-    pass
+    var = set()
+    fn = set()
+    rational = False
+    exact = True
+    names = CASvariable.names
+
+    def __new__(cls, name, number):
+        if name in cls.names:
+            return cls.names[name]
+        e = False
+        try:
+            assert type(name) == str
+            assert len(name) in range(1, 4)
+            assert '.' not in name
+            exec(f'{name}=0')
+        except Exception:
+            e = True
+        if e:
+            raise ValueError(f'Invalid name recieved: {name!r}')
+        self = super(CASconstant, cls).__new__(cls)
+        self.value = number
+        self.name = name
+        self.names[name] = self
+        self.tex = name
+
+    def __str__(self, /):
+        return str(self.value)
+
+    def __eq__(self, other, /):
+        return self.value == other
+
+    def __hash__(self, /):
+        return hash(self.value)
+
+    def tex(self, /):
+        return getTex(self.value)
 
 
 class CASnumber(CASobject, _arithmetic):
@@ -616,12 +534,15 @@ class CASsum(CAScommutative):
     def preSimplify(self):
         return self
 
+    def distribute(self):
+        return CASsum(*map(distribute, self))
+
 
 class CASprod(CAScommutative):
     def preSimplify(self):
         if self.collapse in self:
             return self.collapse
-        return self.distribute()
+        return self
 
     def distribute(self):
         for i, n in enumerate(self):
@@ -689,7 +610,7 @@ CASprod.texoper = ''
 CASprod.empty = CASnumber(1)
 CASprod.collapse = CASsum.empty
 
-#"""
+"""
 
 
 class function:
@@ -702,8 +623,8 @@ def cas_func_wrap(func):
     @wraps(func)
     def wrap(*args):
         if all(map(isConstant, args)):
-            if any(map(isExact, args)):
-                return  # CASnest(wrap, args)  # FLAG
+            # if any(map(isExact, args)):
+            #    return  # CASnest(wrap, args)  # FLAG
             return func(*args)
         return mathfunc(CASfunction(wrap, args))
 
@@ -721,8 +642,394 @@ class mathfunc(_arithmetic):
 # """
 
 
+constants = (int, float, complex, Decimal, Fraction, Number)
+Rationals = (int, Fraction)
+MathAttributes = ('__add__', '__radd__', '__sub__', '__mul__', '__rsub__', '__rmul__',
+                  '__truediv__', '__rtruediv__', '__pow__', '__rpow__')
+
+
+def isConstant(n: typing.Any) -> bool:
+    '''isConstant
+
+    Check whether a number is constant for cas engine
+
+    Parameters
+    ----------
+    n : typing.Any
+        Number to be checked
+
+    Returns
+    -------
+    bool
+    '''
+    if isinstance(n, constants):
+        return True
+    if hasattr(n, 'exact'):
+        return bool(n.exact)
+    return all(map(lambda x: hasattr(n, x), MathAttributes))
+
+
+def isRational(n: typing.Any) -> bool:
+    '''isRational
+
+    Check whether n is rational for cas engine
+
+    Parameters
+    ----------
+    n : typing.Any
+        Number to be checked
+
+    Returns
+    -------
+    bool
+    '''
+    ''''''
+    if isinstance(n, (Rationals)):
+        return True
+    if hasattr(n, 'rational'):
+        return bool(n.rational)
+    return False
+
+
+def isExact(n: typing.Any) -> bool:
+    '''isExact
+
+    Check whether a number is stored 'exactly' in the engine
+
+    Parameters
+    ----------
+    n : typing.Any
+        Number to be checked
+
+    Returns
+    -------
+    bool
+    '''
+    if isRational(n):
+        return True
+    if hasattr(n, 'exact'):
+        return bool(n.exact)
+
+
+# DATA HANDLING #
+
+def createVariables(*names: tuple[str]) -> tuple[CASvariable]:
+    '''createVariables _summary_
+
+    Create CAS variables for a list of names
+    x, y, z = create_variables('x', 'y', 'z')
+
+    Returns
+    -------
+    tuple[CASvariable]
+        One variable for each name input
+
+    Raises
+    ------
+    TypeError
+        Names must be strings
+    '''
+    if not all(map(lambda x: type(x) is str, names)):
+        raise TypeError('All names must be strings')
+    return tuple(map(CASvariable, names))
+
+
+def removeDuplicates(tup: tuple) -> tuple:
+    '''removeDuplicates
+
+    Remove duplicates
+
+    Parameters
+    ----------
+    tup : tuple
+        Original values of iterable
+
+    Returns
+    -------
+    tuple
+        New tuple with duplicates removed
+    '''
+    return tuple(OrderedDict.fromkeys(tup).keys())
+
+
+def getArgs(args, selector):
+    '''get args according to selector'''
+    return [args[select] for select in selector]
+
+
+def distribute(expression):
+    '''distribute
+
+    Propogate distribution in CAS
+
+    Parameters
+    ----------
+    expression : CASobject
+        Point in distribution
+
+    Returns
+    -------
+    CASobject
+        New expression re-distributed
+    '''
+    if hasattr(expression, 'distribute'):
+        return expression.distribute()
+    return expression
+
+
+# TYPE VALIDATION AND CONVERSION TOOLS #
+
+def casSafe(n):
+    '''casSafe
+
+    Generate CAS safe version of a number
+
+    Parameters
+    ----------
+    n : Some form of number/expression
+        Number to convert to CASobject
+
+    Returns
+    -------
+    CASobject
+        New or original object that is safe within CAS
+
+    Raises
+    ------
+    TypeError
+        Invalid CAS type
+    '''
+    # if type(n) is mathfunc:
+    #    n = n.composition
+    if isinstance(n, CASvariable):
+        if n.value is not None:
+            n = n.value
+    if isConstant(n):
+        if not isinstance(n, CASobject):
+            logging.debug(f'converting {n} to cas_exact')
+            try:
+                return CASnumber(n)
+            except Exception as error:
+                logging.warn(f'{error.__class__.__name__}: {error.args[0]}')
+        return n
+    if not isinstance(n, CASobject):
+        raise TypeError(f'Invalid CAS types, {type(n)}')
+    if callable(n):
+        return n(*map(casSafe, n.args))
+    return n
+
+# ALTERNATE STRING TOOLS #
+
+
+def getTex(value: CASobject) -> str:
+    '''getTex
+
+    Get TeX representation of value
+
+    Parameters
+    ----------
+    value : CASobject
+        Object to be rendered as TeX
+
+    Returns
+    -------
+    str
+        TeX-renderable string
+    '''
+    if hasattr(value, 'tex'):
+        tex = value.tex
+        if callable(tex):
+            return tex()
+        return tex
+    return str(value)
+
+
+bitor = lambda a, b: a | b
+
+
+def getVar(n: tuple[CASobject]) -> set[CASvariable]:
+    '''getVar
+
+    Gather variables for expression construction
+
+    Parameters
+    ----------
+    n : tuple[CASobject]
+        List of things to check before expression construction
+
+    Returns
+    -------
+    set[CASvariable]
+        Set of all CASvariables involved in expression
+    '''
+    return reduce(bitor, (i.var for i in n if hasattr(i, 'var')), set())
+
+
+def getFn(n: tuple[CASobject]) -> set[types.functionType]:
+    '''getVar
+
+    Gather functions for expression construction
+
+    Parameters
+    ----------
+    n : tuple[CASobject]
+        List of things to check before expression construction
+
+    Returns
+    -------
+    set[types.functionType]
+        Set of all functions involved in expression
+    '''
+    return reduce(bitor, (i.fn for i in n if hasattr(i, 'fn')), set())
+
+
+def getSimplify(n):
+    '''getSimplify
+
+    Attempt to simplify a variable
+
+    Parameters
+    ----------
+    n
+        Attempt to simplify n
+
+    Returns
+    -------
+    Unknown
+        Attempted simplification
+    '''
+    return n.simplify() if hasattr(n, 'simplify') else n
+
+
+def printTex(value: CASobject) -> None:
+    '''Utility for easier copy/pasting'''
+    print(getTex(value))
+
+
+def evaluateableStr(value: CASobject) -> str:
+    '''evaluateableStr
+
+    Constructs evaluatable string representation of expression
+
+    Parameters
+    ----------
+    value : CASobject
+        Expression to be formulated
+
+    Returns
+    -------
+    str
+        Evaluatable string
+    '''
+    if hasattr(value, 'evalstr'):
+        evalstr = value.evalstr
+        if callable(evalstr):
+            return evalstr()
+        return evalstr
+    return str(value)
+
+# MATH TOOLS #
+
+
+def _compDerive(n: CASobject, var: CASvariable, k: int) -> CASobject:
+    '''_compDerive
+
+    Compute partials
+
+    Parameters
+    ----------
+    n : CASobject
+        Expression to compute partial of
+    var : CASvariable
+        Compute partial with respect to var
+    k : int
+        Compute kth partial
+
+    Returns
+    -------
+    CASobject
+        kth partial derivative of n with respect to var
+
+    Raises
+    ------
+    TypeError
+        Invalid n recieved
+    '''
+    # Making sure k is valid
+    assert k >= 0  # Send to integral.
+    if type(k) is not int:
+        return NotImplemented  # decimal derivatives not implemented
+
+    # 0th derivative means nothing
+    if k == 0:
+        return n
+
+    # logging computation
+    log = f'Computing {k} partial of {str(n)} with respect to {var.name}'
+    logging.info(log)
+
+    # catch trivial and identity derivatives
+    if k == 1 and var == n:
+        return CASnumber(1)
+
+    elif isConstant(n) or isinstance(n, CASvariable):
+        return CASnumber(0)
+
+    # Call attributes
+    if isinstance(n, (CASobject)):
+        return n._compDerive(var, k)
+
+    raise TypeError(f'Invalid type, type {type(n)}')
+
+
+def _prodDeriveExpansion(f: CASobject, g: CASobject, v: CASvariable, k: int, n: int) -> CASobject:
+    '''_prodDeriveExpansion
+
+    Return a term of a partial of a product
+
+    Parameters
+    ----------
+    f : CASobject
+        One of the terms in the product
+    g : CASobject
+        Other term in the product
+    v : CASvariable
+        Compute partial with respect to v
+    k : int
+        Comput kth partial
+    n : int
+        The term of the resulting sum
+
+    Returns
+    -------
+    CASobject
+        nth term of kth partial of fg with respect to v
+    '''
+    f_p = _compDerive(f, v, n)
+    g_p = _compDerive(g, v, k-n)
+    c_p = binomialCoeficient(n, k)
+    return CASprod(c_p, f_p, g_p)
+
+
+def binomialCoeficient(k: int, n: int) -> int:
+    '''binomialCoeficient
+
+    k choose n
+
+    Parameters
+    ----------
+    k : int
+        Power of bionomial expansion
+    n : int
+        Term of polynomial
+
+    Returns
+    -------
+    int
+        Coefficient of nth term of (a+b)**k
+    '''
+    return math.factorial(n)/(math.factorial(n-k)*math.factorial(k))
+
+
 if __name__ == '__main__':
-    v = CASvariable('v')
-    vp1 = v+1
-    vpv = v+v
-    vtv = CASprod(vpv, vp1)
+    t, x, y, z = createVariables('t', 'x', 'y', 'z')
