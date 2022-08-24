@@ -35,6 +35,8 @@ RELEASE NOTES:
   1.1
    Version 1.1.0:
     Adds hooks and new features to CAS
+   Version 1.1.1:
+    Bugfixes and more thorough documentation.
 '''
 
 if __name__ == '__main__':  # To account for relative imports when run
@@ -107,8 +109,8 @@ def hook(name: str, varnum: int=None, r: bool=False, riter: tuple[int]=(), prefa
 
     Returns
     -------
-    int
-        Coefficient of nth term of (a+b)**k
+    types.FunctionType
+        Wrapped function
     '''
     if type(name) is not str:
         raise TypeError(f'Invalid type recieved for argument `name`, recieved {type(name)} and not str')
@@ -193,20 +195,15 @@ def mathReturn(function: types.FunctionType) -> types.FunctionType:
     return wrapper
 
 
-class _getitemtype(type):
-    def __getitem__(self, *args):
-        self._getitem(self, *args)
-
-
-class CAS(type, metaclass=_getitemtype):
-    def _getitem(self, *args):
+class CAS(type):
+    def __class_getitem__(self, *args):
         print(args)
 
 
 class CASobject(metaclass=CAS):
     exact: bool
     value: int
-    var: set
+    var: tuple
     fn: set
 
     def __repr__(self, /):
@@ -242,10 +239,7 @@ class _arithmetic:
 
     @mathReturn
     def __add__(self, other, /):
-        try:
-            other = casSafe(other)
-        except Exception:
-            return NotImplemented
+        other = casSafe(other)
         if isRational(other) and isRational(self):
             return CASnumber(self.value + other.value)
         return CASsum(self, other)
@@ -264,10 +258,7 @@ class _arithmetic:
 
     @mathReturn
     def __mul__(self, other):
-        try:
-            other = casSafe(other)
-        except Exception:
-            return NotImplemented
+        other = casSafe(other)
         if isRational(other) and isRational(self):
             return CASnumber(self.value * other.value)
         return CASprod(self, other)
@@ -286,27 +277,26 @@ class _arithmetic:
 
     @mathReturn
     def __pow__(self, other):
-        try:
-            other = casSafe(other)
-        except Exception:
-            return NotImplemented
+        other = casSafe(other)
         if isRational(self) and (type(other.value) is int):
             return CASnumber(self.value ** other.value)
         return CASpow(self, other)
 
     @mathReturn
     def __rpow__(self, other):
-        try:
-            other = casSafe(other)
-        except Exception:
-            return NotImplemented
+        other = casSafe(other)
         if isRational(other) and (type(self.value) is int):
             return CASnumber(other.value ** self.value)
         return CASpow(other, self)
 
 
 class CASfunction(CASobject, _arithmetic):
-    NotImplemented
+    def __new__(cls, function, call):
+        if all(map(isConstant, call)):
+            if not any(map(lambda x: type(type(x)) == CAS, call)):
+                return function(*call)
+            return NotImplemented
+        return NotImplemented
 
 
 class CASvariable(CASobject, _arithmetic):
@@ -316,7 +306,7 @@ class CASvariable(CASobject, _arithmetic):
     names: dict = {}
     value = typing.Any = None
     exact = False
-    var: set
+    var: tuple
     fn = set()
 
     def __new__(cls, name, tex=None):
@@ -344,7 +334,7 @@ class CASvariable(CASobject, _arithmetic):
 
         self.name = name
         self.names[name] = self
-        self.var = {self}
+        self.var = (self,)
         self.tex = name if tex is None else tex
 
         return self
@@ -360,7 +350,7 @@ class CASvariable(CASobject, _arithmetic):
 
 
 class CASconstant(CASobject, _arithmetic):
-    var = set()
+    var = ()
     fn = set()
     rational = False
     exact = True
@@ -400,7 +390,7 @@ class CASconstant(CASobject, _arithmetic):
 
 
 class CASnumber(CASobject, _arithmetic):
-    var = set()
+    var = ()
     fn = set()
     rational = True
     exact = True
@@ -565,7 +555,7 @@ class CAScommutative(CASexpression, tuple):
         other = casSafe(other)
         self = getSimplify(self)
         other = getSimplify(other)
-        if type(self) != cls:
+        if type(self) is not cls:
             return self == other
         if type(self) is not type(other):
             return False
@@ -624,6 +614,23 @@ class CASprod(CAScommutative):
                 return CASsum(*map(lambda x: CASprod(x, *self[:i], *self[i+1:]), n)).simplify().distribute()
         return self
 
+    def _compDerive(self, var, k, /):
+        a, b = self._extract_num()
+        if len(b) == 1:
+            return CASprod(a, _compDerive(b[0], var, k))
+        if len(b) == 2:
+            f = b[0]
+            g = b[1]
+        elif len(b) == 3:
+            f = b[0]
+            g = CASprod(b[1], b[2])
+        else:
+            length = len(b)
+            f = CASprod(b[: length//2])
+            g = CASprod(b[length//2:])
+        terms = [_prodDeriveExpansion(f, g, var, k, n) for n in range(k+1)]
+        return a*sum(terms)
+
 
 class CASpow(CASexpression):
     def __new__(cls, a, b):
@@ -633,7 +640,7 @@ class CASpow(CASexpression):
             return casSafe(a)
         self = super(cls, cls).__new__(cls)
         self.a, self.b = map(casSafe, (a, b))
-        self.var = self.a.var | self.b.var
+        self.var = addtuple(self.a.var, self.b.var)
         self.fn = self.a.fn | self.b.fn
         self.exact = not self.var
         self.value = None if not self.exact else self.a.value ** self.b.value
@@ -681,6 +688,29 @@ class CASpow(CASexpression):
         if type(self.b.value) is not int:
             return CASpow(distribute(self.a), distribute(self.b))
         return CASprod(*[self.a for n in range(self.b.value)]).distribute()
+
+    def _compDerive(self, var, k, /):
+        if var not in self.var:
+            return CASnumber(0)
+        if isConstant(self.b):
+            if self.a == var:
+                if type(self.b.value) is int:
+                    b = self.b.value
+                    if k > self.b:
+                        return CASnumber(0)
+                    coef = math.prod(range(b-k+1, b+1))
+                else:
+                    coef = math.prod(map(lambda x: (self.b-x+1), range(0, k)))
+                return CASprod(coef, CASpow(var, self.b-k))
+            partial = CASprod(self.b, CASpow(self.a, self.b-1), _compDerive(self.a, var, 1))
+            return _compDerive(partial, var, k-1)
+        if isConstant(self.a):
+            return NotImplemented
+            return _compDerive(CASprod(ln(self.a), self), var, k-1)
+        return NotImplemented
+        pross = CASprod(ln(self.a), self.b)
+        internal = _compDerive(pross, var, 1)
+        return _compDerive(CASprod(self, internal), var, k-1)
 
 
 CASsum.operation = sum
@@ -957,7 +987,10 @@ def evalstr(n) -> str:
         return str(n.value)
     return str(n) if not hasattr(n, 'evalstr') else n.evalstr()
 
+
 bitor = lambda a, b: a | b
+
+addtuple = lambda a, b: a+b
 
 
 def getVar(n: tuple[CASobject]) -> set[CASvariable]:
@@ -975,7 +1008,7 @@ def getVar(n: tuple[CASobject]) -> set[CASvariable]:
     set[CASvariable]
         Set of all CASvariables involved in expression
     '''
-    return reduce(bitor, (i.var for i in n if hasattr(i, 'var')), set())
+    return removeDuplicates(tuple(reduce(addtuple, (i.var for i in n if hasattr(i, 'var')), ())))
 
 
 def getFn(n: tuple[CASobject]) -> set[types.FunctionType]:
@@ -1148,3 +1181,27 @@ t, x, y, z = createVariables('t', 'x', 'y', 'z')
 pi = CASconstant('π', math.pi, '\\pi')
 e = CASconstant('e', math.e)
 tau = CASconstant('τ', math.tau, '\\tau')
+
+
+def ln(x, /):
+    '''Return the natural logarithm of x
+recources to x.ln() or x.log(e) if ln cannot be found'''
+    if x == 0:
+        raise ValueError('math domain error')
+    try:
+        return math.log(x)
+    except Exception:
+        pass
+    try:
+        return cmath.log(x)
+    except Exception:
+        pass
+    try:
+        return x.ln()
+    except Exception:
+        pass
+    try:
+        return x.log(math.e)
+    except Exception:
+        pass
+    raise TypeError('ln cannot be found of % s.' % type(x).__name__)
