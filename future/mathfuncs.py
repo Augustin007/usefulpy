@@ -75,6 +75,7 @@ import cmath
 from decimal import Decimal
 from fractions import Fraction
 from numbers import Number
+from operator import add, or_
 
 # CHECKS #
 
@@ -640,7 +641,7 @@ class CASpow(CASexpression):
             return casSafe(a)
         self = super(cls, cls).__new__(cls)
         self.a, self.b = map(casSafe, (a, b))
-        self.var = addtuple(self.a.var, self.b.var)
+        self.var = add(self.a.var, self.b.var)
         self.fn = self.a.fn | self.b.fn
         self.exact = not self.var
         self.value = None if not self.exact else self.a.value ** self.b.value
@@ -987,12 +988,6 @@ def evalstr(n) -> str:
         return str(n.value)
     return str(n) if not hasattr(n, 'evalstr') else n.evalstr()
 
-
-bitor = lambda a, b: a | b
-
-addtuple = lambda a, b: a+b
-
-
 def getVar(n: tuple[CASobject]) -> set[CASvariable]:
     '''getVar
 
@@ -1008,7 +1003,7 @@ def getVar(n: tuple[CASobject]) -> set[CASvariable]:
     set[CASvariable]
         Set of all CASvariables involved in expression
     '''
-    return removeDuplicates(tuple(reduce(addtuple, (i.var for i in n if hasattr(i, 'var')), ())))
+    return removeDuplicates(tuple(reduce(add, (i.var for i in n if hasattr(i, 'var')), ())))
 
 
 def getFn(n: tuple[CASobject]) -> set[types.FunctionType]:
@@ -1026,7 +1021,7 @@ def getFn(n: tuple[CASobject]) -> set[types.FunctionType]:
     set[types.FunctionType]
         Set of all functions involved in expression
     '''
-    return reduce(bitor, (i.fn for i in n if hasattr(i, 'fn')), set())
+    return reduce(or_, (i.fn for i in n if hasattr(i, 'fn')), set())
 
 
 def getSimplify(n):
