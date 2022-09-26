@@ -630,10 +630,7 @@ class cas_exact_object:
     @log_call
     def __neg__(self):
         '''Return -self'''
-        try:
-            return cas_exact(-self.value)
-        except Exception:
-            return mul_exact_expression((-1, self.value))
+        return mul_exact_expression((-1, self))            
 
     @math_return_dec
     @hook('add', 2, False, (1,), 'exact')
