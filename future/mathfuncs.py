@@ -575,6 +575,13 @@ class CAScommutative(CASexpression, tuple):
         if type(self) is not type(other):
             return False
         return Counter(self) == Counter(other)
+    
+    def __hash__(self, /):
+        # Expensive checks
+        self = self.simplify().distribute()
+        if not isinstance(self, CAScommutative):
+            return hash(self)
+        return hash(tuple(sorted(self, key = lambda x: hash(x))))
 
 
 class d:  # Not entirely sure what to do here
@@ -633,7 +640,7 @@ class CASprod(CAScommutative):
         return self
 
     def _compDerive(self, var, k, /):
-        a, b = self._extract_num()
+        a, b = self._extractNum()
         if len(b) == 1:
             return CASprod(a, _compDerive(b[0], var, k))
         if len(b) == 2:
@@ -675,7 +682,7 @@ class CASpow(CASexpression):
         return self
 
     def __hash__(self, /):
-        self = getSimplify(self)
+        self = getDistribute(getSimplify(self))
         if type(self) is CASpow:
             return hash((self.a, self.b))
         return hash(self)
@@ -714,7 +721,7 @@ class CASpow(CASexpression):
             if self.a == var:
                 if type(self.b.value) is int:
                     b = self.b.value
-                    if k > self.b:
+                    if k > b:
                         return CASnumber(0)
                     coef = math.prod(range(b-k+1, b+1))
                 else:
@@ -728,6 +735,14 @@ class CASpow(CASexpression):
         internal = _compDerive(pross, var, 1)
         return _compDerive(CASprod(self, internal), var, k-1)
 
+
+class CASfunction(CASexpression):
+    def __new__(cls, func, nest, /):
+        pass
+
+class CASfunctionHelper:
+    def __new__(func):
+        pass
 
 CASsum.operation = sum
 CASsum.next = CASprod
@@ -1042,7 +1057,7 @@ def getFn(n: tuple[CASobject]) -> set[types.FunctionType]:
 def getSimplify(n):
     '''getSimplify
 
-    Attempt to simplify a variable
+    Attempt to simplify an expression
 
     Parameters
     ----------
@@ -1051,10 +1066,27 @@ def getSimplify(n):
 
     Returns
     -------
-    Unknown
+    Any
         Attempted simplification
     '''
     return n.simplify() if hasattr(n, 'simplify') else n
+
+def getDistribute(n):
+    '''getDistribute
+
+    Attempt to distribute an expression
+
+    Parameters
+    ----------
+    n
+        Attempt to distribute n
+
+    Returns
+    -------
+    Any
+        Attempted distribution
+    '''
+    return n.distribute() if hasattr(n, 'distribute') else n
 
 
 def printTex(value: CASobject) -> None:
