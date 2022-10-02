@@ -458,10 +458,22 @@ quaternion'''
         '''return string representation of self'''
         if self == 0:
             return '(0)'
-        return '+'.join([(str(a if int(a) != float(a) else int(a))+b
-                          if a not in (1, -1) or b == '' else b)
-                         for a, b in zip(self.astuple(),
-                         ('', 'i', 'j', 'k')) if a]).replace('+-', '-')
+        stringlist = []
+        for a, b in zip(self.astuple(), ('', 'i', 'j', 'k')):
+            if a==0:
+                continue
+            astr = str(int(a) if int(a)==float(a) else a)
+            if b == '':
+                stringlist.append(astr)
+                continue
+            match a:
+                case 1:
+                    stringlist.append(b)
+                case -1:
+                    stringlist.append('-'+b)
+                case _:
+                    stringlist.append(astr+b)
+        return '+'.join(stringlist).replace('+-', '-')
 
     __repr__ = __str__
 
