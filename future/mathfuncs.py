@@ -305,15 +305,6 @@ class _arithmetic:
         return CASpow(other, self)
 
 
-class CASfunction(CASobject, _arithmetic):
-    def __new__(cls, function, call):
-        if all(map(isConstant, call)):
-            if not any(map(lambda x: type(type(x)) == CAS, call)):
-                return function(*call)
-            return NotImplemented
-        return NotImplemented
-
-
 class CASvariable(CASobject, _arithmetic):
     '''variable for cas engine'''
     name: str
@@ -362,7 +353,9 @@ class CASvariable(CASobject, _arithmetic):
 
     def __str__(self, /):
         return self.name
-
+    
+    def evaluate(self, vardict:dict, /):
+        return vardict.get(self, self)
 
 class CASconstant(CASobject, _arithmetic):
     var = ()
@@ -536,6 +529,16 @@ class CAScommutative(CASexpression, tuple):
                 return expShort[0]
             return self.__class__(*expShort)
         return self.__class__(num, *expShort)
+    
+    def evaluate(self, vardict:dict):
+        runcheck = []
+        for item in self:
+            if hasattr(item, 'evaluate'):
+                runcheck.append(item.evaluate(vardict))
+                continue
+            runcheck.append(item)
+        print(runcheck)
+        return getSimplify(self.__class__(*runcheck))
 
     def _extractNum(self, /):
         check = isRational if self.exact else isConstant
@@ -654,7 +657,7 @@ class CASprod(CAScommutative):
             f = CASprod(b[: length//2])
             g = CASprod(b[length//2:])
         terms = [_prodDeriveExpansion(f, g, var, k, n) for n in range(k+1)]
-        return a*sum(terms)
+        return getSimplify(a*sum(terms))
 
 
 class CASpow(CASexpression):
@@ -733,16 +736,64 @@ class CASpow(CASexpression):
             return _compDerive(CASprod(ln(self.a), self), var, k-1)
         pross = CASprod(ln(self.a), self.b)
         internal = _compDerive(pross, var, 1)
-        return _compDerive(CASprod(self, internal), var, k-1)
+        return getSimplify(_compDerive(CASprod(self, internal), var, k-1))
+    
+    def evaluate(self, vardict:dict):
+        return getSimplify(CASpow(getEvaluate(self.a, vardict), getEvaluate(self.b, vardict)))
+
+class CASfunctionWrapper:
+    def __init__(self, func, partials, partialsReferences, indefiniteInt, indefiniteIntReferences):
+        self.func = func
+        self.__name__ = func.__name__
+        self.partials = partials
+        self.partialsReferences = partialsReferences
+        self.indefiniteInt = indefiniteInt
+        self.indefiniteIntReferences = indefiniteIntReferences
+    
+    def __call__(self, *args):
+        return NotImplemented ## TODO: Implement .evaluate
 
 
-class CASfunction(CASexpression):
-    def __new__(cls, func, nest, /):
+class CASfunction(CASexpression, _arithmetic):
+    helper: CASfunctionWrapper
+    func: types.FunctionType
+    nest: tuple[CASobject]
+    partials:tuple[CASobject]
+    indefiniteInt:tuple[CASobject]
+    __name__:str
+    exact:bool
+    value:typing.Any
+
+    def __new__(cls, helper:CASfunctionWrapper, nest:tuple[CASobject], exact:bool, value=None, /):
+        self = super(cls, cls).__new__(cls)
+        self.func = helper.func
+        self.helper = helper
+        self.__name__ = helper.__name__
+        self.nest = nest
+        self.var = getVar(nest)
+        self.fn = getFn(nest)
+        partialRefSet = {a:b for a, b in zip(helper.partialsReferences, nest)}
+        self.partials = [fprime.evaluate(partialRefSet) for fprime in helper.partials]
+        indefiniteRefSet = {a:b for a, b in zip(helper.indefiniteIntReferences, nest)}
+        self.indefiniteInt = [faprime.evaluate(indefiniteRefSet) for faprime in helper.indefiniteInt]
+        self.exact = exact
+        self.value = value
+
+    def _compDerive(self, var, k):
+        return _compDerive(getSimplify(CASsum(*tuple(CASprod(a, _compDerive(b, var, 1)) for a, b in zip(self.partials, self.nest) if var in b.var))), var, k-1)
+        #TODO: prime_cycle
+    
+    def __str__(self, /):
+        return f'{self.__name__}{self.nest}'
+    
+    def tex(self, /):
         pass
+        #self.format?
 
-class CASfunctionHelper:
-    def __new__(func):
-        pass
+    def evaluate(self, vardict:dict):
+        return self.helper(*[getEvaluate(n, vardict) for n in self.nest])
+        ##FLAG
+
 
 CASsum.operation = sum
 CASsum.next = CASprod
@@ -755,38 +806,6 @@ CASprod.oper = '*'
 CASprod.texoper = ''
 CASprod.empty = CASnumber(1)
 CASprod.collapse = CASsum.empty
-
-"""
-
-
-class function:
-    pass
-
-
-def cas_func_wrap(func):
-    '''Wraps a function to make it work in the cas engine.'''
-
-    @wraps(func)
-    def wrap(*args):
-        if all(map(isConstant, args)):
-            # if any(map(isExact, args)):
-            #    return  # CASnest(wrap, args)  # FLAG
-            return func(*args)
-        return mathfunc(CASfunction(wrap, args))
-
-    wrap.original = func
-    wrap = function(wrap)
-    wrap.original = func
-    wrap.prime = {}
-    wrap.format = None
-    wrap.prime_cycle = {}
-    return wrap
-
-
-class mathfunc(_arithmetic):
-    pass
-# """
-
 
 constants = (int, float, complex, Decimal, Fraction, Number)
 Rationals = (int, Fraction)
@@ -1088,6 +1107,10 @@ def getDistribute(n):
     '''
     return n.distribute() if hasattr(n, 'distribute') else n
 
+def getEvaluate(n, vardict:dict):
+    if hasattr(n, 'evaluate'):
+        return n.evaluate(vardict)
+    return n
 
 def printTex(value: CASobject) -> None:
     '''Utility for easier copy/pasting'''
@@ -1165,7 +1188,7 @@ def _compDerive(n: CASobject, var: CASvariable, k: int) -> CASobject:
 
     # Call attributes
     if isinstance(n, (CASobject)):
-        return n._compDerive(var, k)
+        return getSimplify(n._compDerive(var, k))
 
     raise TypeError(f'Invalid type, type {type(n)}')
 
