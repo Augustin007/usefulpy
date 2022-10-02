@@ -58,6 +58,8 @@ if __name__ == '__main__':
     fmt = '[%(levelname)s] %(name)s - %(message)s'
     logging.basicConfig(format=fmt, level=lvl)
 
+autoSimplify = True
+
 # IMPORTS #
 # Relative imports
 from .. import validation
@@ -188,6 +190,8 @@ def mathReturn(function: types.FunctionType) -> types.FunctionType:
     @logCall
     def wrapper(*args, **kwargs):
         returnVal = function(*args, **kwargs)
+        if not autoSimplify:
+            return returnVal
         try:
             return getSimplify(casSafe(returnVal))
         except Exception as error:
@@ -227,6 +231,12 @@ class CASobject(metaclass=CAS):
         if self.exact:
             return str(self.value)
         return str(self)
+    
+    def derive(self, var, k):
+        return _compDerive(self, var, k)
+    
+    def partial(self, var):
+        return _compDerive(self, var, 1)
 
 
 class _arithmetic:
@@ -270,7 +280,11 @@ class _arithmetic:
 
     @mathReturn
     def __truediv__(self, other):
-        return self*other**-1
+        if isRational(other):
+            other = Fraction(1, other)
+        else:
+            other = other**-1
+        return self*other
 
     @mathReturn
     def __rtruediv__(self, other):
@@ -512,7 +526,7 @@ class CAScommutative(CASexpression, tuple):
                 continue
             if count != 0:
                 if count != 1:
-                    expShort.append(self.next(value, count).simplify())
+                    expShort.append(getSimplify(self.next(value, count)))
                     continue
                 expShort.append(value)
         if len(expShort) == 0:
@@ -539,7 +553,7 @@ class CAScommutative(CASexpression, tuple):
             count, value = value._extractNum()
             if len(value) == 1:
                 return count, getSimplify(value[0])
-            return count, self.next(*value).simplify()
+            return count, getSimplify(self.next(*value))
         return 1, value
 
     def __str__(self, /):
@@ -594,13 +608,16 @@ class CASsum(CAScommutative):
     def _compDerive(self, var, k, /):
         if var not in self.var:
             return 0
-        return CASsum(*map(lambda x: _compDerive(x, var, k), self)).simplify()
+        return getSimplify(CASsum(*map(lambda x: _compDerive(x, var, k), self)))
 
     def preSimplify(self):
         return self
 
     def distribute(self):
-        return CASsum(*map(distribute, self)).simplify()
+        return getSimplify(CASsum(*map(distribute, self)))
+
+    def __str__(self, /):
+        return (self.oper).join(map(str, self))
 
 
 class CASprod(CAScommutative):
@@ -612,7 +629,7 @@ class CASprod(CAScommutative):
     def distribute(self):
         for i, n in enumerate(self):
             if type(n) is CASsum:
-                return CASsum(*map(lambda x: CASprod(x, *self[:i], *self[i+1:]), n)).simplify().distribute()
+                return getSimplify(CASsum(*map(lambda x: CASprod(x, *self[:i], *self[i+1:]), n))).distribute()
         return self
 
     def _compDerive(self, var, k, /):
@@ -652,13 +669,13 @@ class CASpow(CASexpression):
             if hasattr(self.b, 'value') and type(self.b.value) is int:
                 return CASnumber(self.a.value**self.b.value)
         if type(self.a) is CASprod:
-            return CASprod(*map(lambda n: CASpow(n, self.b).simplify(), self.a))
+            return getSimplify(CASprod(*map(lambda n: CASpow(n, self.b)), self.a))
         if type(self.a) is CASpow:
             return CASpow(self.a.a, CASprod(self.a.b, self.b))
         return self
 
     def __hash__(self, /):
-        self = self.simplify()
+        self = getSimplify(self)
         if type(self) is CASpow:
             return hash((self.a, self.b))
         return hash(self)
@@ -706,9 +723,7 @@ class CASpow(CASexpression):
             partial = CASprod(self.b, CASpow(self.a, self.b-1), _compDerive(self.a, var, 1))
             return _compDerive(partial, var, k-1)
         if isConstant(self.a):
-            return NotImplemented
             return _compDerive(CASprod(ln(self.a), self), var, k-1)
-        return NotImplemented
         pross = CASprod(ln(self.a), self.b)
         internal = _compDerive(pross, var, 1)
         return _compDerive(CASprod(self, internal), var, k-1)
