@@ -742,19 +742,34 @@ class CASpow(CASexpression):
         return getSimplify(CASpow(getEvaluate(self.a, vardict), getEvaluate(self.b, vardict)))
 
 class CASfunctionWrapper:
-    def __init__(self, func, partials, partialsReferences, indefiniteInt, indefiniteIntReferences):
+    def __init__(self, func:types.FunctionType, partials:tuple[CASobject]=(), partialsReferences:tuple[CASvariable]=(), indefiniteInt:tuple[CASobject]=(), indefiniteIntReferences:tuple[CASvariable]=()):
         self.func = func
         self.__name__ = func.__name__
         self.partials = partials
         self.partialsReferences = partialsReferences
         self.indefiniteInt = indefiniteInt
         self.indefiniteIntReferences = indefiniteIntReferences
-    
+
     def __call__(self, *args):
-        return NotImplemented ## TODO: Implement .evaluate
+        if any(map(lambda x: isinstance(x, CASobject), args)):
+            args = tuple(map(casSafe, args))
+            exact = all(map(lambda x: isExact(x), args))
+            value = None
+            if exact:
+                value = self.func(*map(getValue, args))
+            return CASfunction(self, args, exact, value) ## TODO: Implement .evaluate
+        return self.func(*args)
+
+    def partialReset(self, partials, partialsReferences):
+        self.partials = partials
+        self.partialsReferences = partialsReferences
+    
+    def intReset(self, indefiniteInt, indefiniteIntReferences):
+        self.indefiniteInt = indefiniteInt
+        self.indefiniteIntReferences = indefiniteIntReferences
 
 
-class CASfunction(CASexpression, _arithmetic):
+class CASfunction(CASexpression):
     helper: CASfunctionWrapper
     func: types.FunctionType
     nest: tuple[CASobject]
@@ -778,12 +793,17 @@ class CASfunction(CASexpression, _arithmetic):
         self.indefiniteInt = [faprime.evaluate(indefiniteRefSet) for faprime in helper.indefiniteInt]
         self.exact = exact
         self.value = value
+        return self
 
     def _compDerive(self, var, k):
         return _compDerive(getSimplify(CASsum(*tuple(CASprod(a, _compDerive(b, var, 1)) for a, b in zip(self.partials, self.nest) if var in b.var))), var, k-1)
         #TODO: prime_cycle
     
     def __str__(self, /):
+        if len(self.nest) == 0:
+            return self.__name__+'()'
+        if len(self.nest) == 1:
+            return f'{self.__name__}({self.nest[0]})'
         return f'{self.__name__}{self.nest}'
     
     def tex(self, /):
@@ -877,7 +897,6 @@ def isExact(n: typing.Any) -> bool:
 
 
 # DATA HANDLING #
-
 def createVariables(*names: tuple[str]) -> tuple[CASvariable]:
     '''createVariables _summary_
 
@@ -1139,6 +1158,11 @@ def evaluateableStr(value: CASobject) -> str:
         return evalstr
     return str(value)
 
+def symbolic(partials:tuple[CASobject]=(), partialsReferences:tuple[CASvariable]=(), indefiniteInt:tuple[CASobject]=(), indefiniteIntReferences:tuple[CASvariable]=()):
+    def symbolicWrapper(func:types.FunctionType):
+        return CASfunctionWrapper(func, partials, partialsReferences, indefiniteInt, indefiniteIntReferences)
+    return symbolicWrapper
+
 # MATH TOOLS #
 
 
@@ -1247,8 +1271,8 @@ pi = CASconstant('π', math.pi, '\\pi')
 e = CASconstant('e', math.e)
 tau = CASconstant('τ', math.tau, '\\tau')
 
-
-def ln(x, /):
+@symbolic((1/x,), (x,))
+def ln(x, /): #raw ln
     '''Return the natural logarithm of x
 recources to x.ln() or x.log(e) if ln cannot be found'''
     if x == 0:
@@ -1270,3 +1294,5 @@ recources to x.ln() or x.log(e) if ln cannot be found'''
     except Exception:
         pass
     raise TypeError('ln cannot be found of % s.' % type(x).__name__)
+
+# ln.intReset((x*ln(x)-x,), (x,))
