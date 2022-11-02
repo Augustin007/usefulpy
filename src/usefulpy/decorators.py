@@ -15,6 +15,7 @@ RELEASE NOTES:
   Version 0.0.1:
    Maybe I should have looked through the functools module better
 '''
+## Prepping U.D0.1.0 for U0.3.0
 
 if __name__ == '__main__':
     __package__ = 'usefulpy'
@@ -26,25 +27,70 @@ __author__ = 'Augustin Garcia'
 import functools
 import time
 import random
+import logging
+import types
+
+def _logCallSub(level: int, function: types.FunctionType) -> types.FunctionType:
+    '''_logCallSub _summary_
+
+    Parameters
+    ----------
+    level : int
+        _description_
+    function : types.FunctionType
+        _description_
+
+    Returns
+    -------
+    types.FunctionType
+        _description_
+    '''    
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        logging.log(level, f'{function.__name__} called with args {args} and kwargs {kwargs}')
+        return function(*args, **kwargs)
+    wrapper.logged = True
+    return wrapper
 
 
-def debug(func):
-    '''Print the function signature and return value'''
-    @functools.wraps(func)
-    def wrapper_debug(*args, **kwargs):
-        args_repr = [repr(a) for a in args]
-        kwargs_repr = [f'{k}={v!r}' for k, v in kwargs.items()]
-        signature = ", ".join(args_repr + kwargs_repr)
-        print(f'Calling {func.__name__}({signature})')
-        value = func(*args, **kwargs)
-        print(f'{func.__name__!r} returned {value!r}')
-        return value
-    return wrapper_debug
+# This was written this way for backward compatability.
+# Intended functionality outlined in documentation summary.
+def logCall(x: types.FunctionType | int) -> types.FunctionType:
+    '''For logging calls and call signatures.
+    @logCall(logging.DEBUG)
+    def foo(bar):
+        ...
+
+    Parameters
+    ----------
+    x : types.FunctionType | int
+        Level of logging or function to log
+
+    Returns
+    -------
+    types.FunctionType
+        Returns a decorator that wraps a function at a custom logging level or a function logged at level debug.
+    '''    
+    if type(x) is int:
+        return lambda y: _logCallSub(x, y)
+    else:
+        return _logCallSub(logging.DEBUG, x)
 
 
-@functools.cache
-def repeat(n):
-    '''Make a function repeat 'n' times'''
+# Haven't used this in ages, but then, who has?
+def repeat(n: int) -> types.FunctionType:
+    '''Make a function repeat n times.
+
+    Parameters
+    ----------
+    n : int
+        Number of times to repeat.
+
+    Returns
+    -------
+    types.FunctionType
+        Function wrapper for a repeating function
+    '''
     def decorator_repeat(func):
         @functools.wraps(func)
         def wrapper_repeat(*args, **kwargs):
@@ -55,10 +101,22 @@ def repeat(n):
     return decorator_repeat
 
 
-@functools.cache
-def timed_repeat(n, t):
+def timed_repeat(n: int, t: float) -> types.FunctionType:
     '''Make a function repeat 'n' times, with a 't' time in the interval
-between a return and a call'''
+between a return and a call
+
+    Parameters
+    ----------
+    n : int
+        Number of times to repeat
+    t : float
+        Time between repeats
+
+    Returns
+    -------
+    types.FunctionType
+        Function wrapper for repeating function
+    '''
     def decorator_repeat(func):
         @functools.wraps(func)
         def wrapper_repeat(*args, **kwargs):
@@ -71,7 +129,7 @@ between a return and a call'''
 
 
 # Sample Dictionary: {2:(0, 1), 1:((10,), 0)}
-def shift_args(dict_):
+def shift_args(dict_:dict) -> types.FunctionType:
     ''' Custom input-output for a function.
 
 example:
@@ -118,46 +176,8 @@ log base 1 of 2
     return decorator_shift_args
 
 
-def _getstr(fn, *args):
-    '''Generates a string representation for pipeline'''
-    if len(args) != 0:
-        args = list(args)
-        args[0:1] = [fn, args[0]]
-        return tuple([_getstr(a) for a in args])
-    if type(fn) is str:
-        return fn
-    if hasattr(fn, '__name__'):
-        return fn.__name__
-    if hasattr(fn, '__str__'):
-        return str(fn)
-    return repr(fn)
-
-
-@functools.cache
-def pipeline(b):
-    class _pipeline(object):
-        def __init__(self, a, b):
-            self.a = a
-            self.b = b
-
-        @functools.wraps(b)
-        def __call__(self, *args, **kwargs):
-            return self.a(self.b(*args, **kwargs))
-
-        def __str__(self):
-            a, b = _getstr(self.a, self.b)
-            return a+'———'+b
-
-        def __repr__(self):
-            return f'<Pipeline[{str(self)}] at {hex(id(self))}>'
-
-    def pipe_dec(a):
-        return _pipeline(a, b)
-
-    return pipe_dec
-
-
-class attribute_lookup_object(object):
+#attribute.log(math.e))
+class librarian:
     def __call__(self, name, strict=True, call=False):
         if call:
             def lookup(x):
@@ -179,12 +199,11 @@ class attribute_lookup_object(object):
     def __getattr__(self, name):
         return self(name)
 
-
-attribute = attribute_lookup_object()
+attribute = librarian()
 
 
 def func_zip(*functions, raise_flag_exclusive=(Exception,), raise_flag_inclusive=(), final_exception=Exception()):
-
+    '''Combine various functions into a single function'''
     @functools.wraps(functions[0])
     def wrapper(*args, **kwargs):
         for function in functions:
@@ -203,7 +222,6 @@ def func_zip(*functions, raise_flag_exclusive=(Exception,), raise_flag_inclusive
     return wrapper
 
 
-@functools.cache
 def default_setter(func):
     '''Make a function with a forced first argument'''
     def wrapper_func(arg):
@@ -219,18 +237,17 @@ def default_setter(func):
     return wrapper_func
 
 
-@functools.cache  # minimize exact returns
+@functools.cache 
 def default_with_decorator(*decorators, check=None):
     '''Make a function with a forced first argument.
      Apply decorators to the returning function function
      Check that the first argument is valid'''
     def default_setter(func):
-        @functools.cache  # minimizes duplicate functions in this case
+        @functools.cache
         def wrapper_func(arg):
             if check:
                 if not check(arg):
-                    raise ValueError(f'{arg} is an inapropriate value\
- for {func.__name__}')
+                    raise ValueError(f'{arg} is an inapropriate value for {func.__name__}')
 
             @functools.wraps(func)
             def nfunc(*args, **kwargs):
@@ -252,7 +269,8 @@ def default_with_decorator(*decorators, check=None):
     return default_setter
 
 
-def arg_modifier(modify):
+def arg_modifier(modify: types.FunctionType) -> types.FunctionType:
+    '''modify args according to modify function'''
     def wrapper_creator(func):
         @functools.wraps(func)
         def wrapper_modifier(*args, **kwargs):
