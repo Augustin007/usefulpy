@@ -1291,32 +1291,120 @@ pi = CASconstant('π', math.pi, '\\pi')
 e = CASconstant('e', math.e)
 tau = CASconstant('τ', math.tau, '\\tau')
 
-ln = symbolic((1/x,), (x,))(decorators.func_zip(math.log, cmath.log, decorators.attribute.ln, lambda x: x.log(math.e)))
-#  decorators.attribute.log(math.e))
-"""
-@symbolic((1/x,), (x,))
-def ln(x, /): #raw ln
-    '''Return the natural logarithm of x
-recources to x.ln() or x.log(e) if ln cannot be found'''
-    if x == 0:
-        raise ValueError('math domain error')
+@symbolic((0,))
+def floor(x, /):
+    '''Return the floor of x'''
     try:
-        return math.log(x)
+        return math.floor(x)  # math's floor already allows for custom types
     except Exception:
         pass
-    try:
-        return cmath.log(x)
-    except Exception:
-        pass
-    try:
-        return x.ln()
-    except Exception:
-        pass
-    try:
-        return x.log(math.e)
-    except Exception:
-        pass
-    raise TypeError('ln cannot be found of % s.' % type(x).__name__)
-#"""
+    # I feel that imaginary types should still work
+    # They bring it to the closest gaussian number
+    if type(x) is complex:
+        return math.floor(x.real) + math.floor(x.imag)*1j
+    raise TypeError(f'invalid type, type {type(x).__name__}')
 
+@symbolic((0,))
+def ceil(x, /):
+    '''Return the ceil of x'''
+    try:
+        return math.ceil(x)  # math's ceil already allows for custom types
+    except Exception:
+        pass
+    # imaginary type is not built in.
+    if type(x) is complex:
+        return ceil(x.real) + ceil(x.imag)*1j
+
+    raise TypeError(f'invalid type, type {type(x).__name__}')
+
+
+ln = symbolic((1/x,), (x,))(decorators.func_zip(math.log, cmath.log, decorators.attribute.ln, lambda x: x.log(math.e), final_exception=TypeError('Invalid Type')))
+ln.__name__ = 'ln'
+#  decorators.attribute.log(math.e))
 ln.intReset((x*ln(x)-x,), (x,))
+
+
+# exp
+##TODO: Reimpliment custom coefficient for elementary functions
+
+# Sigmoid
+
+# exp(x)-1
+
+#sqrt(x)
+#isqrt(x)
+#cbrt(x)
+#icbrt(x)
+
+#log (ln/ln with decorator shift args)
+
+#log_2(x)
+
+#log1p(x)
+
+acos = symbolic()(decorators.func_zip(math.acos, cmath.acos, lambda x: x.acos(), final_exception = TypeError('Invalid Type')))
+acosh = symbolic()(decorators.func_zip(math.acosh, cmath.acosh, lambda x: x.acosh(), final_exception = TypeError('Invalid Type')))
+asin = symbolic()(decorators.func_zip(math.asin, cmath.asin, lambda x: x.asin(), final_exception = TypeError('Invalid Type')))
+asinh = symbolic()(decorators.func_zip(math.asinh, cmath.asinh, lambda x: x.asinh(), final_exception = TypeError('Invalid Type')))
+atan = symbolic()(decorators.func_zip(math.atan, cmath.atan, lambda x: x.atan(), final_exception = TypeError('Invalid Type')))
+atanh = symbolic()(decorators.func_zip(math.atanh, cmath.atanh, lambda x: x.atanh(), final_exception = TypeError('Invalid Type')))
+
+@symbolic()
+def atan2(y, x):
+    '''Return the arc tangent(measured in radians) of y/x'''
+    return math.atan2(validation.trynumber(y), validation.trynumber(x))
+
+asec = symbolic()(decorators.func_zip(lambda x:1/asec(x), lambda x: x.asec(), final_exception = TypeError('Invalid Type')))
+asech = symbolic()(decorators.func_zip(lambda x:1/asec(x), lambda x: x.asech(), final_exception = TypeError('Invalid Type')))
+acsc = symbolic()(decorators.func_zip(lambda x:1/acsc(x), lambda x: x.acsc(), final_exception = TypeError('Invalid Type')))
+acsch = symbolic()(decorators.func_zip(lambda x:1/acsch(x), lambda x: x.acsch(), final_exception = TypeError('Invalid Type')))
+acot = symbolic()(decorators.func_zip(lambda x:1/acot(x), lambda x: x.acot(), final_exception = TypeError('Invalid Type')))
+acoth = symbolic()(decorators.func_zip(lambda x:1/acoth(x), lambda x: x.acoth(), final_exception = TypeError('Invalid Type')))
+
+cos = symbolic()(decorators.func_zip(math.cos, cmath.cos, lambda x: x.cos(), final_exception = TypeError('Invalid Type')))
+cosh = symbolic()(decorators.func_zip(math.cosh, cmath.cosh, lambda x: x.cosh(), final_exception = TypeError('Invalid Type')))
+sin = symbolic()(decorators.func_zip(math.sin, cmath.sin, lambda x: x.sin(), final_exception = TypeError('Invalid Type')))
+sinh = symbolic()(decorators.func_zip(math.sinh, cmath.sinh, lambda x: x.sinh(), final_exception = TypeError('Invalid Type')))
+tan = symbolic()(decorators.func_zip(math.tan, cmath.tan, lambda x: x.tan(), final_exception = TypeError('Invalid Type')))
+tanh = symbolic()(decorators.func_zip(math.tanh, cmath.tanh, lambda x: x.tanh(), final_exception = TypeError('Invalid Type')))
+
+sec = symbolic()(decorators.func_zip(lambda x: 1/cos(x), lambda x: x.sec(), final_exception = TypeError('Invalid Type')))
+sech = symbolic()(decorators.func_zip(lambda x: 1/cosh(x), lambda x: x.sech(), final_exception = TypeError('Invalid Type')))
+csc = symbolic()(decorators.func_zip(lambda x: 1/sin(x), lambda x: x.csc(), final_exception = TypeError('Invalid Type')))
+csch = symbolic()(decorators.func_zip(lambda x: 1/sinh(x), lambda x: x.csch(), final_exception = TypeError('Invalid Type')))
+cot = symbolic()(decorators.func_zip(lambda x: 1/tan(x), lambda x: x.cot(), final_exception = TypeError('Invalid Type')))
+coth = symbolic()(decorators.func_zip(lambda x: 1/tanh(x), lambda x: x.coth(), final_exception = TypeError('Invalid Type')))
+
+acos.partialReset((-(1-x**2)**-(1/2),), (x,))
+asin.partialReset(((1-x**2)**-(1/2),), (x,))
+atan.partialReset((1/(1+x**2),), (x,))
+asec.partialReset(((x**4-x**2)**(-1/2),), (x,))
+acot.partialReset((-1/(1+x**2),), (x,))
+acsc.partialReset((-(x**4-x**2)**(-1/2),), (x,))
+
+cos.partialReset((-sin(x),), (x,))
+sin.partialReset((cos,), (x,))
+# cos.prime_cycle[0] = 4
+# sin.prime_cycle[0] = 4
+tan.partialReset((sec(x)**2,), (x,))
+sec.partialReset((sec(x)*tan(x),), (x,))
+cot.partialReset((-(csc(x)**2),), (x,))
+csc.partialReset((-csc(x)*cot(x),), (x,))
+
+acosh.partialReset(((x**2-1)**(-1/2),),(x,))
+asinh.partialReset(((x**2+1)**(-1/2),), (x,))
+atanh.partialReset((1/(1-x**2),), (x,))
+asech.partialReset((-1/(x*(1-x**2)**(1/2))), (x,))
+acoth.partialReset((1/(1-x**2),), (x,))
+acsch.partialReset((-(x**4+x**2)**(-1/2),), (x,))
+
+cosh.partialReset((sinh,), (x,))
+sinh.partialReset((cosh,), (x,))
+# cosh.prime_cycle[0] = 2
+# sinh.prime_cycle[0] = 2
+tanh.partialReset((sech(x)**2,), (x,))
+sech.partialReset((-sech(x)*tanh(x),), (x,))
+coth.partialReset((-(csch(x)**2),), (x,))
+csch.partialReset((-csch(x)*coth(x),), (x,))
+
+# Define everything in terms of cos/sin?
