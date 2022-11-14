@@ -546,7 +546,6 @@ class CAScommutative(CASexpression, tuple):
                 runcheck.append(item.evaluate(vardict))
                 continue
             runcheck.append(item)
-        print(runcheck)
         return getSimplify(self.__class__(*runcheck))
 
     def _extractNum(self, /):
@@ -1180,6 +1179,7 @@ def symbolic(partials:tuple[CASobject]=(), partialsReferences:tuple[CASvariable]
         return CASfunction(func, partials, partialsReferences, indefiniteInt, indefiniteIntReferences)
     return symbolicWrapper
 
+
 # MATH TOOLS #
 
 
@@ -1251,7 +1251,7 @@ def _prodDeriveExpansion(f: CASobject, g: CASobject, v: CASvariable, k: int, n: 
     v : CASvariable
         Compute partial with respect to v
     k : int
-        Comput kth partial
+        Compute kth partial
     n : int
         The term of the resulting sum
 
@@ -1407,4 +1407,7 @@ sech.partialReset((-sech(x)*tanh(x),), (x,))
 coth.partialReset((-(csch(x)**2),), (x,))
 csch.partialReset((-csch(x)*coth(x),), (x,))
 
-# Define everything in terms of cos/sin?
+# TODO: redefine everything in terms of cos/sin?
+
+
+# eof
