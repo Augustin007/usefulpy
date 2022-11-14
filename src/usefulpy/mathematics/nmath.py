@@ -482,24 +482,6 @@ class segmented_sieve:
         segmented_sieve.searched_till = segmented_sieve.primes[k+add]**2-1
 
     @staticmethod
-    def is_prime(n: int) -> bool:
-        if n <= segmented_sieve.searched_till:
-            return n in segmented_sieve.primes
-        for test_number in segmented_sieve.Primes_till(_math.isqrt(n)+1):
-            if n % test_number == 0:
-                return False
-        return True
-
-    @staticmethod
-    def is_composite(n: int) -> bool:
-        if n <= segmented_sieve.searched_till:
-            return n not in segmented_sieve.primes
-        for test_number in segmented_sieve.Primes_till(_math.isqrt(n)+1):
-            if n % test_number == 0:
-                return True
-        return False
-
-    @staticmethod
     def Primes_till(n: int) -> list[int]:
         while n >= segmented_sieve.searched_till:
             segmented_sieve.extend()
