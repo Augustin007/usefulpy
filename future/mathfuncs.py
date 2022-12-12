@@ -313,6 +313,8 @@ class _arithmetic:
             return CASnumber(other.value ** self.value)
         return CASpow(other, self)
 
+    def distribute(self):
+        return self
 
 class CASvariable(CASobject, _arithmetic):
     '''variable for cas engine'''
@@ -662,10 +664,10 @@ class CASprod(CAScommutative):
             g = CASprod(b[1], b[2])
         else:
             length = len(b)
-            f = CASprod(b[: length//2])
-            g = CASprod(b[length//2:])
+            f = CASprod(*b[: length//2])
+            g = CASprod(*b[length//2:])
         terms = [_prodDeriveExpansion(f, g, var, k, n) for n in range(k+1)]
-        return getSimplify(a*sum(terms))
+        return getSimplify(CASprod(a,*sum(terms)))
 
 
 class CASpow(CASexpression):
