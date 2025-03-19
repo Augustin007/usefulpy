@@ -1,140 +1,147 @@
-'''
-decorators
-
-This program is meant to contain decorators for a better python experience
-
-LICENSE PLATAFORMS and INSTALLATION:
-This is a section of usefulpy. See usefulpy.__init__ and usefulpy license
-file
-
-RELEASE NOTES:
-0
- 0.0
-  Version 0.0.0:
-   Decorators.py contains a few decorators
-  Version 0.0.1:
-   Maybe I should have looked through the functools module better
-1
- 1.0
-  Version 1.0.0
-   I haven't worked on Usefulpy in a while, but I thought I'd give it a whirl again.
-'''
-## Prepping U.D0.1.0 for U0.3.0
+import logging
+import sys
 
 if __name__ == '__main__':
-    __package__ = 'usefulpy'
-__version__ = '0.1.0'
-__author__ = 'Augustin Garcia'
+    if len(sys.argv)>=2:
+        fmt = '[%(levelname)s] %(name)s - %(message)s'
+        logging.basicConfig(format=fmt, level=int(sys.argv[1]))
 
-import functools
-import time
-import random
-import logging
+import traceback
+from abc import ABC, abstractmethod
+from functools import wraps
+from inspect import signature
+import typing
 import types
+import functools
+import random
 
-def _logCallSub(level: int, function: types.FunctionType) -> types.FunctionType:
-    '''_logCallSub _summary_
+UnionTypes = types.UnionType, typing.Union
 
-    Parameters
-    ----------
-    level : int
-        _description_
-    function : types.FunctionType
-        _description_
+def FunctionWrapper(n):
+    @wraps(n)
+    def internal(obj, *args, **kwargs):
+        new = n(obj, *args, **kwargs)
+        return wraps(new.func)(n.__call__).__get__(new)
+    return internal
 
-    Returns
-    -------
-    types.FunctionType
-        _description_
-    '''    
-    @functools.wraps(function)
-    def wrapper(*args, **kwargs):
-        logging.log(level, f'{function.__name__} called with args {args} and kwargs {kwargs}')
-        return function(*args, **kwargs)
-    wrapper.logged = True
-    return wrapper
+class _FunctionWrapper(ABC):
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+        self.on_init()
 
+    def on_init(self):
+        pass
 
-# This was written this way for backward compatability.
-# Intended functionality outlined in documentation summary.
-def logCall(x: types.FunctionType | int) -> types.FunctionType:
-    '''For logging calls and call signatures.
-    @logCall(logging.DEBUG)
-    def foo(bar):
-        ...
+    @abstractmethod
+    def __pre_call__(self, *args, **kwargs):
+        pass
 
-    Parameters
-    ----------
-    x : types.FunctionType | int
-        Level of logging or function to log
+    @abstractmethod
+    def __post_call__(self, result):
+        pass
 
-    Returns
-    -------
-    types.FunctionType
-        Returns a decorator that wraps a function at a custom logging level or a function logged at level debug.
-    '''    
-    if type(x) is int:
-        return lambda y: _logCallSub(x, y)
-    else:
-        return _logCallSub(logging.DEBUG, x)
+    def __call__(self, *args, **kwargs):
+        try:
+            self.__pre_call__(*args, **kwargs)
+            result = self.func(*args, **kwargs)
+            self.__post_call__(result)
+            return result
+        except Exception:
+            t, v, tb = sys.exc_info()
+            sys.excepthook(t, v, tb.tb_next)
+        sys.exit()
 
 
-# Haven't used this in ages, but then, who has?
-def repeat(n: int) -> types.FunctionType:
-    '''Make a function repeat n times.
+@FunctionWrapper
+class _log(_FunctionWrapper):
+    def on_init(self):
+        self.func._logger = self
+        self.logger = self.args[0]
+    level = 0
 
-    Parameters
-    ----------
-    n : int
-        Number of times to repeat.
+    def __pre_call__(self, *args, **kwargs):
+        if self.level>0:
+            logging.log(self.logger, f'{self.level}: - {self.func} called with arguments {args!r} and keywords {kwargs!r}')
+            #TODO:change the logger?
+        self.level+=1
 
-    Returns
-    -------
-    types.FunctionType
-        Function wrapper for a repeating function
-    '''
-    def decorator_repeat(func):
-        @functools.wraps(func)
-        def wrapper_repeat(*args, **kwargs):
-            for _ in range(n):
-                value = func(*args, **kwargs)
-            return value
-        return wrapper_repeat
-    return decorator_repeat
+    def __post_call__(self, result):
+        self.level -= 1
+        if self.level>0:
+            logging.log(self.logger, f'{self.level}: - {self.func} returned {result!r}')
+            #TODO:change the logger?
+
+def logged(x: types.FunctionType | int):
+    if isinstance(x, int):
+        return lambda y: _log(y, x)
+    return _log(x, logged.default)
+logged.default = logging.DEBUG
+
+def _hint(instance, hint):
+    if hint == typing.Any:
+        return True
+    if isinstance(hint, type):
+        return isinstance(instance, hint)
+    if hasattr(hint, '__origin__') and hasattr(hint, '__args__'):
+        if hint.__origin__ in UnionTypes:
+            return any(map(lambda a: _hint(instance, a), hint.__args__))
+        if not isinstance(hint, types.GenericAlias):
+            hint = types.GenericAlias(hint.__origin__, hint.__args__)
+        if isinstance(instance, hint.__origin__):
+            if ... not in hint.__args__:
+                if len(hint.__args__)!=len(instance):
+                    return False
+                for element, arg in zip(instance, hint.__args__):
+                    if not _hint(element, arg):
+                        return False
+                return True
+            # ind = 0
+            # prev = None
+            #for arg in hint.__args__:
+            #    return False
+            #prev = arg
+    return False
 
 
-def timed_repeat(n: int, t: float) -> types.FunctionType:
-    '''Make a function repeat 'n' times, with a 't' time in the interval
-between a return and a call
+@FunctionWrapper
+class typed(_FunctionWrapper):
+    def on_init(self):
+        self.annotations = self.func.__annotations__
+        self.signature = signature(self.func)
+        for param in self.signature.parameters:
+            assert param in self.annotations, f'Missing annotations for {param!r}'
+        assert 'return' in self.annotations, f'Missing annotation for return'
+        self.retanot = self.annotations['return']
+    
+    def __pre_call__(self, *args, **kwargs):
+        bound = self.signature.bind(*args, **kwargs)
+        bound.apply_defaults()
+        annotations = self.annotations
+        try:
+            for name, value in bound.arguments.items():
+                if not _hint(value, annotations[name]):
+                    raise TypeError(f'Argument {name} must be of type {annotations[name]}')
+            return
+        except TypeError:
+            t, v, tb = sys.exc_info()
+            sys.excepthook(t, v, tb.tb_next)
+        sys.exit()
 
-    Parameters
-    ----------
-    n : int
-        Number of times to repeat
-    t : float
-        Time between repeats
-
-    Returns
-    -------
-    types.FunctionType
-        Function wrapper for repeating function
-    '''
-    def decorator_repeat(func):
-        @functools.wraps(func)
-        def wrapper_repeat(*args, **kwargs):
-            for _ in range(n):
-                value = func(*args, **kwargs)
-                time.sleep(t)
-            return value
-        return wrapper_repeat
-    return decorator_repeat
-
+    def __post_call__(self, result):
+        try:
+            if not _hint(result, self.retanot):
+                raise TypeError(f'Return value should be a type {self.retanot}')
+            return
+        except TypeError:
+            t, v, tb = sys.exc_info()
+            sys.excepthook(t, v, tb.tb_next)
+        sys.exit()
 
 # Sample Dictionary: {2:(0, 1), 1:((10,), 0)}
 def shift_args(dict_:dict) -> types.FunctionType:
     ''' Custom input-output for a function.
-
-#of args:(Index of arg to be placed at this index | (fixed value,), ...)
 
 example:
 @shift_args({2:(0, 1), 1:((10,), 0)})
@@ -180,7 +187,7 @@ log base 1 of 2
     return decorator_shift_args
 
 
-#attribute.log(math.e)
+#attribute.log
 class librarian:
     def __call__(self, name, strict=True, call=False):
         if call:
@@ -271,20 +278,3 @@ def default_with_decorator(*decorators, check=None):
 
         return wrapper_func
     return default_setter
-
-
-def arg_modifier(modify: types.FunctionType) -> types.FunctionType:
-    '''modify args according to modify function'''
-    def wrapper_creator(func):
-        @functools.wraps(func)
-        def wrapper_modifier(*args, **kwargs):
-            args = [modify(a) for a in args]
-            for a, b in kwargs.items():
-                new_kwarg = modify(b)
-                if new_kwarg != b:
-                    kwargs[a] = b
-            return func(*args, **kwargs)
-        return wrapper_modifier
-    return wrapper_creator
-
-# eof
