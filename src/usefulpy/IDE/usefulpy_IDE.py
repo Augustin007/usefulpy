@@ -17,7 +17,10 @@ RELEASE NOTES:
  0.0
   Version 0.0.0:
    Custom ide for usefulpy.
+
 '''
+
+#TODO: ! start and ? end ??, etc. Clean up input processing, neat coloring? Macros. 
 
 __version__ = '0.0.0'
 __author__ = 'Augustin Garcia'
@@ -25,22 +28,26 @@ __author__ = 'Augustin Garcia'
 from . import usefulpy_syntax
 from .namespace_management import usefulpy_namespace_globals
 import traceback
+from usefulpy import formatting
 
 
 def _output(object, count):
     if object is None:
         return
-    print(f'Out[{count}] : {object!r}')
+    print(formatting.colored(150,0,10,f'Out[{count}] : ')+repr(object))
     print()
 
-
+Color_In = formatting.colors.fg.green
+Color_Out = formatting.colors.fg.red
+Color_back = formatting.colors.disable
 def _input(count):
-    input_ = input(f'In [{count}] : ').rstrip()
+    Instate = formatting.colored(0,200,0,f'In [{count}] : ')
+    input_ = input(Instate).rstrip()
     while not input_:
         print()
-        input_ = input(f'In [{count}] : ').rstrip()
+        input_ = input(Instate).rstrip()
     if input_.endswith(':'):
-        empty = ' '*(len(str(count))+3)+'-- : '
+        empty = ' '*(len(str(count))+3)+formatting.colored(0, 200, 0, '-- : ')
         next_line = input(empty).rstrip()
         while next_line:
             input_ += '\n'+next_line
