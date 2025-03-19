@@ -19,10 +19,8 @@ RELEASE NOTES:
 
 if __name__ == '__main__':
     __package__ = 'usefulpy'
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 __author__ = 'Augustin Garcia'
-# __all__ = ('debug', 'repeat', 'timed_repeat', 'shift_args', 'default_setter',
-#           'default_with_decorator', 'arg_modifier')
 
 import functools
 import time
@@ -132,6 +130,8 @@ between a return and a call
 def shift_args(dict_:dict) -> types.FunctionType:
     ''' Custom input-output for a function.
 
+#of args:(Index of arg to be placed at this index | (fixed value,), ...)
+
 example:
 @shift_args({2:(0, 1), 1:((10,), 0)})
 def log(base, x):
@@ -176,7 +176,7 @@ log base 1 of 2
     return decorator_shift_args
 
 
-#attribute.log(math.e))
+#attribute.log(math.e)
 class librarian:
     def __call__(self, name, strict=True, call=False):
         if call:
